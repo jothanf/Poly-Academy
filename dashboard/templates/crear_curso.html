@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Curso</title>
+</head>
+<body>
+    <h1>Crear Nuevo Curso</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <label for="course_name">Nombre del Curso:</label>
+            <input type="text" id="course_name" name="course_name" required>
+        </div>
+        <div>
+            <label for="description">Descripción:</label>
+            <textarea id="description" name="description" required></textarea>
+        </div>
+        <div>
+            <label for="category">Categoría:</label>
+            <input type="text" id="category" name="category" required>
+        </div>
+        <div>
+            <label for="level">Nivel:</label>
+            <input type="text" id="level" name="level" required>
+        </div>
+        <div>
+            <label for="bullet_points">Puntos clave (JSON):</label>
+            <textarea id="bullet_points" name="bullet_points"></textarea>
+        </div>
+        <div>
+            <label for="img_cover">Imagen del curso (opcional):</label>
+            <input type="file" id="img_cover" name="img_cover">
+        </div>
+        <div>
+            <label for="scorm_version">Versión SCORM:</label>
+            <select id="scorm_version" name="scorm_version">
+                <option value="1.2">SCORM 1.2</option>
+                <option value="2004">SCORM 2004</option>
+            </select>
+        </div>
+        <button type="submit">Crear Curso</button>
+    </form>
+</body>
+</html>
