@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.http import HttpResponse
-from .serializers import CourseModelSerializer, LessonModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer
-from .models import CourseModel, LessonModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
 from django.core.exceptions import ValidationError
 from django.conf import settings
 # Create your views here.
@@ -12,9 +12,9 @@ class CourseView(viewsets.ModelViewSet):
     serializer_class = CourseModelSerializer
     queryset = CourseModel.objects.all()
 
-class LessonModelViewSet(viewsets.ModelViewSet):
-    queryset = LessonModel.objects.all()
-    serializer_class = LessonModelSerializer
+class ClassModelViewSet(viewsets.ModelViewSet):
+    queryset = ClassModel.objects.all()
+    serializer_class = ClassModelSerializer
     #permission_classes = [IsAuthenticated]
 
     """
@@ -96,90 +96,6 @@ from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import ValidationError
 import json
 
-def crear_leccion(request):
-    course_id = '1'
-    try:
-        curso = CourseModel.objects.get(id=course_id)
-    except CourseModel.DoesNotExist:
-        return HttpResponse("Curso no encontrado.", status=404)
-
-    if request.method == 'POST':
-        # Manejar la creación de la lección
-        lesson_data = {
-            'lesson_name': request.POST.get('lesson_name'),
-            'description': request.POST.get('description'),
-            'bullet_points': request.POST.get('bullet_points', '[]'),
-            'img_cover': request.FILES.get('img_cover'),
-            'scorm_version': request.POST.get('scorm_version')
-        }
-
-        try:
-            # Validar campos básicos
-            if not lesson_data['lesson_name'] or not lesson_data['description']:
-                raise ValidationError("Los campos nombre y descripción son obligatorios.")
-
-            # Crear la lección
-            nueva_leccion = LessonModel.objects.create(
-                course=curso,
-                **lesson_data
-            )
-
-            # Crear el layout para la lección
-            layout = LayoutModel.objects.create(
-                title=lesson_data['lesson_name'],
-                instructions=lesson_data['description']
-            )
-
-            # Procesar las tareas
-            tasks_data = json.loads(request.POST.get('tasks', '[]'))
-            for task in tasks_data:
-                task_type = task.get('type')
-                if task_type == 'multiple_choice':
-                    MultipleChoiceModel.objects.create(
-                        layout=layout,
-                        instructions=task['instructions'],
-                        question=task['question'],
-                        answers=task['answers'],
-                        order=task['order']
-                    )
-                elif task_type == 'true_false':
-                    TrueOrFalseModel.objects.create(
-                        layout=layout,
-                        instructions=task['instructions'],
-                        questions=task['questions'],
-                        order=task['order']
-                    )
-                elif task_type == 'ordering':
-                    OrderingTaskModel.objects.create(
-                        layout=layout,
-                        instructions=task['instructions'],
-                        items=task['items'],
-                        order=task['order']
-                    )
-                elif task_type == 'categories':
-                    CategoriesTaskModel.objects.create(
-                        layout=layout,
-                        instructions=task['instructions'],
-                        categories=task['categories'],
-                        order=task['order']
-                    )
-                elif task_type == 'fill_in_the_gaps':
-                    FillInTheGapsTaskModel.objects.create(
-                        layout=layout,
-                        instructions=task['instructions'],
-                        text_with_gaps=task['text_with_gaps'],
-                        keywords=task['keywords'],
-                        order=task['order']
-                    )
-
-            return JsonResponse({'success': True, 'message': 'Lección creada exitosamente'})
-        
-        except ValidationError as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-    return render(request, 'crear_leccion.html', {'curso': curso})
 
 
 from django.shortcuts import render, get_object_or_404
@@ -198,120 +114,4 @@ from django.http import HttpResponse
 from xml.etree.ElementTree import Element, SubElement, tostring
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from .models import CourseModel, LessonModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
-
-def generate_scorm_manifest(course):
-    # Crear la estructura básica del archivo XML de manifiesto SCORM
-    manifest = Element('manifest', identifier="com.example.scorm", version=course.scorm_version)
-
-    metadata = SubElement(manifest, 'metadata')
-    title = SubElement(metadata, 'title')
-    title.text = course.course_name
-
-    organizations = SubElement(manifest, 'organizations')
-    organization = SubElement(organizations, 'organization', identifier="org1")
-    title = SubElement(organization, 'title')
-    title.text = course.course_name
-
-    # Agregar las lecciones y tareas al manifiesto
-    for lesson in course.lessons.all():
-        lesson_item = SubElement(organization, 'item', identifier=lesson.lesson_name)
-        lesson_title = SubElement(lesson_item, 'title')
-        lesson_title.text = lesson.lesson_name
-
-        # Agregar tareas de la lección
-        for layout in lesson.layouts.all():
-            layout_item = SubElement(lesson_item, 'item', identifier=f"layout_{layout.id}")
-            layout_title = SubElement(layout_item, 'title')
-            layout_title.text = layout.title
-
-    return tostring(manifest)
-
-import os
-from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404
-from django.conf import settings
-from io import BytesIO
-import zipfile
-import os
-import json
-from django.core.files.base import ContentFile
-
-def download_scorm(request, course_id):
-    try:
-        course = get_object_or_404(CourseModel, id=course_id)
-        
-        # Crear un buffer temporal para almacenar el archivo ZIP en memoria
-        zip_buffer = BytesIO()
-        
-        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
-            # Generar y agregar el archivo imsmanifest.xml al ZIP
-            manifest_content = generate_scorm_manifest(course)
-            zip_file.writestr('imsmanifest.xml', manifest_content)
-            
-            # Agregar la imagen de portada del curso si existe
-            if course.img_cover and os.path.exists(course.img_cover.path):
-                arcname = os.path.join('course_covers', os.path.basename(course.img_cover.name))
-                zip_file.write(course.img_cover.path, arcname)
-            
-            # Agregar los recursos de cada lección y tareas asociadas
-            for lesson in course.lessons.all():
-                # Agregar la imagen de portada de la lección si existe
-                if lesson.img_cover and os.path.exists(lesson.img_cover.path):
-                    arcname = os.path.join('lesson_covers', os.path.basename(lesson.img_cover.name))
-                    zip_file.write(lesson.img_cover.path, arcname)
-                
-                # Procesar layouts y sus recursos
-                for layout in lesson.layouts.all():
-                    # Agregar imagen del layout si existe
-                    if layout.img_cover and os.path.exists(layout.img_cover.path):
-                        arcname = os.path.join('layout_images', os.path.basename(layout.img_cover.name))
-                        zip_file.write(layout.img_cover.path, arcname)
-                    
-                    # Agregar audio si existe
-                    if layout.audio and os.path.exists(layout.audio.path):
-                        arcname = os.path.join('layout_audio', os.path.basename(layout.audio.name))
-                        zip_file.write(layout.audio.path, arcname)
-                    
-                    # Agregar preguntas como JSON
-                    for question in layout.questions.all():
-                        question_data = {
-                            'instructions': question.instructions,
-                            'question': question.question,
-                            'answers': question.answers,
-                            'order': question.order
-                        }
-                        question_json = json.dumps(question_data, ensure_ascii=False)
-                        zip_file.writestr(
-                            f'questions/layout_{layout.id}/question_{question.id}.json',
-                            question_json
-                        )
-                        
-            # Agregar archivo index.html básico
-            index_html = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Course Content</title>
-                <meta charset="UTF-8">
-            </head>
-            <body>
-                <h1>Course: {}</h1>
-                <div id="content">
-                    <!-- Content will be loaded dynamically -->
-                </div>
-            </body>
-            </html>
-            """.format(course.course_name)
-            zip_file.writestr('index.html', index_html)
-
-        # Preparar la respuesta
-        zip_buffer.seek(0)
-        response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
-        response['Content-Disposition'] = f'attachment; filename="{course.course_name}_SCORM.zip"'
-        return response
-        
-    except Exception as e:
-        # Log the error here if you have logging configured
-        print(f"Error creating SCORM package: {str(e)}")
-        raise Http404(f"Error creating SCORM package: {str(e)}")
+from .models import CourseModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel

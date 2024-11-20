@@ -7,8 +7,6 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
-SCORM_VERSIONS = [('1.2', 'SCORM 1.2'), ('2004', 'SCORM 2004')]
-
 import os
 import zipfile
 from django.conf import settings
@@ -17,79 +15,21 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
 class CourseModel(models.Model):
-    img_cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
+    cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     course_name = models.CharField(max_length=200)
     description = models.TextField()
     category = models.CharField(max_length=100)
     level = models.CharField(max_length=100)
     bullet_points = models.JSONField()
-    scorm_version = models.CharField(max_length=20, choices=SCORM_VERSIONS, default='1.2')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def generate_scorm_package(self):
-        # Directorio temporal para archivos SCORM
-        temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_scorm', str(self.id))
-        os.makedirs(temp_dir, exist_ok=True)
-        
-        # Generar imsmanifest.xml
-        manifest_path = os.path.join(temp_dir, 'imsmanifest.xml')
-        self._generate_manifest_file(manifest_path)
-        
-        # Agregar recursos del curso, lecciones y tareas
-        # Ejemplo: exportar lecciones y sus tareas como archivos HTML o JSON
-
-        # Crear el archivo .zip SCORM
-        zip_filename = f'{self.course_name}_SCORM.zip'
-        zip_path = os.path.join(temp_dir, zip_filename)
-        
-        with zipfile.ZipFile(zip_path, 'w') as scorm_zip:
-            for root, dirs, files in os.walk(temp_dir):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    scorm_zip.write(file_path, os.path.relpath(file_path, temp_dir))
-        
-        # Guardar el archivo SCORM .zip en el almacenamiento de Django
-        with open(zip_path, 'rb') as f:
-            scorm_zip_file = ContentFile(f.read())
-            scorm_file_path = default_storage.save(f'scorm_packages/{zip_filename}', scorm_zip_file)
-        
-        # Limpiar el directorio temporal
-        # Puedes añadir una lógica de limpieza aquí
-
-        return scorm_file_path
-
-    def _generate_manifest_file(self, manifest_path):
-        # Estructura básica de imsmanifest.xml
-        manifest = Element('manifest', identifier="com.example.scorm", version="1.2")
-        
-        metadata = SubElement(manifest, 'metadata')
-        title = SubElement(metadata, 'title')
-        title.text = self.course_name
-        
-        # Agregar organización del curso
-        organizations = SubElement(manifest, 'organizations')
-        organization = SubElement(organizations, 'organization', identifier="org1")
-        title = SubElement(organization, 'title')
-        title.text = self.course_name
-        
-        for lesson in self.lessons.all():
-            item = SubElement(organization, 'item', identifier=lesson.lesson_name)
-            title = SubElement(item, 'title')
-            title.text = lesson.lesson_name
-            # Agregar recursos de la lección
-
-        # Escribir el archivo XML
-        with open(manifest_path, 'wb') as f:
-            f.write(tostring(manifest))
-
-class LessonModel(models.Model):
+class ClassModel(models.Model):
     img_cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     lesson_name = models.CharField(max_length=200)
     description = models.TextField()
     course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, related_name="lessons")
     bullet_points = models.JSONField()
-    scorm_version = models.CharField(max_length=20, choices=SCORM_VERSIONS, default='1.2')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -97,7 +37,7 @@ class LessonModel(models.Model):
         return self.lesson_name
 
 class LayoutModel(models.Model):
-    lesson = models.ForeignKey(LessonModel, on_delete=models.CASCADE, related_name='layouts')
+    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='layouts')
     title = models.CharField(max_length=200)
     instructions = models.TextField()
     img_cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
@@ -220,7 +160,7 @@ class FillInTheGapsTaskModel(models.Model):
 
     
 class TextBlockModel(models.Model):
-    lesson = models.ForeignKey(LessonModel, on_delete=models.CASCADE, related_name='text_blocks')
+    lesson = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='text_blocks')
     title = models.CharField(max_length=200, help_text="Título del bloque de texto")
     instructions = models.TextField(help_text="Instrucciones para el bloque de texto")
     content = models.TextField(help_text="Contenido de texto")

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CourseModel, LessonModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
 
 class CourseModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,12 +7,12 @@ class CourseModelSerializer(serializers.ModelSerializer):
         fields = ['id', 'course_name', 'description', 'category', 'level', 'bullet_points', 'img_cover', 'scorm_version', 'created_at', 'updated_at']
 
 
-class LessonModelSerializer(serializers.ModelSerializer):
+class ClassModelSerializer(serializers.ModelSerializer):
     course = CourseModelSerializer(read_only=True)  # Nested serializer for course information
     
     class Meta:
-        model = LessonModel
-        fields = ['id', 'lesson_name', 'description', 'course', 'bullet_points', 'img_cover', 'scorm_version', 'created_at', 'updated_at']
+        model = ClassModel
+        fields = ['id', 'class_name', 'description', 'course', 'bullet_points', 'img_cover', 'scorm_version', 'created_at', 'updated_at']
 
 
 class LayoutModelSerializer(serializers.ModelSerializer):

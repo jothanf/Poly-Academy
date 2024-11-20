@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
-from .models import CourseModel, LessonModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
-from .serializers import CourseModelSerializer, LessonModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer, TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer, TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer
 
 # ViewSet para CourseModel
 class CourseModelViewSet(viewsets.ModelViewSet):
@@ -10,9 +10,9 @@ class CourseModelViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]  # Permite el acceso sin restricciones
 
 # ViewSet para LessonModel
-class LessonModelViewSet(viewsets.ModelViewSet):
-    queryset = LessonModel.objects.all()
-    serializer_class = LessonModelSerializer
+class ClassModelViewSet(viewsets.ModelViewSet):
+    queryset = ClassModel.objects.all()
+    serializer_class = ClassModelSerializer
     permission_classes = [AllowAny]  # Permite el acceso sin restricciones
 
 # ViewSet para LayoutModel
