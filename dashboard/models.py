@@ -25,7 +25,7 @@ class CourseModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class ClassModel(models.Model):
-    img_cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
+    cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     lesson_name = models.CharField(max_length=200)
     description = models.TextField()
     course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, related_name="lessons")
