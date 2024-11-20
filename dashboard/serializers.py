@@ -4,7 +4,7 @@ from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, T
 class CourseModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseModel
-        fields = ['id', 'course_name', 'description', 'category', 'level', 'bullet_points', 'cover', 'scorm_version', 'created_at', 'updated_at']
+        fields = ['id', 'course_name', 'description', 'category', 'level', 'bullet_points', 'cover', 'created_at', 'updated_at']
 
 
 class ClassModelSerializer(serializers.ModelSerializer):
@@ -12,7 +12,7 @@ class ClassModelSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ClassModel
-        fields = ['id', 'class_name', 'description', 'course', 'bullet_points', 'img_cover', 'scorm_version', 'created_at', 'updated_at']
+        fields = ['id', 'class_name', 'description', 'course', 'bullet_points', 'img_cover', 'created_at', 'updated_at']
 
 
 class LayoutModelSerializer(serializers.ModelSerializer):
