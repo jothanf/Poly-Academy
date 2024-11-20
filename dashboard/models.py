@@ -26,22 +26,22 @@ class CourseModel(models.Model):
 
 class ClassModel(models.Model):
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
-    lesson_name = models.CharField(max_length=200)
+    class_name = models.CharField(max_length=200)
     description = models.TextField()
-    course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, related_name="lessons")
+    course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, related_name="classes")
     bullet_points = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.lesson_name
+        return self.class_name
 
 class LayoutModel(models.Model):
     class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='layouts')
     title = models.CharField(max_length=200)
     instructions = models.TextField()
-    img_cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
-    audio = models.FileField(upload_to='lesson_audio/', null=True, blank=True)
+    cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
+    audio = models.FileField(upload_to='class_audio/', null=True, blank=True)
     audio_script = models.TextField()
 
     ##Multiple Choice Task

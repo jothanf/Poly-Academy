@@ -12,13 +12,13 @@ class ClassModelSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ClassModel
-        fields = ['id', 'class_name', 'description', 'course', 'bullet_points', 'img_cover', 'created_at', 'updated_at']
+        fields = ['id', 'class_name', 'description', 'course', 'bullet_points', 'cover', 'created_at', 'updated_at']
 
 
 class LayoutModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LayoutModel
-        fields = ['id', 'title', 'instructions', 'img_cover', 'audio', 'audio_script']
+        fields = ['id', 'title', 'instructions', 'cover', 'audio', 'audio_script']
 
 
 class MultipleChoiceModelSerializer(serializers.ModelSerializer):
