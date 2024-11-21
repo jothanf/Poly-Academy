@@ -17,19 +17,19 @@ from django.core.files.storage import default_storage
 class CourseModel(models.Model):
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     course_name = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     category = models.CharField(max_length=100)
     level = models.CharField(max_length=100)
-    bullet_points = models.JSONField()
+    bullet_points = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 class ClassModel(models.Model):
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     class_name = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, related_name="classes")
-    bullet_points = models.JSONField()
+    bullet_points = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -39,7 +39,7 @@ class ClassModel(models.Model):
 class LayoutModel(models.Model):
     class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='layouts')
     title = models.CharField(max_length=200)
-    instructions = models.TextField()
+    instructions = models.TextField(null=True, blank=True)
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     audio = models.FileField(upload_to='class_audio/', null=True, blank=True)
     audio_script = models.TextField()
@@ -48,7 +48,7 @@ class LayoutModel(models.Model):
 
 class MultipleChoiceModel(models.Model):
     layout = models.ForeignKey(LayoutModel, on_delete=models.CASCADE, related_name="questions")
-    instructions = models.TextField()
+    instructions = models.TextField(null=True, blank=True)
     question = models.CharField(max_length=200)
     answers = models.JSONField(
         help_text="Formato: [{'text': 'respuesta', 'is_correct': true/false}, ...]"
@@ -75,7 +75,7 @@ def validate_questions_true_false(questions):
 
 class TrueOrFalseModel(models.Model):
     layout = models.ForeignKey(LayoutModel, on_delete=models.CASCADE, related_name="true_or_false_tasks")
-    instructions = models.TextField()
+    instructions = models.TextField(null=True, blank=True)
     #questions = models.JSONField(validators=[validate_questions_true_false])
     questions = models.JSONField()
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
@@ -104,7 +104,7 @@ def validate_items_ordering(items):
 
 class OrderingTaskModel(models.Model):
     layout = models.ForeignKey(LayoutModel, related_name="ordering_tasks", on_delete=models.CASCADE)
-    instructions = models.TextField()
+    instructions = models.TextField(null=True, blank=True)
     #items = models.JSONField(help_text="Lista de elementos a ordenar en formato JSON.", validators=[validate_items_ordering])
     items = models.JSONField(help_text="Lista de elementos a ordenar en formato JSON.")
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
@@ -130,7 +130,7 @@ def validate_categories(categories):
 
 class CategoriesTaskModel(models.Model):
     layout = models.ForeignKey(LayoutModel, related_name="categories_tasks", on_delete=models.CASCADE)
-    instructions = models.TextField()
+    instructions = models.TextField(null=True, blank=True)
     #categories = models.JSONField(validators=[validate_categories])
     categories = models.JSONField()
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
@@ -146,7 +146,7 @@ class CategoriesTaskModel(models.Model):
 
 class FillInTheGapsTaskModel(models.Model):
     layout = models.ForeignKey(LayoutModel, on_delete=models.CASCADE, related_name="fill_in_the_gaps_tasks")
-    instructions = models.TextField(help_text="Instrucciones para la tarea de llenar los espacios.")
+    instructions = models.TextField(null=True, blank=True)
     text_with_gaps = models.TextField(help_text="Texto con espacios para completar. Usa '{gap}' para indicar los espacios.")
     keywords = models.JSONField(help_text="Palabras claves en formato JSON, en el orden de aparición de los espacios.")
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
@@ -162,7 +162,7 @@ class FillInTheGapsTaskModel(models.Model):
 class TextBlockModel(models.Model):
     lesson = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='text_blocks')
     title = models.CharField(max_length=200, help_text="Título del bloque de texto")
-    instructions = models.TextField(help_text="Instrucciones para el bloque de texto")
+    instructions = models.TextField(null=True, blank=True)
     content = models.TextField(help_text="Contenido de texto")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -174,7 +174,7 @@ class TextBlockModel(models.Model):
 
 class VideoModel(models.Model):
     title = models.CharField(max_length=200, help_text="Título del video")
-    instructions = models.TextField(help_text="Instrucciones sobre el contenido del video")
+    instructions = models.TextField(null=True, blank=True)
     video_file = models.FileField(upload_to='videos/', null=True, blank=True, help_text="Archivo de video")
     script = models.TextField(help_text="Transcripción de lo que se dice en el video")
 
