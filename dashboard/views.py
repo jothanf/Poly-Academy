@@ -85,6 +85,36 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
 
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            response = super().partial_update(request, *args, **kwargs)
+            return Response({
+                'status': 'success',
+                'message': f'{self.model_name} actualizado parcialmente con éxito',
+                'data': response.data
+            })
+        except DRFValidationError as e:
+            error_details = {}
+            if isinstance(e.detail, dict):
+                for field, errors in e.detail.items():
+                    error_details[field] = [str(error) for error in errors]
+            else:
+                error_details['general'] = [str(error) for error in e.detail]
+
+            return Response({
+                'status': 'error',
+                'message': f'Error al actualizar parcialmente {self.model_name}',
+                'campos_con_error': error_details,
+                'tipo_error': 'validación'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Error al actualizar parcialmente {self.model_name}',
+                'detalle_error': str(e),
+                'tipo_error': 'sistema'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 class CourseView(BaseModelViewSet):
     serializer_class = CourseModelSerializer
     queryset = CourseModel.objects.all()
