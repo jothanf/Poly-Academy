@@ -138,3 +138,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# Asegúrate de que la carpeta 'media' exista
+if not os.path.exists(MEDIA_ROOT):
+    os.makedirs(MEDIA_ROOT)

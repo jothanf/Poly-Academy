@@ -172,3 +172,7 @@ class FillInTheGapsTaskModelViewSet(BaseModelViewSet):
     queryset = FillInTheGapsTaskModel.objects.all()
     serializer_class = FillInTheGapsTaskModelSerializer
     model_name = 'tarea de rellenar huecos'
+
+def course_list(request):
+    courses = CourseModel.objects.all().order_by('-created_at')
+    return render(request, 'course_list.html', {'courses': courses})

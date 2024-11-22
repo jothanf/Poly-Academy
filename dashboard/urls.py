@@ -35,4 +35,5 @@ router.register(r'fillinthegaps', api.FillInTheGapsTaskModelViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('courses/', views.course_list, name='course_list'),
 ]
