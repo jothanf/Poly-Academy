@@ -18,9 +18,9 @@ class CourseModel(models.Model):
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     course_name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
-    category = models.CharField(max_length=100)
-    level = models.CharField(max_length=100)
-    bullet_points = models.JSONField(help_text="Formato: ['punto 1', 'punto 2', ...]")
+    category = models.CharField(max_length=100, null=True, blank=True)
+    level = models.CharField(max_length=100, null=True, blank=True)
+    bullet_points = models.JSONField(help_text="Formato: ['punto 1', 'punto 2', ...]", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -38,11 +38,11 @@ class ClassModel(models.Model):
 
 class LayoutModel(models.Model):
     class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='layouts')
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, null=True, blank=True)
     instructions = models.TextField(null=True, blank=True)
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     audio = models.FileField(upload_to='class_audio/', null=True, blank=True)
-    audio_script = models.TextField()
+    audio_script = models.TextField(null=True, blank=True)
 
     ##Multiple Choice Task
 
@@ -61,6 +61,7 @@ class MultipleChoiceModel(models.Model):
 
     ##True or False Task
 
+"""
 def validate_questions_true_false(questions):
     if not isinstance(questions, dict) or "questions" not in questions:
         raise ValidationError("El JSON debe tener una clave 'questions' que contenga una lista de preguntas.")
@@ -72,6 +73,7 @@ def validate_questions_true_false(questions):
             raise ValidationError("Cada pregunta debe tener una clave 'statement' y una clave 'state'.")
         if question["state"] not in [1, 2, 3]:
             raise ValidationError("El campo 'state' debe ser 1 (true), 2 (false), o 3 (not_state).")
+"""
 
 class TrueOrFalseModel(models.Model):
     layout = models.ForeignKey(LayoutModel, on_delete=models.CASCADE, related_name="true_or_false_tasks")
@@ -117,7 +119,7 @@ class OrderingTaskModel(models.Model):
         return f"Tarea de Ordenar - {self.instructions[:30]}"
 
     ## Categories Task
-
+"""
 def validate_categories(categories):
     if not isinstance(categories, dict) or "categories" not in categories:
         raise ValidationError("El JSON debe tener una clave 'categories' que contenga una lista de categorías.")
@@ -127,7 +129,7 @@ def validate_categories(categories):
             raise ValidationError("Cada categoría debe tener una clave 'name' y una lista de 'items'.")
         if not isinstance(category["items"], list):
             raise ValidationError("La clave 'items' debe ser una lista.")
-
+"""
 class CategoriesTaskModel(models.Model):
     layout = models.ForeignKey(LayoutModel, related_name="categories_tasks", on_delete=models.CASCADE)
     instructions = models.TextField(null=True, blank=True)
@@ -161,7 +163,7 @@ class FillInTheGapsTaskModel(models.Model):
     
 class TextBlockModel(models.Model):
     lesson = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='text_blocks')
-    title = models.CharField(max_length=200, help_text="Título del bloque de texto")
+    title = models.CharField(max_length=200, help_text="Título del bloque de texto", null=True, blank=True)
     instructions = models.TextField(null=True, blank=True)
     content = models.TextField(help_text="Contenido de texto")
 
@@ -176,7 +178,7 @@ class VideoModel(models.Model):
     title = models.CharField(max_length=200, help_text="Título del video")
     instructions = models.TextField(null=True, blank=True)
     video_file = models.FileField(upload_to='videos/', null=True, blank=True, help_text="Archivo de video")
-    script = models.TextField(help_text="Transcripción de lo que se dice en el video")
+    script = models.TextField(help_text="Transcripción de lo que se dice en el video", null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
