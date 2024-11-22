@@ -7,16 +7,36 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <h1>Lista de Cursos Disponibles para Descargar en SCORM</h1>
-    <ul>
-        {% for course in courses %}
-            <li>
-                <strong>{{ course.course_name }}</strong> - {{ course.description }}
-                <a href="{% url 'download_scorm' course.id %}">Descargar en SCORM</a>
-            </li>
-        {% empty %}
-            <li>No hay cursos disponibles.</li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <h1>Cursos Disponibles</h1>
+        
+        <div class="courses-grid">
+            {% for course in courses %}
+                <div class="course-card">
+                    {% if course.cover %}
+                        <img src="{{ course.cover.url }}" alt="{{ course.course_name }}" class="course-cover" width="100px" height="100px">
+                    {% endif %}
+                    <div class="course-info">
+                        <h2>{{ course.course_name }}</h2>
+                        <p class="description">{{ course.description }}</p>
+                        <div class="course-details">
+                            <span class="category">Categoría: {{ course.category }}</span>
+                            <span class="level">Nivel: {{ course.level }}</span>
+                        </div>
+                        <ul class="bullet-points">
+                            {% for point in course.bullet_points %}
+                                <li>{{ point }}</li>
+                            {% endfor %}
+                        </ul>
+                        <div class="course-footer">
+                            <span class="date">Creado: {{ course.created_at|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="no-courses">No hay cursos disponibles en este momento.</p>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>

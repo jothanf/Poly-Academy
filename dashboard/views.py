@@ -8,6 +8,7 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.parsers import MultiPartParser, FormParser
 # Create your views here.
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -119,6 +120,23 @@ class CourseView(BaseModelViewSet):
     serializer_class = CourseModelSerializer
     queryset = CourseModel.objects.all()
     model_name = 'curso'
+    parser_classes = (MultiPartParser, FormParser)
+
+    def create(self, request, *args, **kwargs):
+        try:
+            imagen = request.FILES.get('imagen')
+            response = super().create(request, *args, **kwargs)
+            return Response({
+                'status': 'success',
+                'message': 'Curso creado exitosamente',
+                'data': response.data
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al crear el curso',
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class ClassModelViewSet(BaseModelViewSet):
     queryset = ClassModel.objects.all()
@@ -154,3 +172,7 @@ class FillInTheGapsTaskModelViewSet(BaseModelViewSet):
     queryset = FillInTheGapsTaskModel.objects.all()
     serializer_class = FillInTheGapsTaskModelSerializer
     model_name = 'tarea de rellenar huecos'
+
+def course_list(request):
+    courses = CourseModel.objects.all().order_by('-created_at')
+    return render(request, 'course_list.html', {'courses': courses})
