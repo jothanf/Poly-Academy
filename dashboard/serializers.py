@@ -8,11 +8,14 @@ class CourseModelSerializer(serializers.ModelSerializer):
 
 
 class ClassModelSerializer(serializers.ModelSerializer):
-    course = CourseModelSerializer(read_only=True)  # Nested serializer for course information
+    course_id = serializers.PrimaryKeyRelatedField(
+        queryset=CourseModel.objects.all(),
+        source='course'
+    )
     
     class Meta:
         model = ClassModel
-        fields = ['id', 'class_name', 'description', 'course', 'bullet_points', 'cover', 'created_at', 'updated_at']
+        fields = ['id', 'class_name', 'description', 'course_id', 'bullet_points', 'cover', 'created_at', 'updated_at']
 
 
 class LayoutModelSerializer(serializers.ModelSerializer):
