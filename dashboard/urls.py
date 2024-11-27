@@ -27,13 +27,14 @@ router = DefaultRouter()
 router.register(r'courses', views.CourseView, 'courses')
 router.register(r'classes', api.ClassModelViewSet)
 router.register(r'layouts', api.LayoutModelViewSet)
-router.register(r'multiplechoice', api.TrueOrFalseModelViewSet)
+router.register(r'multiplechoice', api.MultipleChoiceModelViewSet)
+router.register(r'trueorfalse', api.TrueOrFalseModelViewSet)
 router.register(r'orderingtasks', api.OrderingTaskModelViewSet)
 router.register(r'categoriestasks', api.CategoriesTaskModelViewSet)
 router.register(r'fillinthegaps', api.FillInTheGapsTaskModelViewSet)
 
-
 urlpatterns = [
     path('api/', include(router.urls)),
     path('courses/', views.course_list, name='course_list'),
+    path('courses/<int:course_id>/classes/<int:class_id>/', views.ClassDetailView.as_view(), name='class_detail'),
 ]

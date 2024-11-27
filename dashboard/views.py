@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+from rest_framework.generics import RetrieveAPIView
 # Create your views here.
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -176,3 +178,10 @@ class FillInTheGapsTaskModelViewSet(BaseModelViewSet):
 def course_list(request):
     courses = CourseModel.objects.all().order_by('-created_at')
     return render(request, 'course_list.html', {'courses': courses})
+
+class ClassDetailView(RetrieveAPIView):
+    serializer_class = ClassModelSerializer
+
+    def get_queryset(self):
+        course_id = self.kwargs['course_id']
+        return ClassModel.objects.filter(course_id=course_id)

@@ -21,7 +21,7 @@ class ClassModelSerializer(serializers.ModelSerializer):
 class LayoutModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LayoutModel
-        fields = ['id', 'title', 'instructions', 'cover', 'audio', 'audio_script']
+        fields = ['id', 'class_model', 'title', 'instructions', 'cover', 'audio', 'audio_script']
 
 
 class MultipleChoiceModelSerializer(serializers.ModelSerializer):

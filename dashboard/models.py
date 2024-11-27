@@ -14,6 +14,23 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
+class MediaModel(models.Model):
+    MEDIA_TYPES = [
+        ('image', 'Image'),
+        ('audio', 'Audio'),
+        ('video', 'Video'),
+    ]
+
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPES)
+    file = models.FileField(upload_to='task_media/')
+    description = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.media_type} - {self.file.name}"
+
 class CourseModel(models.Model):
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     course_name = models.CharField(max_length=200)
@@ -53,6 +70,7 @@ class MultipleChoiceModel(models.Model):
     answers = models.JSONField(
         help_text="Formato: [{'text': 'respuesta', 'is_correct': true/false}, ...]"
     )
+    media = models.ManyToManyField(MediaModel, related_name="multiple_choice_tasks", blank=True)
     order = models.PositiveIntegerField(default=0)
     
     class Meta:
@@ -80,6 +98,7 @@ class TrueOrFalseModel(models.Model):
     instructions = models.TextField(null=True, blank=True)
     #questions = models.JSONField(validators=[validate_questions_true_false])
     questions = models.JSONField()
+    media = models.ManyToManyField(MediaModel, related_name="true_or_false_tasks", blank=True)
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
 
     class Meta:
@@ -109,6 +128,7 @@ class OrderingTaskModel(models.Model):
     instructions = models.TextField(null=True, blank=True)
     #items = models.JSONField(help_text="Lista de elementos a ordenar en formato JSON.", validators=[validate_items_ordering])
     items = models.JSONField(help_text="Lista de elementos a ordenar en formato JSON.")
+    media = models.ManyToManyField(MediaModel, related_name="ordering_tasks", blank=True)
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
 
     class Meta:
@@ -135,6 +155,7 @@ class CategoriesTaskModel(models.Model):
     instructions = models.TextField(null=True, blank=True)
     #categories = models.JSONField(validators=[validate_categories])
     categories = models.JSONField()
+    media = models.ManyToManyField(MediaModel, related_name="categories_tasks", blank=True)
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
 
     class Meta:
@@ -152,6 +173,7 @@ class FillInTheGapsTaskModel(models.Model):
     text_with_gaps = models.TextField(help_text="Texto con espacios para completar. Usa '{gap}' para indicar los espacios.")
     keywords = models.JSONField(help_text="Palabras claves en formato JSON, en el orden de aparición de los espacios.")
     order = models.PositiveIntegerField(default=0, help_text="Orden de aparición de la tarea.")
+    media = models.ManyToManyField(MediaModel, related_name="fill_in_the_gaps_tasks", blank=True)
 
     class Meta:
         ordering = ['order']
@@ -186,6 +208,7 @@ class VideoModel(models.Model):
     def __str__(self):
         return self.title
     
+
 
 """
 Course Json:
