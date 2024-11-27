@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveAPIView
+from rest_framework import generics
 # Create your views here.
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -180,6 +181,44 @@ def course_list(request):
     return render(request, 'course_list.html', {'courses': courses})
 
 class ClassDetailView(RetrieveAPIView):
+    serializer_class = ClassModelSerializer
+
+    def get_queryset(self):
+        course_id = self.kwargs['course_id']
+        return ClassModel.objects.filter(course_id=course_id)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+
+        # Obtener todos los layouts asociados a la clase
+        layouts = instance.layouts.all()  # Acceder a todos los layouts de la clase
+
+        # Inicializar listas para las tareas
+        multiple_choice_tasks = []
+        true_or_false_tasks = []
+        ordering_tasks = []
+        categories_tasks = []
+        fill_in_the_gaps_tasks = []
+
+        # Iterar sobre cada layout y obtener las tareas
+        for layout in layouts:
+            multiple_choice_tasks.extend(layout.multiplechoicemodel_set.all())
+            true_or_false_tasks.extend(layout.trueorfalsemodel_set.all())
+            ordering_tasks.extend(layout.orderingtaskmodel_set.all())
+            categories_tasks.extend(layout.categoriestaskmodel_set.all())
+            fill_in_the_gaps_tasks.extend(layout.fillinthegapstaskmodel_set.all())
+
+        return Response({
+            'class': serializer.data,
+            'multiple_choice_tasks': MultipleChoiceModelSerializer(multiple_choice_tasks, many=True).data,
+            'true_or_false_tasks': TrueOrFalseModelSerializer(true_or_false_tasks, many=True).data,
+            'ordering_tasks': OrderingTaskModelSerializer(ordering_tasks, many=True).data,
+            'categories_tasks': CategoriesTaskModelSerializer(categories_tasks, many=True).data,
+            'fill_in_the_gaps_tasks': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
+        })
+
+class ClassListView(generics.ListAPIView):
     serializer_class = ClassModelSerializer
 
     def get_queryset(self):
