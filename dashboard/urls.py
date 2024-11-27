@@ -20,6 +20,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 from . import views
 from . import api
+from .views import LayoutDetailView
 
 # Inicializa el router
 router = DefaultRouter()
@@ -34,14 +35,10 @@ router.register(r'orderingtasks', api.OrderingTaskModelViewSet)
 router.register(r'categoriestasks', api.CategoriesTaskModelViewSet)
 router.register(r'fillinthegaps', api.FillInTheGapsTaskModelViewSet)
 
-# Crea un NestedRouter para las clases
-courses_router = routers.NestedDefaultRouter(router, r'courses', lookup='course')
-courses_router.register(r'classes', views.ClassModelViewSet, basename='course-classes')
-
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('api/', include(courses_router.urls)),  # Incluye las rutas anidadas
     path('courses/', views.course_list, name='course_list'),
     path('courses/<int:course_id>/classes/<int:class_id>/', views.ClassDetailView.as_view(), name='class_detail'),
     path('api/courses/<int:course_id>/classes/', views.ClassListView.as_view(), name='course-classes-list'),
+    path('api/layouts/<int:pk>/', LayoutDetailView.as_view(), name='layout-detail'),
 ]

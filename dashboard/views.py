@@ -12,6 +12,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveAPIView
 from rest_framework import generics
+import logging
+
+# Configurar el logger
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -191,8 +196,11 @@ class ClassDetailView(RetrieveAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
 
+        logger.debug(f"Obteniendo detalles de la clase: {instance.class_name}")
+
         # Obtener todos los layouts asociados a la clase
         layouts = instance.layouts.all()  # Acceder a todos los layouts de la clase
+        logger.debug(f"Número de layouts encontrados: {layouts.count()}")
 
         # Inicializar listas para las tareas
         multiple_choice_tasks = []
@@ -203,11 +211,18 @@ class ClassDetailView(RetrieveAPIView):
 
         # Iterar sobre cada layout y obtener las tareas
         for layout in layouts:
+            logger.debug(f"Procesando layout: {layout.title}")
             multiple_choice_tasks.extend(layout.multiplechoicemodel_set.all())
             true_or_false_tasks.extend(layout.trueorfalsemodel_set.all())
             ordering_tasks.extend(layout.orderingtaskmodel_set.all())
             categories_tasks.extend(layout.categoriestaskmodel_set.all())
             fill_in_the_gaps_tasks.extend(layout.fillinthegapstaskmodel_set.all())
+
+        logger.debug(f"Tareas de opción múltiple encontradas: {len(multiple_choice_tasks)}")
+        logger.debug(f"Tareas de verdadero/falso encontradas: {len(true_or_false_tasks)}")
+        logger.debug(f"Tareas de ordenamiento encontradas: {len(ordering_tasks)}")
+        logger.debug(f"Tareas de categorías encontradas: {len(categories_tasks)}")
+        logger.debug(f"Tareas de llenar espacios encontradas: {len(fill_in_the_gaps_tasks)}")
 
         return Response({
             'class': serializer.data,
@@ -224,3 +239,29 @@ class ClassListView(generics.ListAPIView):
     def get_queryset(self):
         course_id = self.kwargs['course_id']
         return ClassModel.objects.filter(course_id=course_id)
+
+class LayoutDetailView(RetrieveAPIView):
+    serializer_class = LayoutModelSerializer
+
+    def get_queryset(self):
+        return LayoutModel.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+
+        # Obtener todas las tareas asociadas al layout
+        multiple_choice_tasks = instance.questions.all()  # Tareas de opción múltiple
+        true_or_false_tasks = instance.true_or_false_tasks.all()  # Tareas de verdadero o falso
+        ordering_tasks = instance.ordering_tasks.all()  # Tareas de ordenamiento
+        categories_tasks = instance.categories_tasks.all()  # Tareas de categorías
+        fill_in_the_gaps_tasks = instance.fill_in_the_gaps_tasks.all()  # Tareas de llenar espacios
+
+        return Response({
+            'layout': serializer.data,
+            'multiple_choice_tasks': MultipleChoiceModelSerializer(multiple_choice_tasks, many=True).data,
+            'true_or_false_tasks': TrueOrFalseModelSerializer(true_or_false_tasks, many=True).data,
+            'ordering_tasks': OrderingTaskModelSerializer(ordering_tasks, many=True).data,
+            'categories_tasks': CategoriesTaskModelSerializer(categories_tasks, many=True).data,
+            'fill_in_the_gaps_tasks': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
+        })

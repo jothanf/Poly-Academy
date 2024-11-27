@@ -142,3 +142,19 @@ CORS_ALLOW_CREDENTIALS = True
 # Asegúrate de que la carpeta 'media' exista
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'dashboard.views': {  # Asegúrate de que el nombre coincida con tu archivo de vistas
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
