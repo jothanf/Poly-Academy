@@ -82,16 +82,23 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         try:
+            instance = self.get_object()
             super().destroy(request, *args, **kwargs)
             return Response({
                 'status': 'success',
-                'message': f'{self.model_name} eliminado exitosamente'
-            })
+                'message': f'{self.model_name} eliminado exitosamente',
+                'data': {
+                    'id': instance.id,
+                    'course_name': instance.course_name if hasattr(instance, 'course_name') else None,
+                    'class_name': instance.class_name if hasattr(instance, 'class_name') else None,
+                }
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 'status': 'error',
                 'message': f'Error al eliminar {self.model_name}',
-                'error': str(e)
+                'detalle_error': str(e),
+                'tipo_error': 'sistema'
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, *args, **kwargs):
@@ -265,3 +272,28 @@ class LayoutDetailView(RetrieveAPIView):
             'categories_tasks': CategoriesTaskModelSerializer(categories_tasks, many=True).data,
             'fill_in_the_gaps_tasks': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
         })
+
+class ClassDeleteView(APIView):
+    def delete(self, request, pk, format=None):
+        try:
+            class_instance = ClassModel.objects.get(pk=pk)
+            class_instance.delete()
+            return Response({
+                'status': 'success',
+                'message': 'Clase eliminada exitosamente',
+                'data': {
+                    'id': class_instance.id,
+                    'class_name': class_instance.class_name,
+                }
+            }, status=status.HTTP_200_OK)
+        except ClassModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Clase no encontrada',
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al eliminar la clase',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
