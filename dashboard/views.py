@@ -273,7 +273,7 @@ class LayoutDetailView(RetrieveAPIView):
             'fill_in_the_gaps_tasks': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
         })
 
-class ClassDeleteView(APIView):
+class ClasDeleteView(APIView):
     def delete(self, request, pk, format=None):
         try:
             class_instance = ClassModel.objects.get(pk=pk)
