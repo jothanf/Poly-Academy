@@ -183,7 +183,7 @@ class FillInTheGapsTaskModel(models.Model):
         return f"Tarea de Llenar Espacios - {self.instructions[:30]}"
 
     
-class TextBlockModel(models.Model):
+class TextBlockLayoutModel(models.Model):
     lesson = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='text_blocks')
     title = models.CharField(max_length=200, help_text="Título del bloque de texto", null=True, blank=True)
     instructions = models.TextField(null=True, blank=True)
@@ -196,7 +196,8 @@ class TextBlockModel(models.Model):
         return self.title
     
 
-class VideoModel(models.Model):
+class VideoLayoutModel(models.Model):
+    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='videos')
     title = models.CharField(max_length=200, help_text="Título del video")
     instructions = models.TextField(null=True, blank=True)
     video_file = models.FileField(upload_to='videos/', null=True, blank=True, help_text="Archivo de video")

@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.http import HttpResponse
-from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.response import Response
@@ -295,5 +295,78 @@ class ClasDeleteView(APIView):
             return Response({
                 'status': 'error',
                 'message': 'Error al eliminar la clase',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+class ClassTasksView(APIView):
+    def get(self, request, class_id, format=None):
+        try:
+            class_instance = ClassModel.objects.get(id=class_id)
+            layouts = class_instance.layouts.all()
+            videos = class_instance.videos.all()
+            text_blocks = class_instance.text_blocks.all()
+
+            # Inicializar listas para las tareas y contenido
+            multiple_choice_tasks = []
+            true_or_false_tasks = []
+            ordering_tasks = []
+            categories_tasks = []
+            fill_in_the_gaps_tasks = []
+            media_items = set()  # Usamos un set para evitar duplicados
+
+            # Iterar sobre cada layout y obtener las tareas
+            for layout in layouts:
+                # Obtener tareas
+                multiple_choice = layout.questions.all()
+                true_or_false = layout.true_or_false_tasks.all()
+                ordering = layout.ordering_tasks.all()
+                categories = layout.categories_tasks.all()
+                fill_in_gaps = layout.fill_in_the_gaps_tasks.all()
+
+                # Extender listas de tareas
+                multiple_choice_tasks.extend(multiple_choice)
+                true_or_false_tasks.extend(true_or_false)
+                ordering_tasks.extend(ordering)
+                categories_tasks.extend(categories)
+                fill_in_the_gaps_tasks.extend(fill_in_gaps)
+
+                # Recopilar multimedia de las tareas
+                for task in multiple_choice:
+                    media_items.update(task.media.all())
+                for task in true_or_false:
+                    media_items.update(task.media.all())
+                for task in ordering:
+                    media_items.update(task.media.all())
+                for task in categories:
+                    media_items.update(task.media.all())
+                for task in fill_in_gaps:
+                    media_items.update(task.media.all())
+
+            return Response({
+                'status': 'success',
+                'class_id': class_instance.id,
+                'class_name': class_instance.class_name,
+                'content': {
+                    'videos': VideoLayoutModelSerializer(videos, many=True).data,
+                    'text_blocks': TextBlockLayoutModelSerializer(text_blocks, many=True).data,
+                },
+                'tasks': {
+                    'multiple_choice': MultipleChoiceModelSerializer(multiple_choice_tasks, many=True).data,
+                    'true_or_false': TrueOrFalseModelSerializer(true_or_false_tasks, many=True).data,
+                    'ordering': OrderingTaskModelSerializer(ordering_tasks, many=True).data,
+                    'categories': CategoriesTaskModelSerializer(categories_tasks, many=True).data,
+                    'fill_in_the_gaps': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
+                },
+                'media': MediaModelSerializer(list(media_items), many=True).data
+            }, status=status.HTTP_200_OK)
+        except ClassModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Clase no encontrada',
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al obtener las tareas',
                 'detalle_error': str(e),
             }, status=status.HTTP_400_BAD_REQUEST)

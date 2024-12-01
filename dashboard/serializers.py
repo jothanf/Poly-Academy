@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel
 
 class CourseModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,3 +52,21 @@ class FillInTheGapsTaskModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = FillInTheGapsTaskModel
         fields = ['id', 'layout', 'instructions', 'text_with_gaps', 'keywords', 'order']
+
+
+class VideoLayoutModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoLayoutModel
+        fields = ['id', 'title', 'instructions', 'video_file', 'script', 'created_at', 'updated_at']
+
+
+class TextBlockLayoutModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TextBlockLayoutModel
+        fields = ['id', 'title', 'instructions', 'content', 'created_at', 'updated_at']
+
+
+class MediaModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaModel
+        fields = ['id', 'media_type', 'file', 'description', 'created_at', 'updated_at']

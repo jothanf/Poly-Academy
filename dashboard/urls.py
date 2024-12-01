@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import api
-from .views import LayoutDetailView, ClasDeleteView
+from .views import LayoutDetailView, ClasDeleteView, ClassTasksView
 
 # Inicializa el router
 router = DefaultRouter()
@@ -41,4 +41,5 @@ urlpatterns = [
     path('api/courses/<int:course_id>/classes/', views.ClassListView.as_view(), name='course-classes-list'),
     path('api/layouts/<int:pk>/', LayoutDetailView.as_view(), name='layout-detail'),
     path('api/clases/delete/<int:pk>/', ClasDeleteView.as_view(), name='clas-delete'),
+    path('api/classes/<int:class_id>/tasks/', ClassTasksView.as_view(), name='class-tasks'),
 ]
