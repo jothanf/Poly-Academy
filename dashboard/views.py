@@ -314,49 +314,38 @@ class ClassTasksView(APIView):
             fill_in_the_gaps_tasks = []
             media_items = set()  # Usamos un set para evitar duplicados
 
-            # Iterar sobre cada layout y obtener las tareas
+            # Serializar los layouts
+            layouts_data = []
             for layout in layouts:
-                # Obtener tareas
-                multiple_choice = layout.questions.all()
-                true_or_false = layout.true_or_false_tasks.all()
-                ordering = layout.ordering_tasks.all()
-                categories = layout.categories_tasks.all()
-                fill_in_gaps = layout.fill_in_the_gaps_tasks.all()
-
-                # Extender listas de tareas
-                multiple_choice_tasks.extend(multiple_choice)
-                true_or_false_tasks.extend(true_or_false)
-                ordering_tasks.extend(ordering)
-                categories_tasks.extend(categories)
-                fill_in_the_gaps_tasks.extend(fill_in_gaps)
+                layout_data = LayoutModelSerializer(layout).data
+                layout_data.update({
+                    'multiple_choice': MultipleChoiceModelSerializer(layout.questions.all(), many=True).data,
+                    'true_or_false': TrueOrFalseModelSerializer(layout.true_or_false_tasks.all(), many=True).data,
+                    'ordering': OrderingTaskModelSerializer(layout.ordering_tasks.all(), many=True).data,
+                    'categories': CategoriesTaskModelSerializer(layout.categories_tasks.all(), many=True).data,
+                    'fill_in_the_gaps': FillInTheGapsTaskModelSerializer(layout.fill_in_the_gaps_tasks.all(), many=True).data,
+                })
+                layouts_data.append(layout_data)
 
                 # Recopilar multimedia de las tareas
-                for task in multiple_choice:
+                for task in layout.questions.all():
                     media_items.update(task.media.all())
-                for task in true_or_false:
+                for task in layout.true_or_false_tasks.all():
                     media_items.update(task.media.all())
-                for task in ordering:
+                for task in layout.ordering_tasks.all():
                     media_items.update(task.media.all())
-                for task in categories:
+                for task in layout.categories_tasks.all():
                     media_items.update(task.media.all())
-                for task in fill_in_gaps:
+                for task in layout.fill_in_the_gaps_tasks.all():
                     media_items.update(task.media.all())
 
             return Response({
                 'status': 'success',
                 'class_id': class_instance.id,
                 'class_name': class_instance.class_name,
-                'content': {
-                    'videos': VideoLayoutModelSerializer(videos, many=True).data,
-                    'text_blocks': TextBlockLayoutModelSerializer(text_blocks, many=True).data,
-                },
-                'tasks': {
-                    'multiple_choice': MultipleChoiceModelSerializer(multiple_choice_tasks, many=True).data,
-                    'true_or_false': TrueOrFalseModelSerializer(true_or_false_tasks, many=True).data,
-                    'ordering': OrderingTaskModelSerializer(ordering_tasks, many=True).data,
-                    'categories': CategoriesTaskModelSerializer(categories_tasks, many=True).data,
-                    'fill_in_the_gaps': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
-                },
+                'task_layouts': layouts_data,
+                'video_layouts': VideoLayoutModelSerializer(videos, many=True).data,  # Videos separados
+                'text_blocks_layouts': TextBlockLayoutModelSerializer(text_blocks, many=True).data,  # Textos separados
                 'media': MediaModelSerializer(list(media_items), many=True).data
             }, status=status.HTTP_200_OK)
         except ClassModel.DoesNotExist:
@@ -368,5 +357,57 @@ class ClassTasksView(APIView):
             return Response({
                 'status': 'error',
                 'message': 'Error al obtener las tareas',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+class TaskLayoutDetailView(APIView):
+    def get(self, request, layout_id, format=None):
+        try:
+            layout_instance = LayoutModel.objects.get(id=layout_id)
+            multiple_choice_tasks = layout_instance.questions.all()
+            true_or_false_tasks = layout_instance.true_or_false_tasks.all()
+            ordering_tasks = layout_instance.ordering_tasks.all()
+            categories_tasks = layout_instance.categories_tasks.all()
+            fill_in_the_gaps_tasks = layout_instance.fill_in_the_gaps_tasks.all()
+
+            # Obtener multimedia asociada a las tareas
+            media_items = set()
+            for task in multiple_choice_tasks:
+                media_items.update(task.media.all())
+            for task in true_or_false_tasks:
+                media_items.update(task.media.all())
+            for task in ordering_tasks:
+                media_items.update(task.media.all())
+            for task in categories_tasks:
+                media_items.update(task.media.all())
+            for task in fill_in_the_gaps_tasks:
+                media_items.update(task.media.all())
+
+            return Response({
+                'status': 'success',
+                'layout_id': layout_instance.id,
+                'layout_title': layout_instance.title,
+                'instructions': layout_instance.instructions,  # Instrucciones
+                'cover': layout_instance.cover.url if layout_instance.cover else None,  # Cover
+                'audio': layout_instance.audio.url if layout_instance.audio else None,  # Audio
+                'audio_script': layout_instance.audio_script,  # Audio script
+                'tasks': {
+                    'multiple_choice': MultipleChoiceModelSerializer(multiple_choice_tasks, many=True).data,
+                    'true_or_false': TrueOrFalseModelSerializer(true_or_false_tasks, many=True).data,
+                    'ordering': OrderingTaskModelSerializer(ordering_tasks, many=True).data,
+                    'categories': CategoriesTaskModelSerializer(categories_tasks, many=True).data,
+                    'fill_in_the_gaps': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
+                },
+                'media': MediaModelSerializer(list(media_items), many=True).data
+            }, status=status.HTTP_200_OK)
+        except LayoutModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Layout no encontrado',
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al obtener el layout',
                 'detalle_error': str(e),
             }, status=status.HTTP_400_BAD_REQUEST)
