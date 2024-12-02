@@ -343,6 +343,9 @@ class ClassTasksView(APIView):
                 'status': 'success',
                 'class_id': class_instance.id,
                 'class_name': class_instance.class_name,
+                'cover': class_instance.cover.url if class_instance.cover else None,
+                'description': class_instance.description,
+                'bullet_points': class_instance.bullet_points,
                 'task_layouts': layouts_data,
                 'video_layouts': VideoLayoutModelSerializer(videos, many=True).data,  # Videos separados
                 'text_blocks_layouts': TextBlockLayoutModelSerializer(text_blocks, many=True).data,  # Textos separados
