@@ -169,6 +169,36 @@ class MultipleChoiceModelViewSet(BaseModelViewSet):
     serializer_class = MultipleChoiceModelSerializer
     model_name = 'modelo de elección múltiple'
 
+    def create(self, request, *args, **kwargs):
+        try:
+            response = super().create(request, *args, **kwargs)
+            return Response({
+                'status': 'success',
+                'message': 'Modelo de elección múltiple creado exitosamente',
+                'data': response.data
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al crear el modelo de elección múltiple',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            response = super().update(request, *args, **kwargs)
+            return Response({
+                'status': 'success',
+                'message': 'Modelo de elección múltiple actualizado exitosamente',
+                'data': response.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al actualizar el modelo de elección múltiple',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 class TrueOrFalseModelViewSet(BaseModelViewSet):
     queryset = TrueOrFalseModel.objects.all()
     serializer_class = TrueOrFalseModelSerializer
