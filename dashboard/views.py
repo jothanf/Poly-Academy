@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.http import HttpResponse
-from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.response import Response
@@ -18,6 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
@@ -412,5 +413,48 @@ class TaskLayoutDetailView(APIView):
             return Response({
                 'status': 'error',
                 'message': 'Error al obtener el layout',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+class MultimediaBlockVideoViewSet(viewsets.ModelViewSet):
+    queryset = MultimediaBlockVideoModel.objects.all()
+    serializer_class = MultimediaBlockVideoModelSerializer
+
+    # Método para listar todos los videos
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'status': 'success',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al crear el bloque multimedia de video',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al actualizar el bloque multimedia de video',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al eliminar el bloque multimedia de video',
                 'detalle_error': str(e),
             }, status=status.HTTP_400_BAD_REQUEST)

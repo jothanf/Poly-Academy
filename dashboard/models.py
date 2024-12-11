@@ -79,6 +79,11 @@ class MultipleChoiceModel(models.Model):
 
     ##True or False Task
 
+class MultimediaBlockVideoModel(models.Model):
+    video = models.FileField(upload_to='videos/', null=True, blank=True, help_text="Archivo de video")
+    script = models.TextField(help_text="Transcripción de lo que se dice en el video", null=True, blank=True)
+    cover = models.ImageField(upload_to='multimedia_block_videos/', null=True, blank=True)
+
 """
 def validate_questions_true_false(questions):
     if not isinstance(questions, dict) or "questions" not in questions:
