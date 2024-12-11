@@ -64,20 +64,25 @@ class LayoutModel(models.Model):
     ##Multiple Choice Task
 
 class MultipleChoiceModel(models.Model):
-    layout = models.ForeignKey(LayoutModel, on_delete=models.CASCADE, related_name="questions")
+    ##layout = models.ForeignKey(LayoutModel, on_delete=models.CASCADE, related_name="questions")
+    tittle = models.CharField(max_length=200, null=True, blank=True)
     instructions = models.TextField(null=True, blank=True)
-    question = models.CharField(max_length=200)
-    answers = models.JSONField(
-        help_text="Formato: [{'text': 'respuesta', 'is_correct': true/false}, ...]"
-    )
-    media = models.ManyToManyField(MediaModel, related_name="multiple_choice_tasks", blank=True)
-    order = models.PositiveIntegerField(default=0)
+    script = models.TextField(null=True, blank=True)
+    question = models.JSONField()
+    cover = models.ImageField(upload_to='cover_multiple_choice_tasks/', null=True, blank=True)
+    audio = models.FileField(upload_to='audio_multiple_choice_tasks/', null=True, blank=True)
+    ##media = models.ManyToManyField(MediaModel, related_name="multiple_choice_tasks", blank=True)
+    ##order = models.PositiveIntegerField(default=0)
+    stats = models.BooleanField(default=False)
     
-    class Meta:
-        unique_together = ('layout', 'order')
-        ordering = ['order']
+
 
     ##True or False Task
+
+class MultimediaBlockVideoModel(models.Model):
+    video = models.FileField(upload_to='videos/', null=True, blank=True, help_text="Archivo de video")
+    script = models.TextField(help_text="Transcripción de lo que se dice en el video", null=True, blank=True)
+    cover = models.ImageField(upload_to='multimedia_block_videos/', null=True, blank=True)
 
 """
 def validate_questions_true_false(questions):
