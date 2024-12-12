@@ -81,4 +81,4 @@ class MultimediaBlockVideoModelSerializer(serializers.ModelSerializer):
 class ClassContentModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassContentModel
-        fields = ['id', 'class_model', 'content_type', 'tittle', 'instructions', 'content_details', 'multimedia', 'order', 'created_at', 'updated_at']
+        fields = ['id', 'class_id', 'content_type', 'tittle', 'instructions', 'content_details', 'multimedia', 'order', 'stats', 'created_at', 'updated_at']
