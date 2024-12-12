@@ -396,7 +396,7 @@ class ClassContentModel(models.Model):
         ('pdf', 'Documento PDF'),
     ]
 
-    class_model = models.ForeignKey('ClassModel', on_delete=models.CASCADE, related_name='contents')
+    class_id = models.ForeignKey('ClassModel', on_delete=models.CASCADE, related_name='contents')
     
     content_type = models.CharField(max_length=100, choices=CONTENT_TYPES)
     tittle = models.CharField(max_length=500, null=True, blank=True)
@@ -408,6 +408,7 @@ class ClassContentModel(models.Model):
     multimedia = models.JSONField(null=True, blank=True)
     
     order = models.PositiveIntegerField(default=0)
+    stats = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
