@@ -1,0 +1,68 @@
+{
+    "class_model": "classid",
+    "content_type": "video",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "multimedia": [
+
+        {
+            "media_type": "video",
+            "file": "ruta/a/la/video.mp4",
+            "transcription": "Transcripción del video"
+        },
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        }
+    ]
+}
+
+{
+    "class_model": "classid",
+    "content_type": "audio",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "multimedia": [
+
+        {
+            "media_type": "audio",
+            "file": "ruta/a/la/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}
+{
+    "class_model": "classid",
+    "content_type": "video_embed",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "multimedia": [
+
+        {
+            "media_type": "video",
+            "url": "https://www.example.com/video.mp4"
+        },
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        }
+    ]
+}
+{
+    "class_model": "classid",
+    "content_type": "attachment",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "multimedia": [
+
+        {
+            "media_type": "pdf",
+            "file": "ruta/a/archivo.pdf",
+            "text": "Texto del archivo pdf"
+        },
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        }
+    ]
+}

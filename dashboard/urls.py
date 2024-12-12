@@ -34,6 +34,7 @@ router.register(r'orderingtasks', api.OrderingTaskModelViewSet)
 router.register(r'categoriestasks', api.CategoriesTaskModelViewSet)
 router.register(r'fillinthegaps', api.FillInTheGapsTaskModelViewSet)
 router.register(r'multimediablockvideos', views.MultimediaBlockVideoViewSet, 'multimediablockvideos')
+router.register(r'class-contents', views.ClassContentModelViewSet, 'class-contents')
 
 urlpatterns = [
     path('api/', include(router.urls)),

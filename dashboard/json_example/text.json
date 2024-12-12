@@ -1,0 +1,108 @@
+
+{
+    "class_model": "classid",
+    "content_type": "text_block",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "textos": [
+            {
+                "texto": "Texto 1",
+                "column": 1
+            },
+            {
+                "texto": "Texto 2",
+                "column": 2
+            }
+        ]
+    },
+   
+}
+
+{
+    "class_model": "classid",
+    "content_type": "text_article",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "texto_block_1": [
+            {
+                texto1
+            }
+        ]
+        "multimedia": [
+            {
+                "media_type": "image",
+                "img_position": "right",
+                "file": "ruta/a/la/imagen.jpg",
+                "text_associated": "texto_1"
+            },
+            {
+                "media_type": "image",
+                "img_position": "left",
+                "file": "ruta/a/la/imagen.jpg",
+                "text_associated": "texto_2"
+            }
+        ]
+    },
+   
+}
+
+{
+    "class_model": "classid",
+    "content_type": "text_quote",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "quote": [
+            {
+                "slice_1": "Texto 1",
+            },
+            {
+                "slice_2": "Texto 2",
+            }
+        ]
+        "multimedia": [
+            {
+                "media_type": "image",
+                "file": "ruta/a/la/imagen.jpg",
+                "slice_associated": "slice_1"
+            },
+            {
+                "media_type": "image",
+                "file": "ruta/a/la/imagen.jpg",
+                "slice_associated": "slice_2"
+            }
+        ]
+    },
+   
+}
+{
+    "class_model": "classid",
+    "content_type": "text_highlighted",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "quote": [
+            {
+                "slice_1": "Texto 1",
+            },
+            {
+                "slice_2": "Texto 2",
+            }
+        ]
+        "multimedia": [
+            {
+                "media_type": "image",
+                "file": "ruta/a/la/imagen.jpg",
+                "slice_associated": "slice_1"
+            },
+            {
+                "media_type": "image",
+                "file": "ruta/a/la/imagen.jpg",
+                "slice_associated": "slice_2"
+            }
+        ]
+    },
+   
+}

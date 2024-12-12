@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.http import HttpResponse
-from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.response import Response
@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import RetrieveAPIView
 from rest_framework import generics
 import logging
+from django.core.files.storage import default_storage
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -488,3 +489,129 @@ class MultimediaBlockVideoViewSet(viewsets.ModelViewSet):
                 'message': 'Error al eliminar el bloque multimedia de video',
                 'detalle_error': str(e),
             }, status=status.HTTP_400_BAD_REQUEST)
+
+class ClassContentModelViewSet(BaseModelViewSet):
+    queryset = ClassContentModel.objects.all()
+    serializer_class = ClassContentModelSerializer
+    model_name = 'contenido de clase'
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_queryset(self):
+        """Permite filtrar por class_model_id si se proporciona en la URL"""
+        queryset = ClassContentModel.objects.all()
+        class_id = self.request.query_params.get('class_id', None)
+        if class_id is not None:
+            queryset = queryset.filter(class_model_id=class_id)
+        return queryset.order_by('order')
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Procesar los archivos multimedia si están presentes
+            multimedia_files = request.FILES.getlist('multimedia')
+            
+            # Crear el contenido
+            response = super().create(request, *args, **kwargs)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Contenido de clase creado exitosamente',
+                'data': response.data
+            }, status=status.HTTP_201_CREATED)
+            
+        except ValidationError as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al crear el contenido de clase',
+                'detalle_error': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            
+            # Actualizar el contenido
+            response = super().update(request, *args, **kwargs)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Contenido de clase actualizado exitosamente',
+                'data': response.data
+            })
+            
+        except ValidationError as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al actualizar el contenido de clase',
+                'detalle_error': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            response = super().partial_update(request, *args, **kwargs)
+            return Response({
+                'status': 'success',
+                'message': 'Contenido de clase actualizado parcialmente con éxito',
+                'data': response.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al actualizar parcialmente el contenido de clase',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance_id = instance.id
+            
+            # Eliminar archivos multimedia asociados si existen
+            if instance.multimedia:
+                for media_item in instance.multimedia:
+                    if media_item.get('file_info', {}).get('path'):
+                        default_storage.delete(media_item['file_info']['path'])
+            
+            super().destroy(request, *args, **kwargs)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Contenido de clase eliminado exitosamente',
+                'data': {'id': instance_id}
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al eliminar el contenido de clase',
+                'detalle_error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Lista de contenidos obtenida exitosamente',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al obtener la lista de contenidos',
+                'detalle_error': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
