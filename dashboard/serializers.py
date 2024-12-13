@@ -81,4 +81,18 @@ class MultimediaBlockVideoModelSerializer(serializers.ModelSerializer):
 class ClassContentModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassContentModel
-        fields = ['id', 'class_id', 'content_type', 'tittle', 'instructions', 'content_details', 'multimedia', 'order', 'stats', 'created_at', 'updated_at']
+        fields = ['id', 'class_id', 'content_type', 'tittle', 'instructions', 
+                 'content_details', 'multimedia', 'order', 'stats', 
+                 'created_at', 'updated_at']
+
+    def validate_content_details(self, value):
+        if value is not None:
+            if not isinstance(value, (dict, list)):
+                raise serializers.ValidationError("El contenido debe ser un objeto o array JSON válido")
+        return value
+
+    def validate_multimedia(self, value):
+        if value is not None:
+            if not isinstance(value, list):
+                raise serializers.ValidationError("El campo multimedia debe ser una lista")
+        return value

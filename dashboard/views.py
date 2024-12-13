@@ -8,12 +8,13 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveAPIView
 from rest_framework import generics
 import logging
 from django.core.files.storage import default_storage
+import json
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -494,7 +495,7 @@ class ClassContentModelViewSet(BaseModelViewSet):
     queryset = ClassContentModel.objects.all()
     serializer_class = ClassContentModelSerializer
     model_name = 'contenido de clase'
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         """Permite filtrar por class_model_id si se proporciona en la URL"""
@@ -506,12 +507,28 @@ class ClassContentModelViewSet(BaseModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
+            # Validar el content_details si está presente
+            if 'content_details' in request.data:
+                try:
+                    if isinstance(request.data['content_details'], str):
+                        json.loads(request.data['content_details'])
+                except json.JSONDecodeError:
+                    return Response({
+                        'status': 'error',
+                        'message': 'Error en la validación de datos',
+                        'campos_con_error': {
+                            'content_details': ['El valor debe ser un JSON válido']
+                        },
+                        'tipo_error': 'validación'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
             # Procesar los archivos multimedia si están presentes
             multimedia_files = request.FILES.getlist('multimedia')
             
-            # Crear el contenido
+            # Crear el contenido usando el método de la clase padre
             response = super().create(request, *args, **kwargs)
             
+            # Si llegamos aquí, la creación fue exitosa
             return Response({
                 'status': 'success',
                 'message': 'Contenido de clase creado exitosamente',
@@ -522,13 +539,15 @@ class ClassContentModelViewSet(BaseModelViewSet):
             return Response({
                 'status': 'error',
                 'message': 'Error de validación',
-                'detalle_error': str(e),
+                'campos_con_error': str(e),
+                'tipo_error': 'validación'
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
                 'status': 'error',
                 'message': 'Error al crear el contenido de clase',
                 'detalle_error': str(e),
+                'tipo_error': 'sistema'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, *args, **kwargs):
