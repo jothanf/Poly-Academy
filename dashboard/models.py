@@ -380,8 +380,7 @@ class ClassContentModel(models.Model):
         ('text_quote', 'Text Quote'),
         ('text_highlighted', 'Text Highlighted'),
         ('info_box', 'Info Box'),
-        ('numeric_list', 'Numeric List'),
-        ('non_numeric_list', 'Non Numeric List'),
+        ('icon_list', 'Icon List'),
         #Multimedia
         ('video', 'Video'),
         ('audio', 'Audio'),

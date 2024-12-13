@@ -1,0 +1,279 @@
+{
+    "class_id": "classid",
+    "content_type": "multiple_choice_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Opción Múltiple",
+    "instructions": "Selecciona la respuesta correcta para cada pregunta.",
+    "content_details": {
+        "questions": [
+            {
+                "question": "¿Cuál es la capital de Francia?",
+                "answers": [
+                    {
+                        "text": "París",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Londres",
+                        "is_correct": false
+                    }
+                ]
+            },
+            {
+                "question": "¿Cuál es la capital de España?",
+                "answers": [
+                    {
+                        "text": "Madrid",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "París",
+                        "is_correct": false
+                    }
+                ]
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg",
+            "question_id": 1
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "true_false_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Verdadero/Falso",
+    "instructions": "Indica si cada afirmación es verdadera o falsa.",
+    "content_details": {
+        "questions": [
+            {
+                "statement": "La Tierra es plana.",
+                "stated": "true",
+            },
+            {
+                "statement": "La Tierra es plana.",
+                "stated": "false",
+            },
+            {
+                "statement": "La Tierra es plana.",
+                "stated": "not_stated",
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "fill_gaps_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Completar Espacios",
+    "instructions": "Completa los espacios en blanco con las palabras correctas.",
+    "content_details": {
+        "passages": [
+            {
+                "text": "El __1__ es un elemento químico.",
+                "keywords": ["hidrogeno", "helio", "litio"],
+                "help_text": true
+            },
+            {
+                "text": "El __1__ es un elemento químico.",
+                "keywords": ["hidrogeno", "helio", "litio"],
+                "help_text": false
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "word_bank_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Banco de Palabras",
+    "instructions": "Selecciona la palabra correcta del banco de palabras para cada espacio.",
+    "content_details": {
+        "word_bank": [
+            {
+                "text": "__Texto__ con __palabras__ clave",
+                "keywords": [
+                    {
+                        "word": "palabra1",
+                        "position": 1
+                    },
+                    {
+                        "word": "palabra2",
+                        "position": 2
+                    }   
+                ]
+            },
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "drop_down_text_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Texto Desplegable",
+    "instructions": "Selecciona la opción correcta de cada menú desplegable.",
+    "content_details": {
+        "drop_down_text": [
+            {
+                "text": "Texto 1 con __palabras__ clave",
+                "options": [
+                    {"word": "palabra1", "correct": true},
+                    {"word": "palabra2", "correct": false}
+                ]
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "ordering_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Ordenamiento",
+    "instructions": "Ordena los elementos en la secuencia correcta.",
+    "content_details": {
+        "ordering": [
+            {
+                "text": "Primero hierve el agua",
+                "indice": 1
+            },
+            {
+                "text": "Agrega el té",
+                "indice": 2
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "sorting_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Clasificación",
+    "instructions": "Clasifica los elementos en las categorías correctas.",
+    "content_details": {
+        "sorting": [
+            {
+                "categoria": "Categoría 1",
+                "imagenes": [
+                    "ruta/a/la/imagen1.jpg",
+                    "ruta/a/la/imagen2.jpg"
+                ]
+            },
+            {
+                "categoria": "Categoría 2",
+                "imagenes": [
+                    "ruta/a/la/imagen3.jpg",
+                    "ruta/a/la/imagen4.jpg"
+                ]
+            },
+            {
+                "categoria": "Categoría 3",
+                "imagenes": [
+                    "ruta/a/la/imagen5.jpg",
+                    "ruta/a/la/imagen6.jpg"
+                ]
+            }
+        ]
+    }
+}
+
+
+{
+    "class_id": "classid",
+    "content_type": "categories",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "categories": [
+            {
+                "categoria": "Categoría 1",
+                "text_items": [
+                    "Texto 1",
+                    "Texto 2"
+                ]
+            },
+            {
+                "categoria": "Categoría 2",
+                "text_items": [
+                    "Texto 3",
+                    "Texto 4"
+                ]
+            }
+        ]
+    }
+}
+
+
+{
+    "class_id": "classid",
+    "content_type": "matching_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Emparejamiento",
+    "instructions": "Empareja los elementos de la columna izquierda con los de la derecha.",
+    "content_details": {
+        "pairs": [
+            {
+                "left": "Texto 1",
+                "right": "Texto 2"
+            },
+            {
+                "left": "Texto 3",
+                "right": "Texto 4"
+            }
+        ]
+    }   
+}
+
+{
+    "class_id": "classid",
+    "content_type": "word_order_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Orden de Palabras",
+    "instructions": "Ordena las palabras para formar una oración correcta.",
+    "content_details": {
+        "sentences": [
+            {
+                "text": "El gato duerme",
+                "words": [{"word": "gato", "position": 1}, {"word": "el", "position": 2}, {"word": "duerme", "position": 3}]
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "picture_matching_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Emparejar Imágenes",
+    "instructions": "Empareja cada imagen con su descripción correcta.",
+    "content_details": {
+        "pairs": [
+            {
+                "image": "ruta/imagen1.jpg",
+                "description": "Un gato dormido",
+            },
+            {
+                "image": "ruta/imagen2.jpg",
+                "description": "Un perro corriendo"
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "picture_labeling_knowledge_check",
+    "tittle": "Evaluación de Conocimientos - Etiquetar Imágenes",
+    "instructions": "Coloca la etiqueta correcta en cada parte de la imagen.",
+    "content_details": {
+        "pairs": [
+            {
+                "image": "ruta/imagen_principal.jpg",
+                "labels": ["cerebro", "corazón", "pulmón"]
+            },
+            {
+                "image": "ruta/imagen_principal.jpg",
+                "labels": ["cerebro", "corazón", "pulmón"]
+            }
+        ]
+    }
+}

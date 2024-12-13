@@ -1,0 +1,170 @@
+{
+    "class_id": "classid",
+    "content_type": "flashcards",
+    "tittle": "Tarjetas de Memoria",
+    "instructions": "Instrucciones para usar las tarjetas de memoria.",
+    "content_details": {
+        "flashcards": [
+            {
+                "front": "Pregunta 1",
+                "img": "ruta/a/la/imagen.jpg"
+            },
+            {
+                "front": "Pregunta 2",
+                "img": "ruta/a/la/imagen.jpg"
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "table",
+    "tittle": "Tabla de Información",
+    "instructions": "Instrucciones para completar la tabla.",
+    "content_details": {
+        "table": {
+            "column": ["column1"],
+            "cell": ["cell1", "cell2", "cell3"]
+        },
+        {
+            "column": ["column2"],
+            "cell": ["cell4", "cell5", "cell6"]
+        },
+        {
+            "column": ["column3"],
+            "cell": ["cell7", "cell8", "cell9"]
+        }
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "accordion",
+    "tittle": "Acordeón de Información",
+    "instructions": "Instrucciones para usar el acordeón.",
+    "content_details": {
+        "accordion": [
+            {
+                "title": "Sección 1",
+                "content": "Contenido de la sección 1",
+                "img": "ruta/a/la/imagen.jpg"
+            },
+            {
+                "title": "Sección 2",
+                "content": "Contenido de la sección 2",
+                "img": "ruta/a/la/imagen.jpg"
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "button_stack",
+    "tittle": "Pila de Botones",
+    "instructions": "Instrucciones para interactuar con los botones.",
+    "content_details": {
+        "buttons": [
+            {
+                "label": "Botón 1",
+                "url": "https://www.example.com",
+                "tittle": "Título del botón 1",
+                "text": "Texto del botón 1"
+            },
+            {
+                "label": "Botón 2",
+                "url": "https://www.example.com",
+                "tittle": "Título del botón 2",
+                "text": "Texto del botón 2"
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "process",
+    "tittle": "Proceso de Información",
+    "instructions": "Instrucciones para seguir el proceso.",
+    "content_details": {
+        "steps": [
+            {
+                "titulo": "Proceso de Información",
+                "description": "Descripción del proceso",
+                "steps": [
+                    {
+                        "step_title": "Paso 1",
+                        "description": "Descripción del paso 1"
+                    },
+                    {
+                        "step_title": "Paso 2",
+                        "description": "Descripción del paso 2"
+                    }
+                ]
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "tabs",
+    "tittle": "Línea de Tiempo",
+    "instructions": "Instrucciones para seguir la línea de tiempo.",
+    "content_details": {
+        "tabs": [
+            {
+                "tab_title": "Evento 1",
+                "content": "Evento 1",
+                "img": "ruta/a/la/imagen.jpg"
+            },
+            {
+                "tab_title": "Evento 2",
+                "content": "Evento 2",
+                "img": "ruta/a/la/imagen.jpg"
+            },
+            {
+                "tab_title": "Evento 3",
+                "content": "Evento 3",
+                "img": "ruta/a/la/imagen.jpg"
+            }
+        ]
+    }
+}
+
+{
+    "class_id": "classid",
+    "content_type": "timeline",
+    "tittle": "Línea de Tiempo",
+    "instructions": "Instrucciones para seguir la línea de tiempo.",
+    "content_details": {
+        "tabs": [
+            {
+                "point": "punto 1",
+                "point_title": "punto titulo 1",
+                "point_text": "punto texto 1",
+                "img": "ruta/a/la/imagen.jpg"
+            },
+            {
+                "point": "punto 2",
+                "point_title": "punto titulo 2",
+                "point_text": "punto texto 2",
+                "img": "ruta/a/la/imagen.jpg"
+            },
+            {
+                "point": "punto 3",
+                "point_title": "punto titulo 3",
+                "point_text": "punto texto 3",
+                "img": "ruta/a/la/imagen.jpg"
+            }
+        ]
+    }
+}
+

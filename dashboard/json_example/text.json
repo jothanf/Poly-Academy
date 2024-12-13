@@ -25,9 +25,12 @@
     "tittle": "Título del contenido",
     "instructions": "Instrucciones para el contenido",
     "content_details": {
-        "texto_block_1": [
+        "texto_block": [
             {
-                texto1
+                "texto": "Texto 1"
+            },
+            {
+                "texto": "Texto 2"
             }
         ]
         "multimedia": [
@@ -83,26 +86,65 @@
     "tittle": "Título del contenido",
     "instructions": "Instrucciones para el contenido",
     "content_details": {
-        "quote": [
+        "text_block": [
             {
-                "slice_1": "Texto 1",
-            },
-            {
-                "slice_2": "Texto 2",
+                "text": "Aquí se recibirá un bloque de texto a través de un JSON."
             }
         ]
+    },
         "multimedia": [
             {
                 "media_type": "image",
                 "file": "ruta/a/la/imagen.jpg",
-                "slice_associated": "slice_1"
+                "principal_img": "true"
             },
             {
                 "media_type": "image",
                 "file": "ruta/a/la/imagen.jpg",
-                "slice_associated": "slice_2"
+                "background_img": "true"
             }
         ]
-    },
-   
+    }
 }
+
+{
+    "class_model": "classid",
+    "content_type": "info_box",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "info_box": [
+            {
+                "type_card": "attention"
+            },
+            {
+                "type_card": "grammar"
+            },
+            {
+                "type_card": "tip"
+            }
+        ]
+    }
+}
+
+{
+    "class_model": "classid",
+    "content_type": "icon_list",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "numeric_list": [
+            {
+                "list_item_1": "text 1",
+                "icon": "icon_1"
+            },
+            {
+                "list_item_2": "text 2",
+                "icon": "icon_2"
+            },
+            {
+                "list_item_3": "text 3",
+                "icon": "icon_3"
+            }
+        ]
+    }

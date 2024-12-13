@@ -1,5 +1,5 @@
 {
-    "class_model": "classid",
+    "class_id": "classid",
     "content_type": "multiple_choice",
     "title": "Título del cuestionario",
     "instructions": "Instrucciones para responder las preguntas.",
@@ -47,7 +47,7 @@
 }
 
 {
-    "class_model": "classid",
+    "class_id": "classid",
     "content_type": "true_false",
     "tittle": "Título de la pregunta",
     "instructions": "Instrucciones sobre cómo responder",
@@ -81,21 +81,22 @@
 }
 
 {
-    "class_model": "classid",
+    "class_id": "classid",
     "content_type": "fill_gaps",
     "tittle": "Título del contenido",
     "instructions": "Instrucciones para el contenido",
     "content_details": {
-        "text": "El __1__ es un elemento químico básico compuesto por __2__ átomos. Se encuentra en estado __3__ en la naturaleza y es fundamental para la vida en la __4__.",
-        "keywords": [
+        "passages": [
             {
-                "word": "hidrógeno",
-                "position": 1
+                "text": "El __1__ es un elemento químico.",
+                "keywords": ["hidrogeno", "helio", "litio"],
+                "help_text": true
             },
             {
-                "word": "dos",
-                "position": 2
-            },
+                "text": "El __1__ es un elemento químico.",
+                "keywords": ["hidrogeno", "helio", "litio"],
+                "help_text": false
+            }
         ]
     },
     "multimedia": [
@@ -112,24 +113,25 @@
 }
 
 {
-    "class_model": "classid",
+    "class_id": "classid",
     "content_type": "word_bank",
     "tittle": "Título del contenido",
     "instructions": "Instrucciones para el contenido",
     "content_details": {
         "word_bank": [
             {
-                "text": "Texto 1 con palabras clave",
-                "keywords": ["palabra1", "palabra2"]
+                "text": "__Texto__ con __palabras__ clave",
+                "keywords": [
+                    {
+                        "word": "palabra1",
+                        "position": 1
+                    },
+                    {
+                        "word": "palabra2",
+                        "position": 2
+                    }   
+                ]
             },
-            {
-                "text": "Texto 2 con palabras clave",
-                "keywords": ["palabra3", "palabra4"]
-            },
-            {
-                "text": "Texto 3 con palabras clave",
-                "keywords": ["palabra5", "palabra6"]
-            }
         ]
     },
     "multimedia": [
@@ -146,23 +148,18 @@
 }
 
 {
-    "class_model": "classid",
+    "class_id": "classid",
     "content_type": "drop_down_text",
     "tittle": "Título del contenido",
     "instructions": "Instrucciones para el contenido",
     "content_details": {
         "drop_down_text": [
             {
-                "text": "Texto 1 con palabras clave",
-                "keywords": ["palabra1", "palabra2"]
-            },
-            {
-                "text": "Texto 2 con palabras clave",
-                "keywords": ["palabra3", "palabra4"]
-            },
-            {
-                "text": "Texto 3 con palabras clave",
-                "keywords": ["palabra5", "palabra6"]
+                "text": "Texto 1 con __palabras__ clave",
+                "options": [
+                    {"word": "palabra1", "correct": true},
+                    {"word": "palabra2", "correct": false}
+                ]
             }
         ]
     },
@@ -180,7 +177,7 @@
 }
 
 {
-    "class_model": "classid",
+    "class_id": "classid",
     "content_type": "ordering",
     "tittle": "Título del contenido",
     "instructions": "Instrucciones para el contenido",
@@ -210,7 +207,7 @@
 }
 
 {
-    "class_model": "classid",
+    "class_id": "classid",
     "content_type": "sorting",
     "tittle": "Título del contenido",
     "instructions": "Instrucciones para el contenido",
