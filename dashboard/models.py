@@ -55,7 +55,7 @@ class ClassModel(models.Model):
 
 class LayoutModel(models.Model):
     class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='layouts')
-    tittle = models.CharField(max_length=200, null=True, blank=True)
+    tittle = models.CharField(max_length=300, null=True, blank=True)
     instructions = models.TextField(null=True, blank=True)
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     audio = models.FileField(upload_to='class_audio/', null=True, blank=True)
@@ -351,7 +351,7 @@ class ClassContentModel(models.Model):
         ('drop_down_text', 'Drop Down Text'),
         ('ordering', 'Ordering'),
         ('sorting', 'Sorting'),
-        ('categories', 'Categories'),
+        ('category', 'Category'),
         ('matching', 'Matching'),
         #Interactive activities
         ('flashcards', 'Flashcards'),
