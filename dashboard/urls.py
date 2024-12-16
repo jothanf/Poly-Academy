@@ -45,4 +45,14 @@ urlpatterns = [
     path('api/clases/delete/<int:pk>/', ClasDeleteView.as_view(), name='clas-delete'),
     path('api/classes/<int:class_id>/tasks/', ClassTasksView.as_view(), name='class-tasks'),
     path('api/task_layout/<int:layout_id>/', TaskLayoutDetailView.as_view(), name='task-layout-detail'),
+    path('api/class-contents/', views.ClassContentModelViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='class-contents-list'),
+    path('api/class-contents/<int:pk>/', views.ClassContentModelViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy'
+    }), name='class-contents-detail'),
 ]

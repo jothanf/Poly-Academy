@@ -498,11 +498,11 @@ class ClassContentModelViewSet(BaseModelViewSet):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
-        """Permite filtrar por class_model_id si se proporciona en la URL"""
+        """Permite filtrar por class_id si se proporciona en la URL"""
         queryset = ClassContentModel.objects.all()
         class_id = self.request.query_params.get('class_id', None)
         if class_id is not None:
-            queryset = queryset.filter(class_model_id=class_id)
+            queryset = queryset.filter(class_id=class_id)
         return queryset.order_by('order')
 
     def create(self, request, *args, **kwargs):
