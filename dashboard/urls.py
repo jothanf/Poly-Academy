@@ -40,7 +40,10 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('courses/', views.course_list, name='course_list'),
     path('courses/<int:course_id>/classes/<int:class_id>/', views.ClassDetailView.as_view(), name='class_detail'),
-    path('api/courses/<int:course_id>/classes/', views.ClassListView.as_view(), name='course-classes-list'),
+    path('api/courses/<int:course_id>/classes/', views.ClassModelViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='course-classes-list'),
     path('api/layouts/<int:pk>/', LayoutDetailView.as_view(), name='layout-detail'),
     path('api/clases/delete/<int:pk>/', ClasDeleteView.as_view(), name='clas-delete'),
     path('api/classes/<int:class_id>/tasks/', ClassTasksView.as_view(), name='class-tasks'),

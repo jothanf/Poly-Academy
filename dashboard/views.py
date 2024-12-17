@@ -162,12 +162,18 @@ class ClassModelViewSet(BaseModelViewSet):
     model_name = 'clase'
 
     def get_queryset(self):
-        """Permite filtrar por course_id si se proporciona en la URL"""
-        queryset = super().get_queryset()
-        course_id = self.request.query_params.get('course_id', None)
-        if course_id is not None:
-            queryset = queryset.filter(course_id=course_id)  # Filtrar por course_id
-        return queryset
+        """Filtra las clases por el course_id proporcionado en la URL"""
+        course_id = self.kwargs.get('course_id')
+        if course_id:
+            return self.queryset.filter(course_id=course_id)
+        return self.queryset
+    
+    def create(self, request, *args, **kwargs):
+        """Asegura que la clase se cree asociada al curso correcto"""
+        course_id = self.kwargs.get('course_id')
+        if course_id:
+            request.data['course_id'] = course_id
+        return super().create(request, *args, **kwargs)
 
 class LayoutModelViewSet(BaseModelViewSet):
     queryset = LayoutModel.objects.all()
