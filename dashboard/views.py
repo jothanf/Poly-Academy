@@ -161,6 +161,14 @@ class ClassModelViewSet(BaseModelViewSet):
     serializer_class = ClassModelSerializer
     model_name = 'clase'
 
+    def get_queryset(self):
+        """Permite filtrar por course_id si se proporciona en la URL"""
+        queryset = super().get_queryset()
+        course_id = self.request.query_params.get('course_id', None)
+        if course_id is not None:
+            queryset = queryset.filter(course_id=course_id)  # Filtrar por course_id
+        return queryset
+
 class LayoutModelViewSet(BaseModelViewSet):
     queryset = LayoutModel.objects.all()
     serializer_class = LayoutModelSerializer

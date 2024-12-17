@@ -55,4 +55,8 @@ urlpatterns = [
         'patch': 'partial_update',
         'delete': 'destroy'
     }), name='class-contents-detail'),
+    path('api/classes/', views.ClassModelViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='class-list'),
 ]
