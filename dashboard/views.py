@@ -162,12 +162,31 @@ class ClassModelViewSet(BaseModelViewSet):
     model_name = 'clase'
 
     def get_queryset(self):
-        """Filtra las clases por el course_id proporcionado en la URL"""
-        course_id = self.kwargs.get('course_id')
+        """Filtra las clases por el course_id proporcionado en la URL o query params"""
+        queryset = super().get_queryset()
+        
+        # Obtener course_id de los query params
+        course_id = self.request.query_params.get('course_id')
+        
+        # Aplicar el filtro si hay course_id
         if course_id:
-            return self.queryset.filter(course_id=course_id)
-        return self.queryset
-    
+            # Usamos course_id porque es el nombre del campo en la base de datos
+            queryset = queryset.filter(course_id=course_id)
+            print(f"Filtrando clases para el curso {course_id}")  # Para debugging
+        
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        
+        return Response({
+            'status': 'success',
+            'message': 'Lista de clases obtenida exitosamente',
+            'data': serializer.data,
+            'total': queryset.count()  # Agregamos el total para verificación
+        })
+
     def create(self, request, *args, **kwargs):
         """Asegura que la clase se cree asociada al curso correcto"""
         course_id = self.kwargs.get('course_id')

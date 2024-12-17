@@ -26,7 +26,7 @@ router = DefaultRouter()
 
 # Registra los viewsets
 router.register(r'courses', views.CourseView, 'courses')
-router.register(r'classes', api.ClassModelViewSet)
+router.register(r'classes', views.ClassModelViewSet, basename='classes')
 router.register(r'layouts', api.LayoutModelViewSet)
 router.register(r'multiplechoice', api.MultipleChoiceModelViewSet)
 router.register(r'trueorfalse', api.TrueOrFalseModelViewSet)
