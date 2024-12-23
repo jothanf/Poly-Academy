@@ -405,6 +405,10 @@ class ClassContentModel(models.Model):
     
     # Campos para multimedia en JSON
     multimedia = models.JSONField(null=True, blank=True)
+    image = models.ImageField(upload_to='content_images/', null=True, blank=True)
+    video = models.FileField(upload_to='content_videos/', null=True, blank=True)
+    audio = models.FileField(upload_to='content_audios/', null=True, blank=True)
+    pdf = models.FileField(upload_to='content_pdfs/', null=True, blank=True)
     
     order = models.PositiveIntegerField(default=0)
     stats = models.BooleanField(default=False)
