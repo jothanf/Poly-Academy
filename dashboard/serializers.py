@@ -83,7 +83,7 @@ class ClassContentModelSerializer(serializers.ModelSerializer):
         model = ClassContentModel
         fields = ['id', 'class_id', 'content_type', 'tittle', 'instructions', 
                  'content_details', 'multimedia', 'order', 'stats', 
-                 'created_at', 'updated_at', 'image', 'video', 'audio', 'pdf']
+                 'created_at', 'updated_at', 'image', 'video', 'video_transcription', 'audio', 'audio_transcription', 'pdf']
 
     def validate_content_details(self, value):
         if value is not None:
