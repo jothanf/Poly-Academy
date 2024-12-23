@@ -395,7 +395,7 @@ class ClassContentModel(models.Model):
         ('pdf', 'Documento PDF'),
     ]
 
-    class_id = models.ForeignKey('ClassModel', on_delete=models.CASCADE, related_name='contents')
+    class_id = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='contents')
     
     content_type = models.CharField(max_length=100, choices=CONTENT_TYPES)
     tittle = models.CharField(max_length=500, null=True, blank=True)
