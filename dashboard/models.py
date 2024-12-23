@@ -408,6 +408,7 @@ class ClassContentModel(models.Model):
     image = models.ImageField(upload_to='content_images/', null=True, blank=True)
     video = models.FileField(upload_to='content_videos/', null=True, blank=True)
     video_transcription = models.TextField(null=True, blank=True)
+    embed_video = models.URLField(null=True, blank=True)
     audio = models.FileField(upload_to='content_audios/', null=True, blank=True)
     audio_transcription = models.TextField(null=True, blank=True)
     pdf = models.FileField(upload_to='content_pdfs/', null=True, blank=True)
