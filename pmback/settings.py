@@ -21,12 +21,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-pq3xskxntvc+lg@br%$7%4qe$c(hzfqs8)!dndse$r^ci!!2hf'
+SECRET_KEY = os.environ.get('SECRET_KEY', default='django-insecure-pq3xskxntvc+lg@br%$7%4qe$c(hzfqs8)!dndse$r^ci!!2hf')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['poly-academy-production-cedd.up.railway.app', '*']
+ALLOWED_HOSTS = [
+    'poly-academy-production-cedd.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+    '*',
+]
 
 
 # Application definition
@@ -134,6 +139,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 CORS_ALLOWED_ORIGINS = [
+    "https://poly-academy-production-cedd.up.railway.app",
     "http://localhost:3000",
 ]
 

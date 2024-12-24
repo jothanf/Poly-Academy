@@ -1,5 +1,6 @@
 # Ignorar bases de datos locales
 db.sqlite3
+.db
 
 # Ignorar archivos de entorno virtual
 venv/
