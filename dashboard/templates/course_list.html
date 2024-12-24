@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Cursos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Cursos Disponibles</h1>
+        
+        <div class="courses-grid">
+            {% for course in courses %}
+                <div class="course-card">
+                    {% if course.cover %}
+                        <img src="{{ course.cover.url }}" alt="{{ course.course_name }}" class="course-cover" width="100px" height="100px">
+                    {% endif %}
+                    <div class="course-info">
+                        <h2>{{ course.course_name }}</h2>
+                        <p class="description">{{ course.description }}</p>
+                        <div class="course-details">
+                            <span class="category">Categoría: {{ course.category }}</span>
+                            <span class="level">Nivel: {{ course.level }}</span>
+                        </div>
+                        <ul class="bullet-points">
+                            {% for point in course.bullet_points %}
+                                <li>{{ point }}</li>
+                            {% endfor %}
+                        </ul>
+                        <div class="course-footer">
+                            <span class="date">Creado: {{ course.created_at|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="no-courses">No hay cursos disponibles en este momento.</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

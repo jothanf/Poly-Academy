@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Lección</title>
+    <style>
+        .toolbox {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .toolbox button {
+            margin-right: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .task-container {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .delete-task {
+            color: red;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .answer-item, .question-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crear Nueva Lección para: {{ curso.course_name }}</h1>
+    
+    <form id="lessonForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="lesson_name">Nombre de la Lección:</label>
+            <input type="text" id="lesson_name" name="lesson_name" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Descripción:</label>
+            <textarea id="description" name="description" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="bullet_points">Puntos clave (JSON):</label>
+            <textarea id="bullet_points" name="bullet_points"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="img_cover">Imagen de la lección (opcional):</label>
+            <input type="file" id="img_cover" name="img_cover">
+        </div>
+        <div class="form-group">
+            <label for="scorm_version">Versión SCORM:</label>
+            <select id="scorm_version" name="scorm_version">
+                <option value="1.2">SCORM 1.2</option>
+                <option value="2004">SCORM 2004</option>
+            </select>
+        </div>
+
+        <div class="toolbox">
+            <button type="button" onclick="agregarTarea('multiple_choice')">Opción Múltiple</button>
+            <button type="button" onclick="agregarTarea('true_false')">Verdadero/Falso</button>
+            <button type="button" onclick="agregarTarea('ordering')">Ordenar Elementos</button>
+            <button type="button" onclick="agregarTarea('categories')">Categorías</button>
+            <button type="button" onclick="agregarTarea('fill_in_the_gaps')">Llenar Espacios</button>
+        </div>
+
+        <div id="tasksContainer"></div>
+        <input type="hidden" name="tasks" id="tasksJson">
+        
+        <button type="submit">Crear Lección</button>
+    </form>
+
+    <script>
+        let tasks = [];
+        let taskCounter = 0;
+
+        function agregarTarea(tipo) {
+            taskCounter++;
+            const taskId = `task-${taskCounter}`;
+            let taskHtml = '';
+            
+            switch(tipo) {
+                case 'multiple_choice':
+                    taskHtml = createMultipleChoiceTask(taskId);
+                    break;
+                case 'true_false':
+                    taskHtml = createTrueFalseTask(taskId);
+                    break;
+                case 'ordering':
+                    taskHtml = createOrderingTask(taskId);
+                    break;
+                case 'categories':
+                    taskHtml = createCategoriesTask(taskId);
+                    break;
+                case 'fill_in_the_gaps':
+                    taskHtml = createFillInTheGapsTask(taskId);
+                    break;
+            }
+
+            const container = document.getElementById('tasksContainer');
+            const taskDiv = document.createElement('div');
+            taskDiv.id = taskId;
+            taskDiv.className = 'task-container';
+            taskDiv.innerHTML = taskHtml;
+            container.appendChild(taskDiv);
+
+            // Agregar la tarea al array
+            tasks.push({
+                id: taskId,
+                type: tipo,
+                order: tasks.length
+            });
+            updateTasksJson();
+        }
+
+        function createMultipleChoiceTask(taskId) {
+            return `
+                <div class="task-header">
+                    <h3>Pregunta de Opción Múltiple</h3>
+                    <span class="delete-task" onclick="deleteTask('${taskId}')">Eliminar</span>
+                </div>
+                <div class="form-group">
+                    <label>Instrucciones:</label>
+                    <textarea class="task-instructions" onchange="updateTask('${taskId}')"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Pregunta:</label>
+                    <input type="text" class="task-question" onchange="updateTask('${taskId}')">
+                </div>
+                <div class="answers-container">
+                    <h4>Respuestas</h4>
+                    <div class="answers-list"></div>
+                    <button type="button" onclick="addAnswer('${taskId}')">Agregar Respuesta</button>
+                </div>
+            `;
+        }
+
+        function addAnswer(taskId) {
+            const taskElement = document.getElementById(taskId);
+            const answersList = taskElement.querySelector('.answers-list');
+
+            const answerId = `answer-${Date.now()}`;
+            const answerHtml = `
+                <div id="${answerId}" class="answer-item">
+                    <input type="text" placeholder="Texto de la respuesta" class="answer-text" onchange="updateTask('${taskId}')">
+                    <label>
+                        Correcta:
+                        <input type="checkbox" class="answer-correct" onchange="updateTask('${taskId}')">
+                    </label>
+                    <button type="button" onclick="removeAnswer('${taskId}', '${answerId}')">Eliminar</button>
+                </div>
+            `;
+            answersList.insertAdjacentHTML('beforeend', answerHtml);
+            updateTask(taskId);
+        }
+
+        function removeAnswer(taskId, answerId) {
+            const answerElement = document.getElementById(answerId);
+            answerElement.remove();
+            updateTask(taskId);
+        }
+
+
+
+        function createTrueFalseTask(taskId) {
+            return `
+                <div class="task-header">
+                    <h3>Pregunta Verdadero/Falso</h3>
+                    <span class="delete-task" onclick="deleteTask('${taskId}')">Eliminar</span>
+                </div>
+                <div class="form-group">
+                    <label>Instrucciones:</label>
+                    <textarea class="task-instructions" onchange="updateTask('${taskId}')"></textarea>
+                </div>
+                <div class="questions-container">
+                    <button type="button" onclick="addTrueFalseQuestion('${taskId}')">Agregar Declaración</button>
+                    <div class="questions-list"></div>
+                </div>
+            `;
+        }
+
+        function createOrderingTask(taskId) {
+            return `
+                <div class="task-header">
+                    <h3>Tarea de Ordenamiento</h3>
+                    <span class="delete-task" onclick="deleteTask('${taskId}')">Eliminar</span>
+                </div>
+                <div class="form-group">
+                    <label>Instrucciones:</label>
+                    <textarea class="task-instructions" onchange="updateTask('${taskId}')"></textarea>
+                </div>
+                <div class="items-container">
+                    <button type="button" onclick="addOrderingItem('${taskId}')">Agregar Elemento</button>
+                    <div class="items-list"></div>
+                </div>
+            `;
+        }
+
+        function createCategoriesTask(taskId) {
+            return `
+                <div class="task-header">
+                    <h3>Tarea de Categorías</h3>
+                    <span class="delete-task" onclick="deleteTask('${taskId}')">Eliminar</span>
+                </div>
+                <div class="form-group">
+                    <label>Instrucciones:</label>
+                    <textarea class="task-instructions" onchange="updateTask('${taskId}')"></textarea>
+                </div>
+                <div class="categories-container">
+                    <button type="button" onclick="addCategory('${taskId}')">Agregar Categoría</button>
+                    <div class="categories-list"></div>
+                </div>
+            `;
+        }
+
+        function createFillInTheGapsTask(taskId) {
+            return `
+                <div class="task-header">
+                    <h3>Tarea de Llenar Espacios</h3>
+                    <span class="delete-task" onclick="deleteTask('${taskId}')">Eliminar</span>
+                </div>
+                <div class="form-group">
+                    <label>Instrucciones:</label>
+                    <textarea class="task-instructions" onchange="updateTask('${taskId}')"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Texto con espacios (usa {gap} para indicar espacios):</label>
+                    <textarea class="task-text" onchange="updateTask('${taskId}')"></textarea>
+                </div>
+                <div class="keywords-container">
+                    <button type="button" onclick="addKeyword('${taskId}')">Agregar Palabra Clave</button>
+                    <div class="keywords-list"></div>
+                </div>
+            `;
+        }
+
+        // Funciones auxiliares para manejar las tareas
+        function deleteTask(taskId) {
+            const taskElement = document.getElementById(taskId);
+            taskElement.remove();
+            tasks = tasks.filter(task => task.id !== taskId);
+            updateTasksJson();
+        }
+
+        function updateTask(taskId) {
+            const taskIndex = tasks.findIndex(task => task.id === taskId);
+            if (taskIndex === -1) return;
+
+            const taskElement = document.getElementById(taskId);
+            const task = tasks[taskIndex];
+            
+            // Actualizar datos comunes
+            task.instructions = taskElement.querySelector('.task-instructions').value;
+
+            // Actualizar datos específicos según el tipo de tarea
+            switch(task.type) {
+                case 'multiple_choice':
+                    updateMultipleChoiceTask(task, taskElement);
+                    break;
+                case 'true_false':
+                    updateTrueFalseTask(task, taskElement);
+                    break;
+                case 'ordering':
+                    updateOrderingTask(task, taskElement);
+                    break;
+                case 'categories':
+                    updateCategoriesTask(task, taskElement);
+                    break;
+                case 'fill_in_the_gaps':
+                    updateFillInTheGapsTask(task, taskElement);
+                    break;
+            }
+
+            updateTasksJson();
+        }
+
+        function updateTasksJson() {
+            document.getElementById('tasksJson').value = JSON.stringify(tasks);
+        }
+
+        // Event Listener para el formulario
+        document.getElementById('lessonForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Lección creada exitosamente');
+                    window.location.href = '/'; // Redirigir al home o donde sea necesario
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error al crear la lección: ' + error);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+{
+    "class_id": "classid",
+    "content_type": "multiple_choice",
+    "title": "Título del cuestionario",
+    "instructions": "Instrucciones para responder las preguntas.",
+    "content_details": {
+        "questions": [
+            {
+                "question": "¿Cuál es la capital de Francia?",
+                "answers": [
+                    {
+                        "text": "París",
+                        "is_correct": true
+                    },
+                    {
+                        "text": "Londres",
+                        "is_correct": false
+                    }
+                ]
+            },
+            {
+                "question": "¿Cuál es el océano más grande?",
+                "answers": [
+                    {
+                        "text": "Océano Atlántico",
+                        "is_correct": false
+                    },
+                    {
+                        "text": "Océano Índico",
+                        "is_correct": false
+                    }
+                ]
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio."
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "true_false",
+    "tittle": "Título de la pregunta",
+    "instructions": "Instrucciones sobre cómo responder",
+    "content_details": {
+        "questions": [
+            {
+                "statement": "La Tierra es plana.",
+                "state": 2
+            },
+            {
+                "statement": "El agua hierve a 100 grados Celsius.",
+                "state": 1
+            },
+            {
+                "statement": "Los gatos pueden volar.",
+                "state": 3
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/a/audio.mp3",
+            "transcription_text": "Transcripción del audio"
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "fill_gaps",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "passages": [
+            {
+                "text": "El __1__ es un elemento químico.",
+                "keywords": ["hidrogeno", "helio", "litio"],
+                "help_text": true
+            },
+            {
+                "text": "El __1__ es un elemento químico.",
+                "keywords": ["hidrogeno", "helio", "litio"],
+                "help_text": false
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "word_bank",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "word_bank": [
+            {
+                "text": "__Texto__ con __palabras__ clave",
+                "keywords": [
+                    {
+                        "word": "palabra1",
+                        "position": 1
+                    },
+                    {
+                        "word": "palabra2",
+                        "position": 2
+                    }   
+                ]
+            },
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "drop_down_text",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "drop_down_text": [
+            {
+                "text": "Texto 1 con __palabras__ clave",
+                "options": [
+                    {"word": "palabra1", "correct": true},
+                    {"word": "palabra2", "correct": false}
+                ]
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "ordering",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "ordering": [
+            {
+                "text": "Texto 1",
+                "indice": 1
+            },
+            {
+                "text": "Texto 2",
+                "indice": 2
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}
+
+{
+    "class_id": "classid",
+    "content_type": "sorting",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "sorting": [
+            {
+                "categoria": "Categoría 1",
+                "imagenes": [
+                    "ruta/a/la/imagen1.jpg",
+                    "ruta/a/la/imagen2.jpg"
+                ]
+            },
+            {
+                "categoria": "Categoría 2",
+                "imagenes": [
+                    "ruta/a/la/imagen3.jpg",
+                    "ruta/a/la/imagen4.jpg"
+                ]
+            },
+            {
+                "categoria": "Categoría 3",
+                "imagenes": [
+                    "ruta/a/la/imagen5.jpg",
+                    "ruta/a/la/imagen6.jpg"
+                ]
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}
+
+{
+    "class_model": "classid",
+    "content_type": "categories",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "categories": [
+            {
+                "categoria": "Categoría 1",
+                "text_items": [
+                    "Texto 1",
+                    "Texto 2"
+                ]
+            },
+            {
+                "categoria": "Categoría 2",
+                "text_items": [
+                    "Texto 3",
+                    "Texto 4"
+                ]
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}
+
+{
+    "class_model": "classid",
+    "content_type": "matching",
+    "tittle": "Título del contenido",
+    "instructions": "Instrucciones para el contenido",
+    "content_details": {
+        "pairs": [
+            {
+                "left": "Texto 1",
+                "right": "Texto 2"
+            },
+            {
+                "left": "Texto 3",
+                "right": "Texto 4"
+            }
+        ]
+    },
+    "multimedia": [
+        {
+            "media_type": "image",
+            "file": "ruta/a/la/imagen.jpg"
+        },
+        {
+            "media_type": "audio",
+            "file": "ruta/al/audio.mp3",
+            "transcription": "Transcripción del audio"
+        }
+    ]
+}

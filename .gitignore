@@ -1,0 +1,32 @@
+# Ignorar bases de datos locales
+db.sqlite3
+
+# Ignorar archivos de entorno virtual
+venv/
+*.pyc
+__pycache__/
+
+# Ignorar archivos de configuración sensibles
+*.env
+
+# Ignorar archivos y carpetas generados automáticamente
+media/
+staticfiles/
+*.log
+*.pot
+*.pyc
+*.pyo
+*.swp
+.DS_Store
+
+# Ignorar configuraciones específicas del IDE
+.vscode/
+.idea/
+
+# Ignorar dependencias específicas del sistema
+*.bak
+*.tmp
+*.old
+
+# Ignorar dependencias si usas una herramienta de despliegue (opcional)
+node_modules/
