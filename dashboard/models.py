@@ -382,8 +382,8 @@ class ClassContentModel(models.Model):
         ('info_box', 'Info Box'),
         ('icon_list', 'Icon List'),
         #Multimedia
+        ('image', 'Imagen'),
         ('video', 'Video'),
-        
         ('audio', 'Audio'),
         ('video_embed', 'Video Embebido'),
         ('attachment', 'Archivo Adjunto'),
