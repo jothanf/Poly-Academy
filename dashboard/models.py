@@ -383,9 +383,12 @@ class ClassContentModel(models.Model):
         ('icon_list', 'Icon List'),
         #Multimedia
         ('video', 'Video'),
+        
         ('audio', 'Audio'),
         ('video_embed', 'Video Embebido'),
         ('attachment', 'Archivo Adjunto'),
+        #IA Chat
+        ('ia_chat', 'IA Chat'),
     ]
 
     MEDIA_TYPES = [
