@@ -484,3 +484,42 @@ class ClassContentModel(models.Model):
     def __str__(self):
         return f"{self.get_content_type_display()} - {self.title or 'Sin título'}"
 
+class ScenarioModel(models.Model):
+    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='scenarios')
+    name = models.CharField(max_length=200)
+    type = models.CharField(max_length=100)
+    location = models.CharField(max_length=200)
+    description = models.TextField()
+    goals = models.JSONField(null=True, blank=True)
+    vocabulary = models.JSONField(null=True, blank=True)
+    key_expressions = models.JSONField(null=True, blank=True)
+    additional_info_objective = models.JSONField(null=True, blank=True)
+    limitations_student = models.TextField()
+    role_student = models.CharField(max_length=200)
+    role_polly = models.CharField(max_length=200)
+    instructions_polly = models.JSONField(null=True, blank=True)
+    limitations_polly = models.JSONField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+class FormattedTextModel(models.Model):
+    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='formatted_texts')
+    title = models.CharField(max_length=200, null=True, blank=True)
+    content = models.TextField(help_text="Contenido con formato HTML/TipTap")
+    instructions = models.TextField(null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Texto Formateado'
+        verbose_name_plural = 'Textos Formateados'
+
+    def __str__(self):
+        return f"Texto Formateado - {self.title or 'Sin título'}"
+

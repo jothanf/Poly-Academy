@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'dashboard',
+    'chat',
     'rest_framework',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -135,6 +137,7 @@ MEDIA_URL = '/media/'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:8000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -158,3 +161,18 @@ LOGGING = {
         },
     },
 }
+
+ASGI_APPLICATION = 'pmback.asgi.application'
+
+# Configuración de channel layers
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
+
+# Permitir WebSocket
+CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB

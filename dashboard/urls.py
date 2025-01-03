@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import api
-from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView
+from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet
 
 # Inicializa el router
 router = DefaultRouter()
@@ -35,6 +35,8 @@ router.register(r'categoriestasks', api.CategoriesTaskModelViewSet)
 router.register(r'fillinthegaps', api.FillInTheGapsTaskModelViewSet)
 router.register(r'multimediablockvideos', views.MultimediaBlockVideoViewSet, 'multimediablockvideos')
 router.register(r'class-contents', views.ClassContentModelViewSet, 'class-contents')
+router.register(r'scenarios', ScenarioModelViewSet, 'scenarios')
+router.register(r'formatted-texts', FormattedTextViewSet, 'formatted-texts')
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -62,4 +64,21 @@ urlpatterns = [
         'get': 'list',
         'post': 'create'
     }), name='class-list'),
+    path('api/ask-openai/', AskOpenAIView.as_view(), name='ask-openai'),
+    path('api/audio-transcription/', views.transcribe_audio, name='audio-transcription'),
+    path('api/scenario-suggestions/', ScenarioSuggestionsView.as_view(), name='scenario-suggestions'),
+    path('api/formatted-texts/', FormattedTextViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='formatted-texts-list'),
+    path('api/formatted-texts/<int:pk>/', FormattedTextViewSet.as_view({
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy'
+    }), name='formatted-texts-detail'),
+    path('api/img_gen/', views.img_gen, name='img_gen'),
+    path('prueva_json/', views.prueva_json, name='prueva_json'),
+    path('api/prueva_json/', views.prueva_json, name='prueva_json_api'),
+    path('prueba_classcontent/', views.prueba_classcontent, name='prueba_classcontent'),
 ]

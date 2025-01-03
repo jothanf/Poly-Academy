@@ -30,3 +30,5 @@ staticfiles/
 
 # Ignorar dependencias si usas una herramienta de despliegue (opcional)
 node_modules/
+
+.ardent-course-446319-k0-078e381fd893.json

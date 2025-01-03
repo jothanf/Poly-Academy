@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
-from django.http import HttpResponse
-from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel
+from django.http import HttpResponse, JsonResponse
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer, ScenarioModelSerializer, FormattedTextModelSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.response import Response
@@ -15,6 +15,13 @@ from rest_framework import generics
 import logging
 from django.core.files.storage import default_storage
 import json
+from .IA.openAI import AIService
+from rest_framework.decorators import api_view
+import tempfile
+import os
+from .IA.imgGen import ImageGenerator
+from django.views.decorators.csrf import csrf_exempt
+import uuid
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -540,6 +547,7 @@ class ClassContentModelViewSet(BaseModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
+            print("Datos recibidos:", request.data)  # Debug
             # Validar el content_details si está presente
             if 'content_details' in request.data:
                 try:
@@ -576,11 +584,13 @@ class ClassContentModelViewSet(BaseModelViewSet):
                 'tipo_error': 'validación'
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            import traceback
+            print("Error detallado:", traceback.format_exc())  # Debug
             return Response({
                 'status': 'error',
                 'message': 'Error al crear el contenido de clase',
                 'detalle_error': str(e),
-                'tipo_error': 'sistema'
+                'traceback': traceback.format_exc()
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, *args, **kwargs):
@@ -667,3 +677,313 @@ class ClassContentModelViewSet(BaseModelViewSet):
                 'message': 'Error al obtener la lista de contenidos',
                 'detalle_error': str(e),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class AskOpenAIView(APIView):
+    def post(self, request):
+        try:
+            ai_service = AIService()
+            question = request.data.get('question', '')
+            
+            if not question:
+                return Response({
+                    'status': 'error',
+                    'message': 'La pregunta es requerida'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            answer = ai_service.chat_with_gpt(question)
+            
+            return Response({
+                'status': 'success',
+                'answer': answer
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Error al procesar la solicitud: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+def transcribe_audio(request):
+    try:
+        audio_file = request.FILES.get('audio')
+        if not audio_file:
+            return Response(
+                {'error': 'No se proporcionó archivo de audio'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Guardar el archivo temporalmente
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as temp_audio:
+            for chunk in audio_file.chunks():
+                temp_audio.write(chunk)
+            temp_audio_path = temp_audio.name
+
+        try:
+            # Usar el servicio AI para transcribir
+            ai_service = AIService()
+            result = ai_service.client.audio.transcriptions.create(
+                model="whisper-1",
+                file=open(temp_audio_path, "rb")
+            )
+
+            # Analizar la pronunciación después de la transcripción
+            pronunciation_analysis = ai_service.analyze_pronunciation(result.text)
+
+            return Response({
+                'status': 'success',
+                'data': {
+                    'transcription': result.text,
+                    'pronunciation_analysis': pronunciation_analysis
+                }
+            })
+
+        finally:
+            # Limpiar el archivo temporal
+            try:
+                os.unlink(temp_audio_path)
+            except Exception as e:
+                print(f"Error al eliminar archivo temporal: {e}")
+
+    except Exception as e:
+        print(f"Error en transcribe_audio: {str(e)}")
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+class ScenarioSuggestionsView(APIView):
+    def post(self, request):
+        try:
+            ai_service = AIService()
+            scenario_info = {
+                'nombre': request.data.get('nombre', ''),
+                'nivel': request.data.get('nivel', ''),
+                'tipo': request.data.get('tipo', ''),
+                'lugar': request.data.get('lugar', ''),
+                'descripcion': request.data.get('descripcion', '')
+            }
+            
+            suggestions = ai_service.generate_scenario_suggestions(scenario_info)
+            
+            if "error" in suggestions:
+                return Response({
+                    'status': 'error',
+                    'message': suggestions['error']
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            return Response({
+                'status': 'success',
+                'data': suggestions
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Error al procesar la solicitud: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ScenarioModelViewSet(viewsets.ModelViewSet):
+    queryset = ScenarioModel.objects.all()
+    serializer_class = ScenarioModelSerializer
+    
+    def get_queryset(self):
+        queryset = ScenarioModel.objects.all()
+        class_id = self.request.query_params.get('class_id', None)
+        if class_id is not None:
+            queryset = queryset.filter(class_model_id=class_id)
+        return queryset
+
+class FormattedTextViewSet(viewsets.ModelViewSet):
+    queryset = FormattedTextModel.objects.all()
+    serializer_class = FormattedTextModelSerializer
+
+    def get_queryset(self):
+        queryset = FormattedTextModel.objects.all()
+        class_id = self.request.query_params.get('class_id', None)
+        if class_id is not None:
+            queryset = queryset.filter(class_model_id=class_id)
+        return queryset.order_by('-created_at')  # Ordenar por fecha de creación descendente
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        # Obtener el límite de la query params
+        limit = request.query_params.get('limit')
+        if limit:
+            queryset = queryset[:int(limit)]
+            
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'status': 'success',
+            'message': 'Textos formateados obtenidos exitosamente',
+            'data': serializer.data
+        })
+
+    def create(self, request, *args, **kwargs):
+        try:
+            print("Datos recibidos:", request.data)  # Debug
+            # Validaciones explícitas
+            if 'class_model' not in request.data:
+                return Response({
+                    'status': 'error',
+                    'message': 'El campo class_model es requerido',
+                    'errors': {'class_model': ['Este campo es requerido']}
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if 'content' not in request.data:
+                return Response({
+                    'status': 'error',
+                    'message': 'El campo content es requerido',
+                    'errors': {'content': ['Este campo es requerido']}
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                print("Errores de validación:", serializer.errors)
+                return Response({
+                    'status': 'error',
+                    'message': 'Error de validación',
+                    'errors': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            self.perform_create(serializer)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Texto formateado creado exitosamente',
+                'data': serializer.data
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            import traceback
+            print("Error detallado:", traceback.format_exc())  # Debug
+            return Response({
+                'status': 'error',
+                'message': str(e),
+                'traceback': traceback.format_exc()
+            }, status=500)
+
+@csrf_exempt
+def img_gen(request):
+    print("Solicitud recibida en img_gen")  # Indica que la solicitud ha llegado
+    if request.method == 'POST':
+        print("Método POST detectado")  # Indica que se ha detectado un método POST
+        try:
+            data = json.loads(request.body)
+            print(f"Datos recibidos: {data}")  # Muestra los datos recibidos
+            
+            prompt = data.get('prompt')
+            if not prompt:
+                print("No se proporcionó un prompt")  # Indica que falta el prompt
+                return JsonResponse({'error': 'No se proporcionó un prompt'}, status=400)
+            
+            generator = ImageGenerator()
+            result = generator.generate_image(prompt)
+            
+            if result['success']:
+                print(f"Imagen generada con éxito: {result['url']}")  # Muestra la URL de la imagen generada
+                return JsonResponse({'url': result['url']})
+            else:
+                print(f"Error al generar la imagen: {result['error']}")  # Muestra el error si la generación falla
+                return JsonResponse({'error': result['error']}, status=500)
+                
+        except Exception as e:
+            print(f"Error inesperado: {str(e)}")  # Muestra cualquier otro error inesperado
+            return JsonResponse({'error': str(e)}, status=500)
+            
+    print("Método no permitido")  # Indica que se ha recibido un método diferente a POST
+    return render(request, 'img_gen.html')
+
+@api_view(['GET', 'POST'])
+def prueva_json(request):
+    if request.method == 'GET':
+        try:
+            content_type = request.query_params.get('content_type')
+            contents = ClassContentModel.objects.all()
+            if content_type:
+                contents = contents.filter(content_type=content_type)
+            
+            serializer = ClassContentModelSerializer(contents, many=True)
+            
+            if request.headers.get('Accept') == 'application/json':
+                return Response({
+                    'status': 'success',
+                    'data': serializer.data
+                })
+            
+            return render(request, 'prueva_json.html')
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+
+    elif request.method == 'POST':
+        try:
+            data = request.data
+            
+            # Validar class_id
+            try:
+                class_instance = ClassModel.objects.get(id=data.get('class_id'))
+            except ClassModel.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'Clase no encontrada'
+                }, status=400)
+
+            # Crear el objeto de contenido
+            content_data = {
+                'class_id': class_instance.id,  # Cambiado para usar el ID en lugar del objeto
+                'content_type': 'picture_matching_knowledge_check',
+                'tittle': data.get('title'),
+                'content_details': data.get('content_details', {})
+            }
+
+            # Crear el serializer con los datos
+            serializer = ClassContentModelSerializer(data=content_data)
+            
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Contenido creado exitosamente',
+                    'data': serializer.data
+                })
+            else:
+                # Devolver errores detallados de validación
+                return Response({
+                    'status': 'error',
+                    'message': 'Error de validación',
+                    'errors': serializer.errors,
+                    'received_data': content_data  # Agregar datos recibidos para debugging
+                }, status=400)
+
+        except Exception as e:
+            import traceback
+            return Response({
+                'status': 'error',
+                'message': str(e),
+                'traceback': traceback.format_exc()  # Agregar traceback para debugging
+            }, status=500)
+
+def save_multimedia_file(file, media_type):
+    if not file:
+        return None
+
+    ext = os.path.splitext(file.name)[1]
+    filename = f"content_media/{uuid.uuid4()}{ext}"
+    path = default_storage.save(filename, file)
+    
+    return {
+        'name': file.name,
+        'url': default_storage.url(path),
+        'path': path,
+        'media_type': media_type,
+        'size': file.size
+    }
+
+def prueba_classcontent(request):
+    # Consultar todos los ClassContentModel donde content_type sea 'image'
+    contents = ClassContentModel.objects.filter(content_type='image')
+    return render(request, 'prueba_classcontent.html', {'contents': contents})
