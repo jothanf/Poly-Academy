@@ -1,0 +1,31 @@
+<h2>Generación de imágenes</h2>
+<input type="text" id="prompt" placeholder="Prompt">
+<button id="generate">Generar</button>
+<div id="image-container"></div>
+
+<script>
+document.getElementById('generate').addEventListener('click', async () => {
+    const prompt = document.getElementById('prompt').value;
+    const imageContainer = document.getElementById('image-container');
+    
+    try {
+        const response = await fetch('/dashboard/img_gen/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            imageContainer.innerHTML = `<img src="${data.url}" alt="Generated image" style="max-width: 250px;">`;
+        } else {
+            imageContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        }
+    } catch (error) {
+        imageContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+});
+</script>

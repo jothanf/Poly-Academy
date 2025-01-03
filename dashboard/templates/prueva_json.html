@@ -1,0 +1,177 @@
+<div style="display: flex; gap: 20px;">
+    <!-- Sección del formulario -->
+    <div style="flex: 1;">
+        <h2>Crear Nuevo Contenido</h2>
+        <form id="imageForm">
+            <!-- Campo oculto para class_id -->
+            <input type="hidden" id="class_id" name="class_id" value="1">
+            
+            <div>
+                <label for="title">Título:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <!-- Contenedor para las imágenes -->
+            <div id="image-container">
+                <!-- Las imágenes se agregarán aquí -->
+            </div>
+
+            <button type="button" id="add-image-button">Agregar imagen</button>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <!-- Sección para mostrar registros -->
+    <div style="flex: 1;">
+        <h2>Contenidos Existentes</h2>
+        <div id="existing-contents">
+            <!-- Los contenidos se cargarán aquí -->
+        </div>
+    </div>
+</div>
+
+<script>
+    console.log('Script iniciado');
+    
+    const imageContainer = document.getElementById('image-container');
+    const addImageButton = document.getElementById('add-image-button');
+    const form = document.getElementById('imageForm');
+
+    addImageButton.addEventListener('click', () => {
+        console.log('Botón Agregar imagen clickeado');
+        const imageDiv = document.createElement('div');
+        imageDiv.className = 'image-item';
+        imageDiv.innerHTML = `
+            <input type="file" name="image" accept="image/*" required>
+            <input type="text" name="imageDescription" placeholder="Descripción de la imagen" required>
+            <button type="button" onclick="removeImage(this)">Eliminar</button>
+        `;
+        imageContainer.appendChild(imageDiv);
+    });
+
+    function removeImage(button) {
+        console.log('Eliminando imagen');
+        button.parentElement.remove();
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('Formulario enviado');
+
+        try {
+            const formData = {
+                class_id: document.getElementById('class_id').value,
+                title: document.getElementById('title').value,
+                content_type: 'picture_matching_knowledge_check',
+                content_details: {
+                    images: []
+                }
+            };
+
+            console.log('Datos iniciales:', formData);
+
+            // Recopilar información de las imágenes
+            const imageDivs = imageContainer.children;
+            for (let div of imageDivs) {
+                const file = div.querySelector('input[type="file"]').files[0];
+                const description = div.querySelector('input[name="imageDescription"]').value;
+                
+                if (file) {
+                    console.log('Procesando imagen:', file.name);
+                    const reader = new FileReader();
+                    await new Promise((resolve) => {
+                        reader.onload = () => {
+                            formData.content_details.images.push({
+                                image: reader.result,
+                                description: description
+                            });
+                            resolve();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+
+            console.log('Datos a enviar:', formData);
+
+            const response = await fetch('/dashboard/api/prueva_json/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            console.log('Respuesta del servidor:', data);
+            
+            if (response.ok) {
+                alert('Contenido creado exitosamente');
+                form.reset();
+                imageContainer.innerHTML = '';
+                await loadExistingContents(); // Recargar los contenidos
+            } else {
+                alert('Error al crear el contenido: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al procesar el formulario');
+        }
+    });
+
+    // Función para cargar los contenidos existentes
+    async function loadExistingContents() {
+        try {
+            console.log('Cargando contenidos existentes...');
+            const response = await fetch('/dashboard/api/prueva_json/?content_type=picture_matching_knowledge_check', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Contenidos cargados:', data);
+            
+            const container = document.getElementById('existing-contents');
+            container.innerHTML = ''; // Limpiar contenido existente
+            
+            if (data.data && data.data.length > 0) {
+                data.data.forEach(content => {
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'content-item';
+                    contentDiv.innerHTML = `
+                        <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                            <h3>${content.tittle || 'Sin título'}</h3>
+                            <p>ID: ${content.id}</p>
+                            <p>Tipo: ${content.content_type}</p>
+                            <p>Fecha: ${new Date(content.created_at).toLocaleString()}</p>
+                            <div>
+                                <h4>Imágenes:</h4>
+                                ${content.content_details?.images?.map(img => `
+                                    <div style="margin: 5px;">
+                                        <p>${img.description}</p>
+                                        <img src="${img.image}" style="max-width: 200px;">
+                                    </div>
+                                `).join('') || 'No hay imágenes'}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(contentDiv);
+                });
+            } else {
+                container.innerHTML = '<p>No hay contenidos disponibles</p>';
+            }
+        } catch (error) {
+            console.error('Error al cargar contenidos:', error);
+            document.getElementById('existing-contents').innerHTML = 
+                '<p>Error al cargar los contenidos</p>';
+        }
+    }
+
+    // Cargar contenidos al iniciar la página
+    document.addEventListener('DOMContentLoaded', loadExistingContents);
+</script>

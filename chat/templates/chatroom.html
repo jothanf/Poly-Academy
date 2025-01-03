@@ -1,0 +1,53 @@
+<h1>Chat Rooms</h1>
+
+<div id="chat-log" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll;"></div>
+<input type="text" id="chat-message-input">
+<button id="chat-message-submit">Enviar</button>
+
+<script>
+    let chatSocket = null;
+    
+    function connectWebSocket() {
+        const roomName = 'lobby';
+        const scenarioId = '{{ scenario.id }}';
+        const wsScheme = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        
+        chatSocket = new WebSocket(
+            `${wsScheme}${window.location.host}/ws/chat/${roomName}/${scenarioId}/`
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#chat-log').innerHTML += `<div style="color: blue;">${data.message}</div><br>`;
+        };
+
+        chatSocket.onclose = function(e) {
+            console.log('Chat socket closed unexpectedly');
+            setTimeout(function() {
+                connectWebSocket();
+            }, 3000);
+        };
+
+        chatSocket.onerror = function(e) {
+            console.error('Chat socket error:', e);
+        };
+    }
+
+    // Iniciar la conexión
+    connectWebSocket();
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            document.querySelector('#chat-log').innerHTML += `<div style="color: green;">${message}</div><br>`;
+            messageInputDom.value = '';
+        } else {
+            console.log('WebSocket is not connected');
+        }
+    };
+</script>

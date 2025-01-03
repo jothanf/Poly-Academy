@@ -1,0 +1,43 @@
+<h2>Prueba Class Content</h2>
+
+<ul>
+    {% for content in contents %}
+        <li>
+            <h3>{{ content.tittle }}</h3>
+            <p>{{ content.instructions }}</p>
+            <p>Id: {{ content.id }}</p>
+            <p>Content Details:</p>
+            <div id="content-details-{{ content.id }}">
+                {% if content.content_details %}
+                    {% for image in content.content_details.images %}
+                        <div>
+                            <p>{{ image.description }}</p>
+                            <img src="{{ image.image }}" alt="{{ image.description }}" style="max-width: 200px;">
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No hay detalles de contenido disponibles.</p>
+                {% endif %}
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for content in contents %}
+            const contentDetails = JSON.parse(document.getElementById('content-details-{{ content.id }}').dataset.content);
+            const container = document.getElementById('content-details-{{ content.id }}');
+
+            // Procesar y mostrar las imágenes
+            if (contentDetails.images) {
+                contentDetails.images.forEach(image => {
+                    const img = document.createElement('img');
+                    img.src = image.url; // Asegúrate de que 'url' sea la clave correcta
+                    img.alt = image.description || 'Imagen';
+                    container.appendChild(img);
+                });
+            }
+        {% endfor %}
+    });
+</script>

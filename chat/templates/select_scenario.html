@@ -1,0 +1,12 @@
+<h2>Selecciona un escenario</h2>
+<div>
+    {% for scenario in scenarios %}
+        <button onclick="selectScenario('{{ scenario.id }}')">{{ scenario.name }}</button>
+    {% endfor %}
+</div>
+
+<script>
+    function selectScenario(scenario_id) {
+        window.location.href = '/chat/chat/' + scenario_id;
+    }
+</script>
