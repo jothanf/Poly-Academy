@@ -7,4 +7,5 @@ from . import views
 urlpatterns = [
     path('', views.select_scenario, name='select_scenario'),
     path('chat/<int:scenario_id>/', views.chat_room, name='chat_room'),
+    path('chat-ai/', views.chat_ai, name='chat_ai'),
 ]
