@@ -6,6 +6,7 @@ from django.conf import settings
 from xml.etree.ElementTree import Element, SubElement, tostring
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.contrib.auth.models import User
 
 import os
 import zipfile
@@ -408,13 +409,13 @@ class ClassContentModel(models.Model):
     
     # Campos para multimedia en JSON
     multimedia = models.JSONField(null=True, blank=True)
-    image = models.ImageField(upload_to='content_images/', null=True, blank=True)
-    video = models.FileField(upload_to='content_videos/', null=True, blank=True)
+    image = models.ImageField(upload_to='content_images/', null=True, blank=True, max_length=500)
+    video = models.FileField(upload_to='content_videos/', null=True, blank=True, max_length=500)
     video_transcription = models.TextField(null=True, blank=True)
     embed_video = models.URLField(null=True, blank=True)
-    audio = models.FileField(upload_to='content_audios/', null=True, blank=True)
+    audio = models.FileField(upload_to='content_audios/', null=True, blank=True, max_length=500)
     audio_transcription = models.TextField(null=True, blank=True)
-    pdf = models.FileField(upload_to='content_pdfs/', null=True, blank=True)
+    pdf = models.FileField(upload_to='content_pdfs/', null=True, blank=True, max_length=500)
     
     order = models.PositiveIntegerField(default=0)
     stats = models.BooleanField(default=False)
@@ -522,4 +523,21 @@ class FormattedTextModel(models.Model):
 
     def __str__(self):
         return f"Texto Formateado - {self.title or 'Sin título'}"
+
+class StudentModel(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class StudentProgressModel(models.Model):
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='progress')
+    class_content = models.ForeignKey(ClassContentModel, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    score = models.FloatField(null=True, blank=True)
+    attempts = models.PositiveIntegerField(default=0)
+    last_attempt = models.DateTimeField(auto_now=True)
+    answers = models.JSONField(null=True, blank=True)  # Almacena las respuestas del estudiante
+
+    class Meta:
+        unique_together = ['student', 'class_content']
 
