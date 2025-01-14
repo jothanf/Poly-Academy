@@ -499,9 +499,9 @@ class ScenarioModel(models.Model):
     conversation_starter = models.TextField(blank=True, null=True)
     vocabulary = models.TextField(null=True, blank=True)
     key_expressions = models.TextField(null=True, blank=True)
-    end_conversation = models.TextField()
-    end_conversation_saying = models.TextField()
-    feedback = models.TextField()
+    end_conversation = models.TextField(null=True, blank=True)
+    end_conversation_saying = models.TextField(null=True, blank=True)
+    feedback = models.TextField(null=True, blank=True)
     scoring = models.TextField(null=True, blank=True)
     additional_info = models.TextField(null=True, blank=True)
 
@@ -512,7 +512,7 @@ class ScenarioModel(models.Model):
         return f"{self.name}"
 
 class FormattedTextModel(models.Model):
-    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='formatted_texts')
+    class_id = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='formatted_texts')
     title = models.CharField(max_length=200, null=True, blank=True)
     content = models.TextField(help_text="Contenido con formato HTML/TipTap")
     instructions = models.TextField(null=True, blank=True)
@@ -559,7 +559,7 @@ class StudentNoteModel(models.Model):
     ]
 
     student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='notes')
-    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='student_notes', null=True, blank=True)
+    class_id = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='student_notes', null=True, blank=True)
     
     title = models.CharField(max_length=200)
     content = models.TextField()

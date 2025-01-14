@@ -113,7 +113,7 @@ class ScenarioModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScenarioModel
         fields = [
-            'id', 'class_model', 'cover', 'name', 'description',
+            'id', 'class_id', 'cover', 'name', 'description',
             'goals', 'objectives', 'student_information',
             'role_polly', 'role_student', 'conversation_starter',
             'vocabulary', 'key_expressions', 'end_conversation',
@@ -141,9 +141,9 @@ class FormattedTextModelSerializer(serializers.ModelSerializer):
                 'content': 'El contenido no puede estar vacío'
             })
         
-        if not data.get('class_model'):
+        if not data.get('class_id'):
             raise serializers.ValidationError({
-                'class_model': 'La clase es requerida'
+                'class_id': 'La clase es requerida'
             })
 
         return data
