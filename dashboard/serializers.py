@@ -130,7 +130,7 @@ class FormattedTextModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormattedTextModel
         fields = [
-            'id', 'class_model', 'title', 'content', 
+            'id', 'class_id', 'title', 'content', 
             'instructions', 'order', 'created_at', 'updated_at'
         ]
 
