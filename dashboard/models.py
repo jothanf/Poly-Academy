@@ -7,6 +7,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 import os
 import zipfile
@@ -483,24 +484,27 @@ class ClassContentModel(models.Model):
         verbose_name_plural = 'Contenidos de Clase'
 
     def __str__(self):
-        return f"{self.get_content_type_display()} - {self.title or 'Sin título'}"
+        return f"{self.get_content_type_display()} - {self.tittle or 'Sin título'}"
 
 class ScenarioModel(models.Model):
     class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='scenarios')
+    cover = models.ImageField(upload_to='scenario_covers/', null=True, blank=True)
     name = models.CharField(max_length=200)
-    type = models.CharField(max_length=100)
-    location = models.CharField(max_length=200)
     description = models.TextField()
     goals = models.JSONField(null=True, blank=True)
+    objectives = models.JSONField(null=True, blank=True)
+    student_information = models.JSONField(null=True, blank=True)
+    role_polly = models.CharField(max_length=200)
+    role_student = models.CharField(max_length=200)
+    conversation_starter = models.TextField()
     vocabulary = models.JSONField(null=True, blank=True)
     key_expressions = models.JSONField(null=True, blank=True)
-    additional_info_objective = models.JSONField(null=True, blank=True)
-    limitations_student = models.TextField()
-    role_student = models.CharField(max_length=200)
-    role_polly = models.CharField(max_length=200)
-    instructions_polly = models.JSONField(null=True, blank=True)
-    limitations_polly = models.JSONField(null=True, blank=True)
-    
+    end_conversation = models.TextField()
+    end_conversation_saying = models.TextField()
+    feedback = models.TextField()
+    scoring = models.JSONField(null=True, blank=True)
+    additional_info = models.JSONField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -540,4 +544,152 @@ class StudentProgressModel(models.Model):
 
     class Meta:
         unique_together = ['student', 'class_content']
+
+class TeacherModel(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class StudentNoteModel(models.Model):
+    NOTE_TYPES = [
+        ('vocabulary', 'Vocabulary'),
+        ('grammar', 'Grammar'),
+        ('expressions', 'Expressions'),
+        ('general', 'General Note'),
+    ]
+
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='notes')
+    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='student_notes', null=True, blank=True)
+    
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    note_type = models.CharField(max_length=20, choices=NOTE_TYPES, default='general')
+    
+    # For organization and search
+    tags = models.JSONField(null=True, blank=True, help_text="List of tags to categorize the note")
+    highlighted = models.BooleanField(default=False)
+    color = models.CharField(max_length=7, null=True, blank=True, help_text="HEX color code for the note")
+    
+    # For references
+    related_url = models.URLField(null=True, blank=True)
+    related_content = models.ForeignKey(
+        ClassContentModel, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='related_notes'
+    )
+    
+    # Time fields
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = 'Student Note'
+        verbose_name_plural = 'Student Notes'
+
+    def __str__(self):
+        return f"Note from {self.student.user.username}: {self.title}"
+
+class VocabularyEntryModel(models.Model):
+    PROFICIENCY_LEVELS = [
+        (1, 'Principiante'),      # Apenas conoce la palabra
+        (2, 'Básico'),           # Reconoce y entiende
+        (3, 'Intermedio'),       # Puede usar en contextos simples
+        (4, 'Avanzado'),         # Usa con confianza
+        (5, 'Dominado')          # Dominio completo
+    ]
+
+    ENTRY_TYPES = [
+        ('word', 'Palabra'),
+        ('phrase', 'Frase'),
+        ('expression', 'Expresión'),
+        ('slang', 'Modismo'),
+        ('idiom', 'Frase hecha')
+    ]
+
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='vocabulary')
+    class_model = models.ForeignKey(ClassModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='vocabulary_entries')
+    
+    # Contenido principal
+    term = models.CharField(max_length=200, help_text="Palabra o frase a aprender")
+    translation = models.CharField(max_length=200, help_text="Traducción a tu idioma nativo")
+    context = models.TextField(null=True, blank=True, help_text="Ejemplo de uso en contexto")
+    notes = models.TextField(null=True, blank=True, help_text="Notas personales sobre el uso")
+    
+    # Categorización
+    entry_type = models.CharField(max_length=20, choices=ENTRY_TYPES, default='word')
+    tags = models.JSONField(null=True, blank=True, help_text="Etiquetas para organizar el vocabulario")
+    category = models.CharField(max_length=100, null=True, blank=True, help_text="Categoría temática")
+    
+    # Progreso de aprendizaje
+    proficiency_level = models.IntegerField(
+        choices=PROFICIENCY_LEVELS, 
+        default=1,
+        help_text="Nivel de dominio actual"
+    )
+    times_practiced = models.PositiveIntegerField(default=0, help_text="Número de veces practicada")
+    last_practiced = models.DateTimeField(null=True, blank=True)
+    next_review = models.DateTimeField(null=True, blank=True, help_text="Fecha sugerida para próxima revisión")
+    
+    # Multimedia
+    audio_pronunciation = models.FileField(
+        upload_to='vocabulary_audio/', 
+        null=True, 
+        blank=True,
+        help_text="Audio de pronunciación"
+    )
+    image = models.ImageField(
+        upload_to='vocabulary_images/', 
+        null=True, 
+        blank=True,
+        help_text="Imagen relacionada"
+    )
+    
+    # Metadatos
+    is_favorite = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = 'Entrada de Vocabulario'
+        verbose_name_plural = 'Entradas de Vocabulario'
+        indexes = [
+            models.Index(fields=['student', 'term']),
+            models.Index(fields=['proficiency_level']),
+            models.Index(fields=['category']),
+        ]
+
+    def __str__(self):
+        return f"{self.term} - {self.translation}"
+
+    def update_proficiency(self, success_rate):
+        """
+        Actualiza el nivel de dominio basado en el éxito de la práctica
+        success_rate: float entre 0 y 1
+        """
+        if success_rate > 0.8 and self.proficiency_level < 5:
+            self.proficiency_level += 1
+        elif success_rate < 0.4 and self.proficiency_level > 1:
+            self.proficiency_level -= 1
+        
+        self.times_practiced += 1
+        self.last_practiced = timezone.now()
+        
+        # Calcula próxima revisión usando espaciado repetitivo
+        days_until_review = {
+            1: 1,      # Principiante: revisar al día siguiente
+            2: 3,      # Básico: revisar en 3 días
+            3: 7,      # Intermedio: revisar en una semana
+            4: 14,     # Avanzado: revisar en dos semanas
+            5: 30,     # Dominado: revisar en un mes
+        }
+        
+        self.next_review = timezone.now() + timezone.timedelta(
+            days=days_until_review[self.proficiency_level]
+        )
+        
+        self.save()
 

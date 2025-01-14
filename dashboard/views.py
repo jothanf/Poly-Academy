@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.http import HttpResponse, JsonResponse
-from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer, ScenarioModelSerializer, FormattedTextModelSerializer
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer, ScenarioModelSerializer, FormattedTextModelSerializer, StudentModelSerializer, StudentNoteModelSerializer, VocabularyEntryModelSerializer, TeacherModelSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.response import Response
@@ -22,6 +22,7 @@ import os
 from .IA.imgGen import ImageGenerator
 from django.views.decorators.csrf import csrf_exempt
 import uuid
+from rest_framework.decorators import action
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -786,13 +787,71 @@ class ScenarioSuggestionsView(APIView):
 class ScenarioModelViewSet(viewsets.ModelViewSet):
     queryset = ScenarioModel.objects.all()
     serializer_class = ScenarioModelSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     
     def get_queryset(self):
         queryset = ScenarioModel.objects.all()
         class_id = self.request.query_params.get('class_id', None)
         if class_id is not None:
             queryset = queryset.filter(class_model_id=class_id)
-        return queryset
+        return queryset.order_by('-created_at')
+
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                scenario = serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Escenario creado exitosamente',
+                    'data': serializer.data
+                }, status=status.HTTP_201_CREATED)
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            if serializer.is_valid():
+                scenario = serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Escenario actualizado exitosamente',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance.delete()
+            return Response({
+                'status': 'success',
+                'message': 'Escenario eliminado exitosamente'
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class FormattedTextViewSet(viewsets.ModelViewSet):
     queryset = FormattedTextModel.objects.all()
@@ -865,33 +924,25 @@ class FormattedTextViewSet(viewsets.ModelViewSet):
 
 @csrf_exempt
 def img_gen(request):
-    print("Solicitud recibida en img_gen")  # Indica que la solicitud ha llegado
     if request.method == 'POST':
-        print("Método POST detectado")  # Indica que se ha detectado un método POST
         try:
             data = json.loads(request.body)
-            print(f"Datos recibidos: {data}")  # Muestra los datos recibidos
-            
+          
             prompt = data.get('prompt')
             if not prompt:
-                print("No se proporcionó un prompt")  # Indica que falta el prompt
                 return JsonResponse({'error': 'No se proporcionó un prompt'}, status=400)
             
             generator = ImageGenerator()
             result = generator.generate_image(prompt)
             
             if result['success']:
-                print(f"Imagen generada con éxito: {result['url']}")  # Muestra la URL de la imagen generada
                 return JsonResponse({'url': result['url']})
             else:
-                print(f"Error al generar la imagen: {result['error']}")  # Muestra el error si la generación falla
                 return JsonResponse({'error': result['error']}, status=500)
                 
         except Exception as e:
-            print(f"Error inesperado: {str(e)}")  # Muestra cualquier otro error inesperado
             return JsonResponse({'error': str(e)}, status=500)
-            
-    print("Método no permitido")  # Indica que se ha recibido un método diferente a POST
+
     return render(request, 'img_gen.html')
 
 @api_view(['GET', 'POST'])
@@ -987,3 +1038,315 @@ def prueba_classcontent(request):
     # Consultar todos los ClassContentModel donde content_type sea 'image'
     contents = ClassContentModel.objects.filter(content_type='image')
     return render(request, 'prueba_classcontent.html', {'contents': contents})
+
+def StudentRegisterView():
+    queryset = StudentModel.objects.all()
+            
+@api_view(['POST'])
+def create_student(request):
+    """
+    Vista para crear un nuevo estudiante.
+    """
+    serializer = StudentModelSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            student = serializer.save()
+            return Response({
+                'status': 'success',
+                'message': 'Estudiante creado exitosamente',
+                'data': {
+                    'id': student.id,
+                    'username': student.user.username,
+                    'email': student.user.email
+                }
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': 'Error al crear el estudiante',
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+    return Response({
+        'status': 'error',
+        'message': 'Error de validación',
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+            
+class StudentListView(generics.ListAPIView):
+    queryset = StudentModel.objects.all()
+    serializer_class = StudentModelSerializer
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return Response({
+            'status': 'success',
+            'data': response.data
+        })
+            
+class StudentViewSet(generics.ListCreateAPIView):
+    queryset = StudentModel.objects.all()
+    serializer_class = StudentModelSerializer
+
+    def get(self, request, *args, **kwargs):
+        students = self.get_queryset()
+        serializer = self.get_serializer(students, many=True)
+        return Response({
+            'status': 'success',
+            'data': serializer.data
+        })
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                student = serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Estudiante creado exitosamente',
+                    'data': {
+                        'id': student.id,
+                        'username': student.user.username,
+                        'email': student.user.email
+                    }
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({
+                    'status': 'error',
+                    'message': 'Error al crear el estudiante',
+                    'error': str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'status': 'error',
+            'message': 'Error de validación',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+            
+class StudentCoursesView(APIView):
+    def get(self, request, student_id):
+        try:
+            student = StudentModel.objects.get(id=student_id)
+            courses = student.courses.all()
+            serializer = CourseModelSerializer(courses, many=True)
+            return Response({
+                'status': 'success',
+                'message': 'Cursos del estudiante obtenidos exitosamente',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+        except StudentModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Estudiante no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+def student_courses(request, student_id):
+    student = StudentModel.objects.get(id=student_id)
+    courses = student.courses.all()
+    return render(request, 'student_courses.html', {'courses': courses})
+
+class StudentNoteViewSet(viewsets.ModelViewSet):
+    serializer_class = StudentNoteModelSerializer
+    
+    def get_queryset(self):
+        """
+        Filtra las notas por estudiante si se proporciona student_id en la URL
+        """
+        queryset = StudentNoteModel.objects.all()
+        student_id = self.request.query_params.get('student_id')
+        if student_id:
+            queryset = queryset.filter(student_id=student_id)
+        return queryset.order_by('-updated_at')
+
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Nota creada exitosamente',
+                    'data': serializer.data
+                }, status=status.HTTP_201_CREATED)
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Nota actualizada exitosamente',
+                    'data': serializer.data
+                })
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance.delete()
+            return Response({
+                'status': 'success',
+                'message': 'Nota eliminada exitosamente'
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class VocabularyEntryViewSet(viewsets.ModelViewSet):
+    serializer_class = VocabularyEntryModelSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def get_queryset(self):
+        queryset = VocabularyEntryModel.objects.all()
+        student_id = self.request.query_params.get('student_id', None)
+        if student_id is not None:
+            queryset = queryset.filter(student_id=student_id)
+        return queryset.order_by('-updated_at')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'status': 'success',
+            'message': 'Vocabulario obtenido exitosamente',
+            'data': serializer.data
+        })
+
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response({
+                'status': 'success',
+                'message': 'Entrada de vocabulario creada exitosamente',
+                'data': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response({
+                'status': 'success',
+                'message': 'Entrada de vocabulario actualizada exitosamente',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def update_proficiency(self, request, pk=None):
+        try:
+            entry = self.get_object()
+            success_rate = float(request.data.get('success_rate', 0))
+            entry.update_proficiency(success_rate)
+            serializer = self.get_serializer(entry)
+            return Response({
+                'status': 'success',
+                'message': 'Nivel de dominio actualizado exitosamente',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+class TeacherViewSet(viewsets.ModelViewSet):
+    queryset = TeacherModel.objects.all()
+    serializer_class = TeacherModelSerializer
+
+    def get_queryset(self):
+        """
+        Opcionalmente filtra los profesores por algún parámetro si lo necesitas
+        """
+        queryset = TeacherModel.objects.all()
+        return queryset.order_by('-created_at')
+
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                teacher = serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Profesor creado exitosamente',
+                    'data': {
+                        'id': teacher.id,
+                        'username': teacher.user.username,
+                        'email': teacher.user.email
+                    }
+                }, status=status.HTTP_201_CREATED)
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            if serializer.is_valid():
+                teacher = serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Profesor actualizado exitosamente',
+                    'data': {
+                        'id': teacher.id,
+                        'username': teacher.user.username,
+                        'email': teacher.user.email
+                    }
+                })
+            return Response({
+                'status': 'error',
+                'message': 'Error de validación',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

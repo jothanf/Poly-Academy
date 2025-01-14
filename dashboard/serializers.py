@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel
+from django.contrib.auth.models import User
+
 
 class CourseModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,8 +84,11 @@ class ClassContentModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassContentModel
         fields = ['id', 'class_id', 'content_type', 'tittle', 
-                 'content_details', 'multimedia', 'order', 'stats', 
-                 'created_at', 'updated_at']
+                  'instructions', 'content_details', 'multimedia', 
+                  'image', 'video', 'video_transcription', 
+                  'embed_video', 'audio', 'audio_transcription', 
+                  'pdf', 'order', 'stats', 
+                  'created_at', 'updated_at']
 
     def validate_content_details(self, value):
         """
@@ -108,11 +113,28 @@ class ScenarioModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScenarioModel
         fields = [
-            'id', 'class_model', 'name', 'type', 'location', 'description',
-            'goals', 'vocabulary', 'key_expressions', 'additional_info_objective',
-            'limitations_student', 'role_student', 'role_polly',
-            'instructions_polly', 'limitations_polly', 'created_at', 'updated_at'
+            'id', 'class_model', 'cover', 'name', 'description',
+            'goals', 'objectives', 'student_information',
+            'role_polly', 'role_student', 'conversation_starter',
+            'vocabulary', 'key_expressions', 'end_conversation',
+            'end_conversation_saying', 'feedback', 'scoring',
+            'additional_info', 'created_at', 'updated_at'
         ]
+
+    def validate(self, data):
+        # Validar campos JSON
+        json_fields = ['goals', 'objectives', 'student_information', 
+                      'vocabulary', 'key_expressions', 'scoring', 
+                      'additional_info']
+        
+        for field in json_fields:
+            if field in data and data[field] is not None:
+                if not isinstance(data[field], (dict, list)):
+                    raise serializers.ValidationError({
+                        field: 'Debe ser un objeto JSON válido'
+                    })
+        
+        return data
 
 
 class FormattedTextModelSerializer(serializers.ModelSerializer):
@@ -135,4 +157,103 @@ class FormattedTextModelSerializer(serializers.ModelSerializer):
                 'class_model': 'La clase es requerida'
             })
 
+        return data
+
+
+class StudentModelSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True)  # Para crear
+    email = serializers.EmailField(write_only=True)    # Para crear
+    user_username = serializers.CharField(source='user.username', read_only=True)  # Para listar
+    user_email = serializers.EmailField(source='user.email', read_only=True)      # Para listar
+
+    class Meta:
+        model = StudentModel
+        fields = ['id', 'username', 'email', 'user_username', 'user_email', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        # Extraer username y email de los datos validados
+        username = validated_data.pop('username')
+        email = validated_data.pop('email')
+        
+        try:
+            # Crear el usuario
+            user = User.objects.create_user(
+                username=username,
+                email=email
+            )
+            
+            # Crear y retornar el estudiante
+            student = StudentModel.objects.create(user=user, **validated_data)
+            return student
+        except Exception as e:
+            raise serializers.ValidationError(f"Error al crear el estudiante: {str(e)}")
+
+class TeacherModelSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True)  # Para crear
+    email = serializers.EmailField(write_only=True)    # Para crear
+    user_username = serializers.CharField(source='user.username', read_only=True)  # Para listar
+    user_email = serializers.EmailField(source='user.email', read_only=True)      # Para listar
+
+    class Meta:
+        model = TeacherModel
+        fields = ['id', 'username', 'email', 'user_username', 'user_email', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        # Extraer username y email de los datos validados
+        username = validated_data.pop('username')
+        email = validated_data.pop('email')
+
+        try:
+            # Crear el usuario
+            user = User.objects.create_user(
+                username=username,
+                email=email
+            )
+            
+            # Crear y retornar el profesor
+            teacher = TeacherModel.objects.create(user=user, **validated_data)
+            return teacher
+        except Exception as e:
+            raise serializers.ValidationError(f"Error al registrar creador de contenido: {str(e)}")
+
+class StudentNoteModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentNoteModel
+        fields = ['id', 'student', 'class_model', 'title', 'content', 'note_type', 'tags', 'highlighted', 'color', 'related_url', 'related_content', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+    def validate(self, data):
+        # Validar que el estudiante existe
+        if not StudentModel.objects.filter(id=data['student'].id).exists():
+            raise serializers.ValidationError("El estudiante especificado no existe")
+        
+        # Si se proporciona class_model, validar que existe
+        if data.get('class_model') and not ClassModel.objects.filter(id=data['class_model'].id).exists():
+            raise serializers.ValidationError("La clase especificada no existe")
+            
+        return data
+
+
+class VocabularyEntryModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VocabularyEntryModel
+        fields = [
+            'id', 'student', 'class_model', 'term', 'translation', 
+            'context', 'notes', 'entry_type', 'tags', 'category',
+            'proficiency_level', 'times_practiced', 'last_practiced',
+            'next_review', 'audio_pronunciation', 'image',
+            'is_favorite', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'times_practiced', 
+                           'last_practiced', 'next_review']
+
+    def validate(self, data):
+        # Validar que el estudiante existe
+        if not StudentModel.objects.filter(id=data['student'].id).exists():
+            raise serializers.ValidationError("El estudiante especificado no existe")
+        
+        # Si se proporciona class_model, validar que existe
+        if data.get('class_model') and not ClassModel.objects.filter(id=data['class_model'].id).exists():
+            raise serializers.ValidationError("La clase especificada no existe")
+            
         return data

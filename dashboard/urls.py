@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import api
-from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet
+from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet, StudentRegisterView, create_student, StudentViewSet, StudentNoteViewSet, VocabularyEntryViewSet, TeacherViewSet
 
 # Inicializa el router
 router = DefaultRouter()
@@ -37,6 +37,9 @@ router.register(r'multimediablockvideos', views.MultimediaBlockVideoViewSet, 'mu
 router.register(r'class-contents', views.ClassContentModelViewSet, 'class-contents')
 router.register(r'scenarios', ScenarioModelViewSet, 'scenarios')
 router.register(r'formatted-texts', FormattedTextViewSet, 'formatted-texts')
+router.register(r'class-notes', StudentNoteViewSet, 'class-notes')
+router.register(r'vocabulary', VocabularyEntryViewSet, 'vocabulary')
+router.register(r'teachers', TeacherViewSet, 'teachers')
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -81,4 +84,7 @@ urlpatterns = [
     path('prueva_json/', views.prueva_json, name='prueva_json'),
     path('api/prueva_json/', views.prueva_json, name='prueva_json_api'),
     path('prueba_classcontent/', views.prueba_classcontent, name='prueba_classcontent'),
+    path('api/students/', StudentViewSet.as_view(), name='student-list'),
+    path('api/students/create/', create_student, name='student-create'),
+    path('api/students/<int:student_id>/courses/', views.StudentCoursesView.as_view(), name='student-courses'),
 ]
