@@ -122,18 +122,7 @@ class ScenarioModelSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        # Validar campos JSON
-        json_fields = ['goals', 'objectives', 'student_information', 
-                      'vocabulary', 'key_expressions', 'scoring', 
-                      'additional_info']
-        
-        for field in json_fields:
-            if field in data and data[field] is not None:
-                if not isinstance(data[field], (dict, list)):
-                    raise serializers.ValidationError({
-                        field: 'Debe ser un objeto JSON válido'
-                    })
-        
+        # Eliminar la validación JSON de los campos TextField
         return data
 
 
