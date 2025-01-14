@@ -487,7 +487,7 @@ class ClassContentModel(models.Model):
         return f"{self.get_content_type_display()} - {self.tittle or 'Sin título'}"
 
 class ScenarioModel(models.Model):
-    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='scenarios')
+    class_id = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='scenarios')
     cover = models.ImageField(upload_to='scenario_covers/', null=True, blank=True)
     name = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
