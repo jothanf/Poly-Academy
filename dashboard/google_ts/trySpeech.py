@@ -58,7 +58,188 @@ def texto_a_audio_google(texto, ruta_salida, idioma="es-ES", voz="es-ES-Wavenet-
         out.write(response.audio_content)
         print(f"Audio guardado en: {ruta_salida}")
 
-# Ejemplo de uso
-texto = "Hola, esta es una prueba de conversión de texto a audio con Google Text-to-Speech."
-ruta_audio = "salidas/audio_google.mp3"
-texto_a_audio_google(texto, ruta_audio, idioma="es-ES", voz="es-ES-Wavenet-B", velocidad=1.2, tono=-5.0)
+# Ejemplos de uso con diferentes configuraciones
+texto = "Hola, soy POLLY tu asistente virtual. Estoy aquí para ayudarte a mejorar tus habilidades en este idioma. ¡Vamos a aprender juntos!"
+
+texto_ingles = "Hello, I am POLLY your virtual assistant. I am here to help you improve your skills in this language. Let's learn together!"
+
+
+
+# Configuraciones de prueba
+configuraciones = [
+    {
+        "voz": "es-ES-Studio-F",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_es_es_studio_F_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-ES-Standard-F",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_es_es_standard_F_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-ES-Studio-C",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_es_es_studio_C_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-ES-Standard-A",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_es_es_standard_A_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-ES-Standard-B",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_es_es_standard_B_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-US-Standard-A",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_es_us_standard_A_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-US-Standard-B",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_es_us_standard_B_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-US-Standard-C",
+        "velocidad": 1.1,
+        "tono": -1.0,
+        "nombre": "masculino_es_us_standard_C_vel_1.1_tono_-1.0"
+    },
+    {
+        "voz": "es-US-Standard-C",
+        "velocidad": 1.3,
+        "tono": -1.0,
+        "nombre": "masculino_es_us_standard_C_vel_1.3_tono_-1.0"
+    },
+    {
+        "voz": "es-US-Standard-C",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_es_us_standard_C_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "es-US-Standard-C",
+        "velocidad": 1.3,
+        "tono": -2.0,
+        "nombre": "masculino_es_us_standard_C_vel_1.3_tono_-2.0"
+    },
+    {
+        "voz": "es-US-Standard-C",
+        "velocidad": 1.1,
+        "tono": -3.0,
+        "nombre": "masculino_es_us_standard_C_vel_1.1_tono_-3.0"
+    },
+    {
+        "voz": "es-US-Standard-C",
+        "velocidad": 1.3,
+        "tono": -3.0,
+        "nombre": "masculino_es_us_standard_C_vel_1.3_tono_-3.0"
+    },
+    {
+        "voz": "en-AU-Standard-A",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_en_au_standard_A_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-AU-Standard-B",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_en_au_standard_B_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-AU-Standard-C",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_en_au_standard_C_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-AU-Standard-D",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_en_au_standard_D_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-GB-Standard-A",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_en_gb_standard_A_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-GB-Standard-B",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_en_gb_standard_B_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-GB-Standard-C",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_en_gb_standard_C_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-GB-Standard-D",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_en_gb_standard_D_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-US-Standard-A",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_en_us_standard_A_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-US-Standard-B",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "masculino_en_us_standard_B_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-US-Standard-C",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_en_us_standard_C_vel_1.1_tono_-2.0"
+    },
+    {
+        "voz": "en-US-Standard-F",
+        "velocidad": 1.1,
+        "tono": -2.0,
+        "nombre": "femenino_en_us_standard_F_vel_1.1_tono_-2.0"
+    }
+]
+
+# Textos para diferentes idiomas
+texto_espanol = "Hola, soy POLLY tu asistente virtual. Estoy aquí para ayudarte a mejorar tus habilidades en este idioma. ¡Vamos a aprender juntos!"
+texto_ingles = "Hello, I am POLLY your virtual assistant. I am here to help you improve your skills in this language. Let's learn together!"
+
+# Genera los audios de prueba
+for config in configuraciones:
+    ruta_audio = f"salidas/{config['nombre']}.mp3"
+    
+    # Determina el idioma y el texto basado en la voz
+    if config['voz'].startswith('es-'):
+        texto_usar = texto_espanol
+        idioma = "es-ES"
+    else:  # voces en inglés
+        texto_usar = texto_ingles
+        idioma = config['voz'][:5]  # Toma los primeros 5 caracteres (ej: "en-US", "en-GB")
+    
+    texto_a_audio_google(
+        texto=texto_usar,
+        ruta_salida=ruta_audio,
+        idioma=idioma,
+        voz=config["voz"],
+        velocidad=config["velocidad"],
+        tono=config["tono"]
+    )

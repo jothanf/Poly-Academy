@@ -214,11 +214,19 @@
     "content_details": {
         "pairs": [
             {
-                "left": "Texto 1",
+                "left": "Texto A",
+                "right": "Texto 1"
+            },
+            {
+                "left": "Texto B",
                 "right": "Texto 2"
             },
             {
-                "left": "Texto 3",
+                "left": "Texto C",
+                "right": "Texto 3"
+            },
+            {
+                "left": "Texto D",
                 "right": "Texto 4"
             }
         ]
