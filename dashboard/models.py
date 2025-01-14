@@ -489,8 +489,8 @@ class ClassContentModel(models.Model):
 class ScenarioModel(models.Model):
     class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='scenarios')
     cover = models.ImageField(upload_to='scenario_covers/', null=True, blank=True)
-    name = models.CharField(max_length=200)
-    description = models.TextField()
+    name = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     goals = models.TextField(null=True, blank=True)
     objectives = models.TextField(null=True, blank=True)
     student_information = models.TextField(null=True, blank=True)
