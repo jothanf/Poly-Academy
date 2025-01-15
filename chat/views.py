@@ -20,18 +20,47 @@ def chat_room(request, scenario_id):
 def chat_ai(request):
     if request.method == 'POST':
         try:
+            # Obtener o inicializar el historial de la sesión
+            if 'chat_history' not in request.session:
+                request.session['chat_history'] = []
+            
             data = json.loads(request.body)
             user_message = data.get('message')
             
-            ai_service = AIService()
-            context = {
-                "role": "system",
-                "content": """Eres un profesor de inglés amable y paciente. 
-                Tu objetivo es ayudar a los estudiantes con sus dudas sobre el idioma inglés,
-                proporcionando explicaciones claras y ejemplos útiles."""
-            }
+            # Obtener el historial actual
+            conversation_history = request.session.get('chat_history', [])
             
-            response = ai_service.chat_with_gpt(user_message)
+            # Si es la primera interacción, agregar el contexto del sistema
+            if not conversation_history:
+                conversation_history.append({
+                    "role": "system",
+                    "content": """Eres un profesor de inglés amable y paciente. 
+                    Tu objetivo es ayudar a los estudiantes con sus dudas sobre el idioma inglés,
+                    proporcionando explicaciones claras y ejemplos útiles."""
+                })
+            
+            # Agregar el mensaje del usuario al historial
+            conversation_history.append({
+                "role": "user",
+                "content": user_message
+            })
+            
+            # Crear una instancia de AIService
+            ai_service = AIService()
+            
+            # Obtener respuesta usando todo el historial
+            response = ai_service.chat_with_gpt(user_message, conversation_history)
+            
+            # Agregar la respuesta al historial
+            conversation_history.append({
+                "role": "assistant",
+                "content": response
+            })
+            
+            # Actualizar el historial en la sesión
+            request.session['chat_history'] = conversation_history
+            request.session.modified = True
+            
             return JsonResponse({'response': response})
             
         except Exception as e:

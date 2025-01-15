@@ -16,44 +16,28 @@ class AIService:
         print(f"Inicializando AIService con API key: {api_key[:5]}...")  # Solo muestra los primeros 5 caracteres por seguridad
         self.client = OpenAI(api_key=api_key)
         
-    def chat_with_gpt(self, user_message):
+    def chat_with_gpt(self, user_message, conversation_history=None):
         try:
-            system_prompt = """Eres POLLY, una profesora de inglés carismática y experta. Tu personalidad se caracteriza por ser:
-            - Extremadamente amable, paciente y motivadora
-            - Empática y atenta a las necesidades del estudiante
-            - Entusiasta sobre el proceso de aprendizaje
-            - Experta en adaptar explicaciones al nivel del estudiante
-
-            Tus responsabilidades incluyen:
-            1. Proporcionar retroalimentación constructiva y detallada
-            2. Celebrar los logros del estudiante, por pequeños que sean
-            3. Explicar conceptos de manera clara y con ejemplos prácticos
-            4. Mantener un ambiente positivo y divertido de aprendizaje
-            5. Sugerir actividades y ejercicios personalizados
-            6. Corregir errores de manera gentil y educativa
-            7. Fomentar la práctica continua y la participación activa
-
-            Recuerda:
-            - Usar un lenguaje accesible y amigable
-            - Incluir ejemplos relevantes en cada explicación
-            - Hacer preguntas para mantener al estudiante involucrado
-            - Proporcionar consejos prácticos y estrategias de aprendizaje
-            - Mantener un tono conversacional y cercano
-
-            Responde siempre como POLLY, manteniendo tu personalidad cálida y profesional."""
-
+            if conversation_history is None:
+                conversation_history = []
+            
+            # Si no hay historial, agregar el system prompt
+            if not conversation_history:
+                conversation_history.append({
+                    "role": "system",
+                    "content": """Eres POLLY, una profesora de inglés carismática y experta..."""
+                })
+            
             print(f"Enviando mensaje a OpenAI: {user_message}")
             response = self.client.chat.completions.create(
                 model="gpt-4",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message}
-                ],
+                messages=conversation_history,
                 max_tokens=500,
-                temperature=0.7  # Ajustado para respuestas más naturales pero consistentes
+                temperature=0.7
             )
+            
             response_text = response.choices[0].message.content
-            print(f"Respuesta recibida de OpenAI: {response_text[:100]}...")  # Solo muestra los primeros 100 caracteres
+            print(f"Respuesta recibida de OpenAI: {response_text[:100]}...")
             return response_text
         except Exception as e:
             error_message = f"Error al comunicarse con OpenAI: {str(e)}"
@@ -202,36 +186,47 @@ class AIService:
         Genera el contexto del escenario para OpenAI basado en el modelo ScenarioModel
         """
         try:
-            # Obtener el nivel del estudiante a partir del CourseModel
-            student_level = scenario.class_model.course.level if scenario.class_model and scenario.class_model.course else "Desconocido"
+            # Obtener el nivel del estudiante
+            student_level = scenario.class_id.course.level if scenario.class_id and scenario.class_id.course else "Desconocido"
 
-            # Construir el contexto base
             context = {
                 "role": "system",
-                "content": f"""Eres un asistente de idiomas llamado {scenario.role_polly} en el siguiente contexto:
+                "content": f"""Eres un asistente de idiomas con las siguientes características específicas:
 
-Escenario: {scenario.name}
-Ubicación: {scenario.location}
-Descripción: {scenario.description}
+IDENTIDAD Y ROL:
+- Tu nombre/rol es: {scenario.role_polly}
+- Debes mantener este rol consistentemente durante toda la conversación
+- Siempre inicia la conversación exactamente con: "{scenario.conversation_starter}"
+- Debes terminar la conversación con: "{scenario.end_conversation_saying}"
 
+OBJETIVOS DE LA CONVERSACIÓN:
+- Metas principales: {scenario.goals}
+- Objetivos específicos: {scenario.objectives}
 
-Tu rol específico:
-- Actúas como: {scenario.role_polly}
-- Objetivos de aprendizaje: {json.dumps(scenario.goals, ensure_ascii=False)}
-- Vocabulario clave: {json.dumps(scenario.vocabulary, ensure_ascii=False)}
-- Expresiones clave: {json.dumps(scenario.key_expressions, ensure_ascii=False)}
+CONTEXTO DEL ESTUDIANTE:
+- El estudiante actúa como: {scenario.role_student}
+- Nivel del estudiante: {student_level}
+- Información relevante del estudiante: {scenario.student_information}
 
-Limitaciones y directrices:
-{json.dumps(scenario.limitations_polly, ensure_ascii=False)}
+CONTENIDO LINGÜÍSTICO:
+- Vocabulario a enfatizar: {scenario.vocabulary}
+- Expresiones clave a utilizar: {scenario.key_expressions}
 
-Instrucciones específicas:
-{json.dumps(scenario.instructions_polly, ensure_ascii=False)}
+DIRECTRICES DE INTERACCIÓN:
+- Descripción del escenario: {scenario.description}
+- Criterios para terminar la conversación: {scenario.end_conversation}
+- Retroalimentación: {scenario.feedback}
+- Sistema de puntuación: {scenario.scoring}
 
-El estudiante actuará como: {scenario.role_student}
-Nivel del estudiante: {student_level}
-Limitaciones del estudiante: {scenario.limitations_student}
+REGLAS ESTRICTAS:
+1. SIEMPRE inicia con el saludo exacto especificado
+2. Mantén el rol y personalidad consistentes
+3. Utiliza el vocabulario y expresiones especificadas
+4. Proporciona retroalimentación según los criterios establecidos
+5. Termina la conversación solo bajo las condiciones especificadas
+6. Usa el cierre de conversación exacto cuando sea apropiado
 
-Mantén la conversación dentro de este contexto y ayuda al estudiante a practicar el idioma de manera natural."""
+Información adicional: {scenario.additional_info}"""
             }
             
             return context
@@ -280,24 +275,11 @@ Mantén la conversación dentro de este contexto y ayuda al estudiante a practic
             return error_message
 
     def get_initial_greeting(self, scenario):
+        """
+        Retorna el saludo inicial exacto especificado en el escenario
+        """
         try:
-            context = self.get_scenario_context(scenario)
-            
-            messages = [
-                context,
-                {
-                    "role": "user",
-                    "content": "Por favor, inicia la conversación saludando y presentándote según el contexto del escenario."
-                }
-            ]
-
-            response = self.client.chat.completions.create(
-                model="gpt-4",
-                messages=messages,
-                max_tokens=500
-            )
-
-            return response.choices[0].message.content
+            return scenario.conversation_starter
         except Exception as e:
             print(f"Error al generar saludo inicial: {str(e)}")
             return "¡Hola! Bienvenido a nuestra conversación."
