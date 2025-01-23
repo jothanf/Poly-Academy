@@ -283,3 +283,27 @@ Información adicional: {scenario.additional_info}"""
         except Exception as e:
             print(f"Error al generar saludo inicial: {str(e)}")
             return "¡Hola! Bienvenido a nuestra conversación."
+
+    def text_to_speech(self, text, voice="alloy", output_file="output.mp3"):
+        try:
+            print(f"Generando audio a partir del texto: {text}")
+            allowed_voices = ["alloy", "ash", "coral", "echo", "fable", "onyx", "nova", "sage", "shimmer"]
+            if voice not in allowed_voices:
+                raise ValueError(f"Voz no válida. Debe ser una de las siguientes: {', '.join(allowed_voices)}")
+            response = self.client.audio.speech.create(
+                model="tts-1",
+                voice=voice,
+                input=text,
+            )
+            
+            # Escribir el contenido del audio directamente al archivo
+            with open(output_file, 'wb') as file:
+                for chunk in response.iter_bytes():
+                    file.write(chunk)
+                
+            print(f"Audio generado y guardado en: {output_file}")
+            return output_file
+        except Exception as e:
+            print(f"Error al generar audio: {str(e)}")
+            return None
+

@@ -532,6 +532,7 @@ class StudentModel(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    profile_picture = models.ImageField(upload_to='student_profile_pictures/', null=True, blank=True)
 
 class StudentProgressModel(models.Model):
     student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='progress')
@@ -549,6 +550,10 @@ class TeacherModel(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    profile_picture = models.ImageField(upload_to='teacher_profile_pictures/', null=True, blank=True)
+
+    def __str__(self):
+        return self.user.email
 
 class StudentNoteModel(models.Model):
     NOTE_TYPES = [
@@ -693,3 +698,48 @@ class VocabularyEntryModel(models.Model):
         
         self.save()
 
+class CourseProgressModel(models.Model):
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='course_progress')
+    course = models.ForeignKey(CourseModel, on_delete=models.CASCADE)
+    progress_percentage = models.FloatField(default=0)
+    average_score = models.FloatField(default=0)
+    completed = models.BooleanField(default=False)
+    last_activity = models.DateTimeField(auto_now=True)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['student', 'course']
+
+class ClassProgressModel(models.Model):
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='class_progress')
+    class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE)
+    progress_percentage = models.FloatField(default=0)
+    average_score = models.FloatField(default=0)
+    completed = models.BooleanField(default=False)
+    last_activity = models.DateTimeField(auto_now=True)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['student', 'class_model']
+
+class StudentActivityLogModel(models.Model):
+    ACTIVITY_TYPES = [
+        ('start_content', 'Inicio de contenido'),
+        ('complete_content', 'Completó contenido'),
+        ('submit_answer', 'Envió respuesta'),
+        ('retry_content', 'Reintentó contenido'),
+        ('view_feedback', 'Vio retroalimentación'),
+    ]
+
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='activity_logs')
+    class_content = models.ForeignKey(ClassContentModel, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
+    score = models.FloatField(null=True, blank=True)
+    details = models.JSONField(null=True, blank=True)  # Para almacenar detalles específicos de la actividad
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+class StudentLoginRecord(models.Model):
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='login_records')
+    login_date = models.DateField(auto_now_add=True)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel, StudentLoginRecord
 from django.contrib.auth.models import User
 
 
@@ -150,57 +150,71 @@ class FormattedTextModelSerializer(serializers.ModelSerializer):
 
 
 class StudentModelSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)  # Para crear
-    email = serializers.EmailField(write_only=True)    # Para crear
-    user_username = serializers.CharField(source='user.username', read_only=True)  # Para listar
-    user_email = serializers.EmailField(source='user.email', read_only=True)      # Para listar
+    username = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True)
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    profile_picture = serializers.ImageField(required=False)
 
     class Meta:
         model = StudentModel
-        fields = ['id', 'username', 'email', 'user_username', 'user_email', 'created_at', 'updated_at']
+        fields = ['id', 'username', 'email', 'password', 'user_username', 
+                 'user_email', 'profile_picture', 'created_at', 'updated_at']
 
     def create(self, validated_data):
-        # Extraer username y email de los datos validados
         username = validated_data.pop('username')
         email = validated_data.pop('email')
-        
+        password = validated_data.pop('password')
+        profile_picture = validated_data.pop('profile_picture', None)
+
         try:
-            # Crear el usuario
             user = User.objects.create_user(
                 username=username,
-                email=email
+                email=email,
+                password=password
             )
             
-            # Crear y retornar el estudiante
-            student = StudentModel.objects.create(user=user, **validated_data)
+            student = StudentModel.objects.create(
+                user=user,
+                profile_picture=profile_picture,
+                **validated_data
+            )
             return student
         except Exception as e:
-            raise serializers.ValidationError(f"Error al crear el estudiante: {str(e)}")
+            raise serializers.ValidationError(f"Error al registrar estudiante: {str(e)}")
 
 class TeacherModelSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)  # Para crear
-    email = serializers.EmailField(write_only=True)    # Para crear
-    user_username = serializers.CharField(source='user.username', read_only=True)  # Para listar
-    user_email = serializers.EmailField(source='user.email', read_only=True)      # Para listar
-
+    username = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True)
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    profile_picture = serializers.ImageField(required=False)
+    
     class Meta:
         model = TeacherModel
-        fields = ['id', 'username', 'email', 'user_username', 'user_email', 'created_at', 'updated_at']
+        fields = ['id', 'username', 'email', 'password', 'user_username', 
+                 'user_email', 'profile_picture', 'created_at', 'updated_at']
 
     def create(self, validated_data):
-        # Extraer username y email de los datos validados
         username = validated_data.pop('username')
         email = validated_data.pop('email')
+        password = validated_data.pop('password')
+        profile_picture = validated_data.pop('profile_picture', None)
 
         try:
-            # Crear el usuario
             user = User.objects.create_user(
                 username=username,
-                email=email
+                email=email,
+                password=password
             )
             
-            # Crear y retornar el profesor
-            teacher = TeacherModel.objects.create(user=user, **validated_data)
+            teacher = TeacherModel.objects.create(
+                user=user,
+                profile_picture=profile_picture,
+                **validated_data
+            )
             return teacher
         except Exception as e:
             raise serializers.ValidationError(f"Error al registrar creador de contenido: {str(e)}")
@@ -246,3 +260,12 @@ class VocabularyEntryModelSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("La clase especificada no existe")
             
         return data
+
+
+class StudentLoginRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentLoginRecord
+        fields = ['student', 'login_date']
+
+    def create(self, validated_data):
+        return StudentLoginRecord.objects.create(**validated_data)

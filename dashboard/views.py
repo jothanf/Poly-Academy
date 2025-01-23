@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.http import HttpResponse, JsonResponse
-from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer, ScenarioModelSerializer, FormattedTextModelSerializer, StudentModelSerializer, StudentNoteModelSerializer, VocabularyEntryModelSerializer, TeacherModelSerializer
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer, ScenarioModelSerializer, FormattedTextModelSerializer, StudentModelSerializer, StudentNoteModelSerializer, VocabularyEntryModelSerializer, TeacherModelSerializer, StudentLoginRecordSerializer
+from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel, StudentLoginRecord
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.response import Response
@@ -23,6 +23,15 @@ from .IA.imgGen import ImageGenerator
 from django.views.decorators.csrf import csrf_exempt
 import uuid
 from rest_framework.decorators import action
+from .google_ts.trySpeech import texto_a_audio_google  # Asegúrate de que la ruta sea correcta
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Q
+from itertools import chain
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -1292,17 +1301,22 @@ class VocabularyEntryViewSet(viewsets.ModelViewSet):
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = TeacherModel.objects.all()
     serializer_class = TeacherModelSerializer
+    parser_classes = (MultiPartParser, FormParser)  # Agregamos soporte para archivos
 
     def get_queryset(self):
-        """
-        Opcionalmente filtra los profesores por algún parámetro si lo necesitas
-        """
         queryset = TeacherModel.objects.all()
         return queryset.order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
         try:
-            serializer = self.get_serializer(data=request.data)
+            # Manejamos los datos del formulario y la imagen
+            data = request.data.dict() if hasattr(request.data, 'dict') else request.data
+            
+            # Si hay una imagen en la solicitud, la agregamos a los datos
+            if 'profile_picture' in request.FILES:
+                data['profile_picture'] = request.FILES['profile_picture']
+
+            serializer = self.get_serializer(data=data)
             if serializer.is_valid():
                 teacher = serializer.save()
                 return Response({
@@ -1311,7 +1325,8 @@ class TeacherViewSet(viewsets.ModelViewSet):
                     'data': {
                         'id': teacher.id,
                         'username': teacher.user.username,
-                        'email': teacher.user.email
+                        'email': teacher.user.email,
+                        'profile_picture': teacher.profile_picture.url if teacher.profile_picture else None
                     }
                 }, status=status.HTTP_201_CREATED)
             return Response({
@@ -1337,7 +1352,8 @@ class TeacherViewSet(viewsets.ModelViewSet):
                     'data': {
                         'id': teacher.id,
                         'username': teacher.user.username,
-                        'email': teacher.user.email
+                        'email': teacher.user.email,
+                        'profile_picture': teacher.profile_picture.url if teacher.profile_picture else None
                     }
                 })
             return Response({
@@ -1349,4 +1365,235 @@ class TeacherViewSet(viewsets.ModelViewSet):
             return Response({
                 'status': 'error',
                 'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def text_to_speech(request):
+    texto = request.data.get('texto')
+    voz = request.data.get('voz', 'alloy')
+    
+    if not texto:
+        return Response({
+            'status': 'error', 
+            'message': 'El texto es requerido'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Crear el directorio temporal si no existe
+        audio_dir = 'media/temp_audio'
+        os.makedirs(audio_dir, exist_ok=True)
+        
+        # Generar un nombre único para el archivo
+        file_uuid = uuid.uuid4()
+        output_file = f"{audio_dir}/tts_{file_uuid}.mp3"
+        
+        ai_service = AIService()
+        result = ai_service.text_to_speech(texto, voice=voz, output_file=output_file)
+        
+        if result:
+            audio_url = f"/media/temp_audio/{os.path.basename(output_file)}"
+            return Response({
+                'status': 'success',
+                'message': 'Audio generado exitosamente',
+                'audio_url': audio_url
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'status': 'error',
+                'message': 'Error al generar el audio'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        print(f"Error en text_to_speech: {str(e)}")
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def teacher_login(request):
+    try:
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Intentar obtener el usuario por email
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Credenciales inválidas'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Autenticar al usuario
+        user = authenticate(username=user.username, password=password)
+        
+        if user is not None:
+            try:
+                teacher = TeacherModel.objects.get(user=user)
+                
+                # Generar token JWT
+                refresh = RefreshToken.for_user(user)
+                
+                return Response({
+                    'status': 'success',
+                    'message': 'Inicio de sesión exitoso',
+                    'token': str(refresh.access_token),
+                    'teacher': {
+                        'id': teacher.id,
+                        'name': user.get_full_name(),
+                        'email': user.email,
+                        'profile_picture': teacher.profile_picture.url if teacher.profile_picture else None
+                    }
+                })
+            except TeacherModel.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'No existe un perfil de profesor para este usuario'
+                }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({
+                'status': 'error',
+                'message': 'Credenciales inválidas'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+            
+    except Exception as e:
+        print("Error en login:", str(e))  # Log para debugging
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def student_login(request):
+    try:
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Intentar obtener el usuario por email
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Credenciales inválidas'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Autenticar al usuario
+        user = authenticate(username=user.username, password=password)
+        
+        if user is not None:
+            try:
+                student = StudentModel.objects.get(user=user)
+                
+                # Generar token JWT
+                refresh = RefreshToken.for_user(user)
+                
+                return Response({
+                    'status': 'success',
+                    'message': 'Inicio de sesión exitoso',
+                    'token': str(refresh.access_token),
+                    'student': {
+                        'id': student.id,
+                        'name': user.get_full_name(),
+                        'email': user.email,
+                        'profile_picture': student.profile_picture.url if student.profile_picture else None
+                    }
+                })
+            except StudentModel.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'No existe un perfil de estudiante para este usuario'
+                }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({
+                'status': 'error',
+                'message': 'Credenciales inválidas'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+            
+    except Exception as e:
+        print("Error en login:", str(e))  # Log para debugging
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class StudentLoginRecordView(generics.ListCreateAPIView):
+    queryset = StudentLoginRecord.objects.all()
+    serializer_class = StudentLoginRecordSerializer
+
+    def get_queryset(self):
+        # Filtra los registros por estudiante si se proporciona student_id
+        queryset = StudentLoginRecord.objects.all()
+        student_id = self.request.query_params.get('student_id')
+        if student_id:
+            queryset = queryset.filter(student=student_id)
+        return queryset.order_by('-login_date')
+
+class SearchView(APIView):
+    def get(self, request):
+        try:
+            # Obtener el término de búsqueda
+            query = request.query_params.get('q', '').strip()
+            
+            if not query:
+                return Response({
+                    'status': 'error',
+                    'message': 'Se requiere un término de búsqueda'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Buscar en CourseModel
+            cursos = CourseModel.objects.filter(
+                Q(course_name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(category__icontains=query) |
+                Q(level__icontains=query)
+            )
+
+            # Buscar en ClassModel
+            clases = ClassModel.objects.filter(
+                Q(class_name__icontains=query) |
+                Q(description__icontains=query)
+            )
+
+            # Buscar en ClassContentModel
+            contenidos = ClassContentModel.objects.filter(
+                Q(tittle__icontains=query) |
+                Q(instructions__icontains=query) |
+                Q(video_transcription__icontains=query) |
+                Q(audio_transcription__icontains=query)
+            )
+
+            # Buscar en ScenarioModel
+            escenarios = ScenarioModel.objects.filter(
+                Q(name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(goals__icontains=query) |
+                Q(objectives__icontains=query) |
+                Q(student_information__icontains=query) |
+                Q(vocabulary__icontains=query) |
+                Q(key_expressions__icontains=query)
+            )
+
+            # Serializar resultados
+            resultados = {
+                'cursos': CourseModelSerializer(cursos, many=True).data,
+                'clases': ClassModelSerializer(clases, many=True).data,
+                'contenidos': ClassContentModelSerializer(contenidos, many=True).data,
+                'escenarios': ScenarioModelSerializer(escenarios, many=True).data,
+                'total_resultados': len(cursos) + len(clases) + len(contenidos) + len(escenarios)
+            }
+
+            return Response({
+                'status': 'success',
+                'message': 'Búsqueda realizada exitosamente',
+                'data': resultados
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Error al realizar la búsqueda: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
