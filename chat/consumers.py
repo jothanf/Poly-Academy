@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from dashboard.IA.openAI import AIService
+from django.core.exceptions import ObjectDoesNotExist
 
 class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -16,12 +17,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.scenario_id = self.scope['url_route']['kwargs'].get('scenario_id')
         self.room_group_name = f'chat_{self.room_name}'
 
-        # Obtener el escenario
-        if self.scenario_id:
-            self.scenario = await sync_to_async(ScenarioModel.objects.get)(id=self.scenario_id)
-            print(f"Escenario obtenido: {self.scenario.name}")
+        # Validar el scenario_id
+        if self.scenario_id and self.scenario_id.isdigit():
+            try:
+                self.scenario = await sync_to_async(ScenarioModel.objects.get)(id=self.scenario_id)
+                print(f"Escenario obtenido: {self.scenario.name}")
             # Asegúrate de que el contexto se esté generando correctamente
-            self.conversation_history = [await sync_to_async(self.ai_service.get_scenario_context)(self.scenario)]
+                self.conversation_history = [await sync_to_async(self.ai_service.get_scenario_context)(self.scenario)]
+            except ObjectDoesNotExist:
+                # Si el escenario no existe, cerrar la conexión
+                await self.close()
+                return
+        else:
+            # Si el scenario_id no es válido, cerrar la conexión
+            await self.close()
+            return
 
         await self.channel_layer.group_add(
             self.room_group_name,
