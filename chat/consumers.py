@@ -19,6 +19,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Obtener el escenario
         if self.scenario_id:
             self.scenario = await sync_to_async(ScenarioModel.objects.get)(id=self.scenario_id)
+            print(f"Escenario obtenido: {self.scenario.name}")
             # Asegúrate de que el contexto se esté generando correctamente
             self.conversation_history = [await sync_to_async(self.ai_service.get_scenario_context)(self.scenario)]
 
@@ -27,6 +28,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+        print(f"Conexión aceptada para la sala: {self.room_group_name}")
 
         # Agregar este nuevo código para iniciar la conversación
         if self.scenario:
@@ -53,6 +55,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        print(f"Desconexión de la sala: {self.room_group_name}")
 
     async def receive(self, text_data):
         try:
@@ -86,7 +89,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Obtener respuesta y análisis de finalización
             response, can_end = await sync_to_async(self.ai_service.chat_with_context_and_check_end)(
                 message, 
-                self.conversation_history,
+                self.conversation_history, 
                 self.scenario
             )
             
@@ -107,6 +110,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message_type': 'assistant'
                 }
             )
+            print(f"Mensaje enviado al grupo: {response}")
+
         except Exception as e:
             print(f"Error en receive: {str(e)}")
             await self.channel_layer.group_send(
