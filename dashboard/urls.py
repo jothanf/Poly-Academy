@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import api
-from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet, StudentRegisterView, create_student, StudentViewSet, StudentNoteViewSet, VocabularyEntryViewSet, TeacherViewSet, text_to_speech, teacher_login, SearchView
+from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet, StudentRegisterView, create_student, StudentViewSet, StudentNoteViewSet, VocabularyEntryViewSet, TeacherViewSet, text_to_speech, SearchView
 
 # Inicializa el router
 router = DefaultRouter()
@@ -42,7 +42,6 @@ router.register(r'vocabulary', VocabularyEntryViewSet, 'vocabulary')
 router.register(r'teachers', TeacherViewSet, 'teachers')
 
 urlpatterns = [
-    path('api/teachers/login/', views.teacher_login, name='teacher-login'),
     path('api/', include(router.urls)),
     path('courses/', views.course_list, name='course_list'),
     path('courses/<int:course_id>/classes/<int:class_id>/', views.ClassDetailView.as_view(), name='class_detail'),
@@ -89,7 +88,6 @@ urlpatterns = [
     path('api/students/create/', create_student, name='student-create'),
     path('api/students/<int:student_id>/courses/', views.StudentCoursesView.as_view(), name='student-courses'),
     path('api/text-to-speech/', text_to_speech, name='text-to-speech'),
-    path('api/students/login/', views.student_login, name='student-login'),
     path('api/student-login-record/', views.StudentLoginRecordView.as_view(), name='student-login-record'),
     path('api/search/', SearchView.as_view(), name='search'),
     path('api/login/', views.unified_login, name='unified-login'),
