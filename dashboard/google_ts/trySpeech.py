@@ -20,7 +20,7 @@ from google.cloud import texttospeech
 import os
 
 # Define la ruta al archivo de credenciales
-ruta_credenciales = os.path.join(os.path.dirname(__file__), '../../../ardent-course-446319-k0-078e381fd893.json')  # Ajusta la ruta según sea necesario
+ruta_credenciales = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'ardent-course-446319-k0-078e381fd893.json')
 
 # Establece las credenciales de Google
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ruta_credenciales
