@@ -43,6 +43,9 @@ class CourseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.course_name
+
 class ClassModel(models.Model):
     cover = models.ImageField(upload_to='course_covers/', null=True, blank=True)
     class_name = models.CharField(max_length=200)

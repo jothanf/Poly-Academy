@@ -22,8 +22,7 @@ import os
 from .IA.imgGen import ImageGenerator
 from django.views.decorators.csrf import csrf_exempt
 import uuid
-from rest_framework.decorators import action
-from .google_ts.trySpeech import texto_a_audio_google  # Asegúrate de que la ruta sea correcta
+from rest_framework.decorators import action  # Asegúrate de que la ruta sea correcta
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -72,33 +71,32 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         try:
-            response = super().update(request, *args, **kwargs)
-            return Response({
-                'status': 'success',
-                'message': f'{self.model_name} actualizado exitosamente',
-                'data': response.data
-            })
-        except DRFValidationError as e:
-            error_details = {}
-            if isinstance(e.detail, dict):
-                for field, errors in e.detail.items():
-                    error_details[field] = [str(error) for error in errors]
+            instance = self.get_object()
+            serializer = self.get_serializer(
+                instance, 
+                data=request.data, 
+                partial=kwargs.get('partial', False)
+            )
+            
+            if serializer.is_valid():
+                self.perform_update(serializer)
+                return Response({
+                    'status': 'success',
+                    'message': 'Curso actualizado exitosamente',
+                    'data': serializer.data
+                }, status=status.HTTP_200_OK)
             else:
-                error_details['general'] = [str(error) for error in e.detail]
-
-            return Response({
-                'status': 'error',
-                'message': f'Error al actualizar {self.model_name}',
-                'campos_con_error': error_details,
-                'tipo_error': 'validación'
-            }, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'status': 'error',
+                    'message': 'Error al actualizar el curso',
+                    'errors': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
         except Exception as e:
             return Response({
                 'status': 'error',
-                'message': f'Error al actualizar {self.model_name}',
-                'detalle_error': str(e),
-                'tipo_error': 'sistema'
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': f'Error al actualizar el curso: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):
         try:
@@ -155,23 +153,29 @@ class CourseView(BaseModelViewSet):
     serializer_class = CourseModelSerializer
     queryset = CourseModel.objects.all()
     model_name = 'curso'
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def create(self, request, *args, **kwargs):
         try:
             imagen = request.FILES.get('imagen')
-            response = super().create(request, *args, **kwargs)
-            return Response({
-                'status': 'success',
-                'message': 'Curso creado exitosamente',
-                'data': response.data
-            }, status=status.HTTP_201_CREATED)
-        except Exception as e:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                self.perform_create(serializer)
+                return Response({
+                    'status': 'success',
+                    'message': 'Curso creado exitosamente',
+                    'data': serializer.data
+                }, status=status.HTTP_201_CREATED)
             return Response({
                 'status': 'error',
                 'message': 'Error al crear el curso',
-                'error': str(e)
+                'errors': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f'Error al crear el curso: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ClassModelViewSet(BaseModelViewSet):
     queryset = ClassModel.objects.all()
@@ -1412,7 +1416,7 @@ def text_to_speech(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def teacher_login(request):
+def unified_login(request):
     try:
         email = request.data.get('email')
         password = request.data.get('password')
@@ -1430,17 +1434,16 @@ def teacher_login(request):
         user = authenticate(username=user.username, password=password)
         
         if user is not None:
+            # Verificar si es profesor
             try:
                 teacher = TeacherModel.objects.get(user=user)
-                
-                # Generar token JWT
                 refresh = RefreshToken.for_user(user)
-                
                 return Response({
                     'status': 'success',
                     'message': 'Inicio de sesión exitoso',
                     'token': str(refresh.access_token),
-                    'teacher': {
+                    'user_type': 'teacher',
+                    'user_data': {
                         'id': teacher.id,
                         'name': user.get_full_name(),
                         'email': user.email,
@@ -1448,65 +1451,27 @@ def teacher_login(request):
                     }
                 })
             except TeacherModel.DoesNotExist:
-                return Response({
-                    'status': 'error',
-                    'message': 'No existe un perfil de profesor para este usuario'
-                }, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({
-                'status': 'error',
-                'message': 'Credenciales inválidas'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-            
-    except Exception as e:
-        print("Error en login:", str(e))  # Log para debugging
-        return Response({
-            'status': 'error',
-            'message': str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def student_login(request):
-    try:
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        # Intentar obtener el usuario por email
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({
-                'status': 'error',
-                'message': 'Credenciales inválidas'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-
-        # Autenticar al usuario
-        user = authenticate(username=user.username, password=password)
-        
-        if user is not None:
-            try:
-                student = StudentModel.objects.get(user=user)
-                
-                # Generar token JWT
-                refresh = RefreshToken.for_user(user)
-                
-                return Response({
-                    'status': 'success',
-                    'message': 'Inicio de sesión exitoso',
-                    'token': str(refresh.access_token),
-                    'student': {
-                        'id': student.id,
-                        'name': user.get_full_name(),
-                        'email': user.email,
-                        'profile_picture': student.profile_picture.url if student.profile_picture else None
-                    }
-                })
-            except StudentModel.DoesNotExist:
-                return Response({
-                    'status': 'error',
-                    'message': 'No existe un perfil de estudiante para este usuario'
-                }, status=status.HTTP_404_NOT_FOUND)
+                # Si no es profesor, verificar si es estudiante
+                try:
+                    student = StudentModel.objects.get(user=user)
+                    refresh = RefreshToken.for_user(user)
+                    return Response({
+                        'status': 'success',
+                        'message': 'Inicio de sesión exitoso',
+                        'token': str(refresh.access_token),
+                        'user_type': 'student',
+                        'user_data': {
+                            'id': student.id,
+                            'name': user.get_full_name(),
+                            'email': user.email,
+                            'profile_picture': student.profile_picture.url if student.profile_picture else None
+                        }
+                    })
+                except StudentModel.DoesNotExist:
+                    return Response({
+                        'status': 'error',
+                        'message': 'El usuario no tiene un perfil válido'
+                    }, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({
                 'status': 'error',

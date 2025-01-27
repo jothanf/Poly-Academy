@@ -92,4 +92,5 @@ urlpatterns = [
     path('api/students/login/', views.student_login, name='student-login'),
     path('api/student-login-record/', views.StudentLoginRecordView.as_view(), name='student-login-record'),
     path('api/search/', SearchView.as_view(), name='search'),
+    path('api/login/', views.unified_login, name='unified-login'),
 ]
