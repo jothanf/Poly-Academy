@@ -307,3 +307,71 @@ Información adicional: {scenario.additional_info}"""
             print(f"Error al generar audio: {str(e)}")
             return None
 
+    def chat_with_context_and_check_end(self, user_message, conversation_history, scenario):
+        """
+        Versión modificada de chat_with_context que también analiza si la conversación puede terminar
+        """
+        try:
+            # Obtener la respuesta normal
+            response = self.chat_with_context(user_message, conversation_history, scenario)
+            
+            # Analizar si se cumplen las condiciones de finalización
+            analysis_prompt = f"""
+            Basado en los siguientes criterios de finalización:
+            {scenario.end_conversation}
+            
+            Y considerando esta conversación:
+            {conversation_history}
+            
+            ¿Se han cumplido las condiciones para finalizar la conversación?
+            Responde solo con 'true' o 'false'.
+            """
+            
+            can_end_response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": analysis_prompt}],
+                max_tokens=10,
+                temperature=0
+            )
+            
+            can_end = can_end_response.choices[0].message.content.strip().lower() == 'true'
+            
+            return response, can_end
+            
+        except Exception as e:
+            print(f"Error en chat_with_context_and_check_end: {str(e)}")
+            return str(e), False
+            
+    def generate_conversation_feedback(self, conversation_history, scenario):
+        """
+        Genera retroalimentación final de la conversación
+        """
+        try:
+            feedback_prompt = f"""
+            Basado en los siguientes criterios de retroalimentación:
+            {scenario.feedback}
+            
+            Y sistema de puntuación:
+            {scenario.scoring}
+            
+            Analiza esta conversación:
+            {conversation_history}
+            
+            Proporciona:
+            1. Una evaluación detallada
+            2. Puntos fuertes
+            3. Áreas de mejora
+            4. Puntuación según los criterios establecidos
+            """
+            
+            response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": feedback_prompt}],
+                max_tokens=500
+            )
+            
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            return f"Error generando retroalimentación: {str(e)}"
+

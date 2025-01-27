@@ -58,8 +58,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             text_data_json = json.loads(text_data)
             message = text_data_json['message']
+            message_type = text_data_json.get('type', 'message')  # Nuevo campo para identificar tipo de mensaje
             
-            print(f"Mensaje recibido del usuario: {message}")
+            if message_type == 'end_conversation':
+                # Manejar la finalización de la conversación
+                feedback = await sync_to_async(self.ai_service.generate_conversation_feedback)(
+                    self.conversation_history,
+                    self.scenario
+                )
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_message',
+                        'message': feedback,
+                        'message_type': 'feedback'
+                    }
+                )
+                return
 
             # Agregar el mensaje del usuario al historial
             self.conversation_history.append({
@@ -67,29 +82,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'content': message
             })
 
-            # Usar el nuevo método que mantiene el contexto
-            response = await sync_to_async(self.ai_service.chat_with_context)(
+            # Obtener respuesta y análisis de finalización
+            response, can_end = await sync_to_async(self.ai_service.chat_with_context_and_check_end)(
                 message, 
                 self.conversation_history,
                 self.scenario
             )
             
-            print(f"Respuesta de ChatGPT: {response}")
-
-            # Agregar la respuesta del asistente al historial
-            self.conversation_history.append({
-                'role': 'assistant',
-                'content': response
-            })
-
-            if response.startswith("Error"):
-                print(f"Error detectado: {response}")
-
+            # Enviar respuesta con indicador de finalización
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'message': response
+                    'message': response,
+                    'can_end': can_end,
+                    'message_type': 'assistant'
                 }
             )
         except Exception as e:
