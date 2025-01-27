@@ -68,20 +68,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             text_data_json = json.loads(text_data)
             message = text_data_json['message']
-            message_type = text_data_json.get('type', 'message')  # Nuevo campo para identificar tipo de mensaje
+            message_type = text_data_json.get('type', 'message')
             
             if message_type == 'end_conversation':
-                # Manejar la finalización de la conversación
                 feedback = await sync_to_async(self.ai_service.generate_conversation_feedback)(
                     self.conversation_history,
                     self.scenario
                 )
+                print(f"Conversación finalizada. Enviando feedback: {feedback}")
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
                         'type': 'chat_message',
                         'message': feedback,
-                        'message_type': 'feedback'
+                        'message_type': 'feedback',
+                        'can_end': True
                     }
                 )
                 return
@@ -99,7 +100,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.scenario
             )
             
-            # Enviar respuesta con indicador de finalización
+            print(f"Respuesta generada. Can end: {can_end}")
+            
+            # Agregar la respuesta del asistente al historial
+            self.conversation_history.append({
+                'role': 'assistant',
+                'content': response
+            })
+            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -115,13 +123,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'message': f"Error: {str(e)}"
+                    'message': f"Error: {str(e)}",
+                    'can_end': False
                 }
             )
 
     async def chat_message(self, event):
         message = event['message']
+        can_end = event.get('can_end', False)
+        message_type = event.get('message_type', 'message')
+        
         print(f"Enviando mensaje al WebSocket: {message}")
+        print(f"Estado can_end: {can_end}")
+        
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'can_end': can_end,
+            'message_type': message_type
         })) 
