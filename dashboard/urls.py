@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import api
-from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet, StudentRegisterView, create_student, StudentViewSet, StudentNoteViewSet, VocabularyEntryViewSet, TeacherViewSet, text_to_speech, SearchView
+from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet, StudentRegisterView, create_student, StudentViewSet, StudentNoteViewSet, VocabularyEntryViewSet, TeacherViewSet, text_to_speech, SearchView, UnifiedLogoutView
 
 # Inicializa el router
 router = DefaultRouter()
@@ -91,5 +91,5 @@ urlpatterns = [
     path('api/student-login-record/', views.StudentLoginRecordView.as_view(), name='student-login-record'),
     path('api/search/', SearchView.as_view(), name='search'),
     path('api/login/', views.unified_login, name='unified-login'),
-    path('api/logout/', views.unified_logout, name='unified-logout'),
+    path('api/logout/', UnifiedLogoutView.as_view(), name='unified-logout'),
 ]

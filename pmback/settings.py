@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'chat',
     'rest_framework',
     'channels',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -204,10 +205,27 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Api PMBack',
+    'DESCRIPTION': 'Api PMBack',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [],
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': False,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+    'TAGS': [
+        {'name': 'auth', 'description': 'Operaciones de autenticación'},
+        {'name': 'dashboard', 'description': 'Operaciones del dashboard'},
+    ],
 }

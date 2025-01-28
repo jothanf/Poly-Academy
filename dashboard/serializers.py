@@ -23,7 +23,7 @@ class ClassModelSerializer(serializers.ModelSerializer):
 class LayoutModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LayoutModel
-        fields = ['id', 'class_model', 'title', 'instructions', 'cover', 'audio', 'audio_script']
+        fields = ['id', 'class_model', 'tittle', 'instructions', 'cover', 'audio', 'audio_script']
 
 
 class MultipleChoiceModelSerializer(serializers.ModelSerializer):
@@ -35,25 +35,25 @@ class MultipleChoiceModelSerializer(serializers.ModelSerializer):
 class TrueOrFalseModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrueOrFalseModel
-        fields = ['id', 'layout', 'instructions', 'questions', 'order']
+        fields = ['id','tittle', 'instructions', 'questions', 'order']
 
 
 class OrderingTaskModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderingTaskModel
-        fields = ['id', 'layout', 'instructions', 'items', 'order']
+        fields = ['id', 'instructions', 'items', 'order']
 
 
 class CategoriesTaskModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoriesTaskModel
-        fields = ['id', 'layout', 'instructions', 'categories', 'order']
+        fields = ['id', 'tittle', 'instructions', 'categories', 'order']
 
 
 class FillInTheGapsTaskModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = FillInTheGapsTaskModel
-        fields = ['id', 'layout', 'instructions', 'text_with_gaps', 'keywords', 'order']
+        fields = ['id', 'tittle', 'instructions', 'text_with_gaps', 'keywords', 'order']
 
 
 class VideoLayoutModelSerializer(serializers.ModelSerializer):
@@ -222,7 +222,7 @@ class TeacherModelSerializer(serializers.ModelSerializer):
 class StudentNoteModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentNoteModel
-        fields = ['id', 'student', 'class_model', 'title', 'content', 'note_type', 'tags', 'highlighted', 'color', 'related_url', 'related_content', 'created_at', 'updated_at']
+        fields = ['id', 'student', 'class_id', 'title', 'content', 'note_type', 'tags', 'highlighted', 'color', 'related_url', 'related_content', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
     def validate(self, data):
@@ -269,3 +269,63 @@ class StudentLoginRecordSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return StudentLoginRecord.objects.create(**validated_data)
+
+class AskOpenAISerializer(serializers.Serializer):
+    question = serializers.CharField()
+    answer = serializers.CharField(read_only=True)
+
+class TranscribeAudioSerializer(serializers.Serializer):
+    audio_file = serializers.FileField()
+    
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    user_type = serializers.ChoiceField(choices=['student', 'teacher'])
+
+class SearchSerializer(serializers.Serializer):
+    query = serializers.CharField()
+    filter_type = serializers.ChoiceField(choices=['all', 'courses', 'classes', 'content'], required=False)
+
+class TextToSpeechRequestSerializer(serializers.Serializer):
+    texto = serializers.CharField(required=True)
+    voz = serializers.CharField(required=False, default='alloy')
+
+class StudentCoursesSerializer(serializers.Serializer):
+    courses = CourseModelSerializer(many=True)
+    progress = serializers.DictField()
+
+class LoginResponseSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    user_type = serializers.CharField()
+
+class TranscribeAudioResponseSerializer(serializers.Serializer):
+    transcription = serializers.CharField()
+    pronunciation_analysis = serializers.DictField()
+
+class MessageResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+
+class ErrorResponseSerializer(serializers.Serializer):
+    error = serializers.CharField()
+
+class SuccessResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    message = serializers.CharField()
+    data = serializers.DictField(required=False)
+
+class GenericResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField()
+    message = serializers.CharField()
+
+class TextToSpeechResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    message = serializers.CharField()
+    audio_url = serializers.CharField()
+
+class LogoutResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    message = serializers.CharField()
+
+class UnifiedLogoutResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    message = serializers.CharField()

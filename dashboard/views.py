@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.http import HttpResponse, JsonResponse
-from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer, ScenarioModelSerializer, FormattedTextModelSerializer, StudentModelSerializer, StudentNoteModelSerializer, VocabularyEntryModelSerializer, TeacherModelSerializer, StudentLoginRecordSerializer
+from .serializers import CourseModelSerializer, ClassModelSerializer, LayoutModelSerializer, MultipleChoiceModelSerializer,  TrueOrFalseModelSerializer, OrderingTaskModelSerializer, CategoriesTaskModelSerializer, FillInTheGapsTaskModelSerializer, VideoLayoutModelSerializer, TextBlockLayoutModelSerializer, MediaModelSerializer, MultimediaBlockVideoModelSerializer, ClassContentModelSerializer, ScenarioModelSerializer, FormattedTextModelSerializer, StudentModelSerializer, StudentNoteModelSerializer, VocabularyEntryModelSerializer, TeacherModelSerializer, StudentLoginRecordSerializer, AskOpenAISerializer, TranscribeAudioSerializer, LoginSerializer, SearchSerializer, TextToSpeechRequestSerializer, TextToSpeechResponseSerializer, LoginResponseSerializer, SuccessResponseSerializer, ErrorResponseSerializer, MessageResponseSerializer, GenericResponseSerializer, LogoutResponseSerializer, StudentCoursesSerializer, UnifiedLogoutResponseSerializer
 from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel,TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel, StudentLoginRecord
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, GenericAPIView
 from rest_framework import generics
 import logging
 from django.core.files.storage import default_storage
@@ -32,6 +32,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Q
 from itertools import chain
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import serializers
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -362,7 +364,9 @@ class LayoutDetailView(RetrieveAPIView):
             'fill_in_the_gaps_tasks': FillInTheGapsTaskModelSerializer(fill_in_the_gaps_tasks, many=True).data,
         })
 
-class ClasDeleteView(APIView):
+class ClasDeleteView(generics.GenericAPIView):
+    serializer_class = ClassModelSerializer
+
     def delete(self, request, pk, format=None):
         try:
             class_instance = ClassModel.objects.get(pk=pk)
@@ -387,7 +391,9 @@ class ClasDeleteView(APIView):
                 'detalle_error': str(e),
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class ClassTasksView(APIView):
+class ClassTasksView(generics.GenericAPIView):
+    serializer_class = ClassModelSerializer
+
     def get(self, request, class_id, format=None):
         try:
             class_instance = ClassModel.objects.get(id=class_id)
@@ -452,7 +458,9 @@ class ClassTasksView(APIView):
                 'detalle_error': str(e),
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class TaskLayoutDetailView(APIView):
+class TaskLayoutDetailView(generics.GenericAPIView):
+    serializer_class = LayoutModelSerializer
+
     def get(self, request, layout_id, format=None):
         try:
             layout_instance = LayoutModel.objects.get(id=layout_id)
@@ -694,17 +702,18 @@ class ClassContentModelViewSet(BaseModelViewSet):
                 'detalle_error': str(e),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class AskOpenAIView(APIView):
+# Primero, crea un serializer para la vista
+
+
+# Luego, modifica la vista para usar GenericAPIView y el serializer
+class AskOpenAIView(generics.GenericAPIView):
+    serializer_class = AskOpenAISerializer
+
     def post(self, request):
-        try:
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
             ai_service = AIService()
-            question = request.data.get('question', '')
-            
-            if not question:
-                return Response({
-                    'status': 'error',
-                    'message': 'La pregunta es requerida'
-                }, status=status.HTTP_400_BAD_REQUEST)
+            question = serializer.validated_data['question']
             
             answer = ai_service.chat_with_gpt(question)
             
@@ -713,12 +722,19 @@ class AskOpenAIView(APIView):
                 'answer': answer
             }, status=status.HTTP_200_OK)
             
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': f'Error al procesar la solicitud: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({
+            'status': 'error',
+            'message': 'Error al procesar la solicitud',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
+@extend_schema(
+    request=TranscribeAudioSerializer,
+    responses={
+        200: SuccessResponseSerializer,
+        400: ErrorResponseSerializer
+    }
+)
 @api_view(['POST'])
 def transcribe_audio(request):
     try:
@@ -768,7 +784,9 @@ def transcribe_audio(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-class ScenarioSuggestionsView(APIView):
+class ScenarioSuggestionsView(generics.GenericAPIView):
+    serializer_class = ScenarioModelSerializer
+    
     def post(self, request):
         try:
             ai_service = AIService()
@@ -960,6 +978,7 @@ def img_gen(request):
 
     return render(request, 'img_gen.html')
 
+@extend_schema(exclude=True)
 @api_view(['GET', 'POST'])
 def prueva_json(request):
     if request.method == 'GET':
@@ -1057,6 +1076,10 @@ def prueba_classcontent(request):
 def StudentRegisterView():
     queryset = StudentModel.objects.all()
             
+@extend_schema(
+    request=StudentModelSerializer,
+    responses={201: StudentModelSerializer}
+)
 @api_view(['POST'])
 def create_student(request):
     """
@@ -1136,7 +1159,9 @@ class StudentViewSet(generics.ListCreateAPIView):
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
             
-class StudentCoursesView(APIView):
+class StudentCoursesView(generics.GenericAPIView):
+    serializer_class = StudentCoursesSerializer
+
     def get(self, request, student_id):
         try:
             student = StudentModel.objects.get(id=student_id)
@@ -1374,6 +1399,16 @@ class TeacherViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@extend_schema(
+    request=TextToSpeechRequestSerializer,
+    responses={
+        200: TextToSpeechResponseSerializer,
+        400: OpenApiResponse(
+            response=TextToSpeechResponseSerializer,
+            description='Error en la solicitud'
+        )
+    }
+)
 @api_view(['POST'])
 def text_to_speech(request):
     texto = request.data.get('texto')
@@ -1416,6 +1451,10 @@ def text_to_speech(request):
             'message': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@extend_schema(
+    request=LoginSerializer,
+    responses={200: LoginResponseSerializer}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def unified_login(request):
@@ -1499,7 +1538,9 @@ class StudentLoginRecordView(generics.ListCreateAPIView):
             queryset = queryset.filter(student=student_id)
         return queryset.order_by('-login_date')
 
-class SearchView(APIView):
+class SearchView(generics.GenericAPIView):
+    serializer_class = SearchSerializer
+
     def get(self, request):
         try:
             # Obtener el término de búsqueda
@@ -1565,30 +1606,28 @@ class SearchView(APIView):
                 'message': f'Error al realizar la búsqueda: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def unified_logout(request):
-    try:
-        # Obtener el token de refresco del request
-        refresh_token = request.data.get('refresh_token')
-        
-        if not refresh_token:
+class UnifiedLogoutView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UnifiedLogoutResponseSerializer
+
+    @extend_schema(
+        responses={
+            200: UnifiedLogoutResponseSerializer,
+            500: ErrorResponseSerializer
+        },
+        description="Cierra la sesión del usuario invalidando su token"
+    )
+    def post(self, request):
+        try:
+            if request.auth:
+                request.auth.delete()
+            
+            return Response({
+                'status': 'success',
+                'message': 'Sesión cerrada exitosamente'
+            })
+        except Exception as e:
             return Response({
                 'status': 'error',
-                'message': 'El token de refresco es requerido'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # Blacklist el token de refresco
-        token = RefreshToken(refresh_token)
-        token.blacklist()
-
-        return Response({
-            'status': 'success',
-            'message': 'Sesión cerrada exitosamente'
-        }, status=status.HTTP_200_OK)
-        
-    except Exception as e:
-        return Response({
-            'status': 'error',
-            'message': f'Error al cerrar sesión: {str(e)}'
-        }, status=status.HTTP_400_BAD_REQUEST)
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
