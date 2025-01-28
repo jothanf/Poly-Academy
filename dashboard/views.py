@@ -27,10 +27,11 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Q
 from itertools import chain
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -149,10 +150,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 'tipo_error': 'sistema'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class CourseView(BaseModelViewSet):
-    serializer_class = CourseModelSerializer
+class CourseView(viewsets.ModelViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = CourseModel.objects.all()
-    model_name = 'curso'
+    serializer_class = CourseModelSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def create(self, request, *args, **kwargs):
@@ -1562,3 +1564,31 @@ class SearchView(APIView):
                 'status': 'error',
                 'message': f'Error al realizar la búsqueda: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unified_logout(request):
+    try:
+        # Obtener el token de refresco del request
+        refresh_token = request.data.get('refresh_token')
+        
+        if not refresh_token:
+            return Response({
+                'status': 'error',
+                'message': 'El token de refresco es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Blacklist el token de refresco
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+
+        return Response({
+            'status': 'success',
+            'message': 'Sesión cerrada exitosamente'
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': f'Error al cerrar sesión: {str(e)}'
+        }, status=status.HTTP_400_BAD_REQUEST)
