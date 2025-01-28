@@ -34,6 +34,7 @@ from itertools import chain
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from .permissions import IsTeacher, IsStudent  # Asegúrate de que esta línea esté presente
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -710,6 +711,7 @@ class AskOpenAIView(generics.GenericAPIView):
     serializer_class = AskOpenAISerializer
 
     def post(self, request):
+        logger.debug("Recibida solicitud en AskOpenAIView")
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             ai_service = AIService()
@@ -1121,44 +1123,53 @@ class StudentListView(generics.ListAPIView):
             'data': response.data
         })
             
-class StudentViewSet(generics.ListCreateAPIView):
+class StudentViewSet(generics.GenericAPIView):
     queryset = StudentModel.objects.all()
     serializer_class = StudentModelSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        students = self.get_queryset()
-        serializer = self.get_serializer(students, many=True)
-        return Response({
-            'status': 'success',
-            'data': serializer.data
-        })
+    def get_object(self):
+        return StudentModel.objects.get(user=self.request.user)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                student = serializer.save()
+    def patch(self, request, *args, **kwargs):
+        print(f"\nRecibida solicitud PATCH para actualizar perfil")
+        print(f"Usuario: {request.user}")
+        print(f"Datos recibidos: {request.data}")
+        
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                print("Datos válidos, guardando...")
+                serializer.save()
                 return Response({
                     'status': 'success',
-                    'message': 'Estudiante creado exitosamente',
-                    'data': {
-                        'id': student.id,
-                        'username': student.user.username,
-                        'email': student.user.email
-                    }
-                }, status=status.HTTP_201_CREATED)
-            except Exception as e:
+                    'message': 'Perfil actualizado exitosamente',
+                    'data': serializer.data
+                })
+            else:
+                print(f"Errores de validación: {serializer.errors}")
                 return Response({
                     'status': 'error',
-                    'message': 'Error al crear el estudiante',
-                    'error': str(e)
+                    'message': 'Error en la validación',
+                    'errors': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
-        return Response({
-            'status': 'error',
-            'message': 'Error de validación',
-            'errors': serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-            
+                
+        except StudentModel.DoesNotExist:
+            print("Estudiante no encontrado")
+            return Response({
+                'status': 'error',
+                'message': 'Estudiante no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error inesperado: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class StudentCoursesView(generics.GenericAPIView):
     serializer_class = StudentCoursesSerializer
 
@@ -1332,7 +1343,11 @@ class VocabularyEntryViewSet(viewsets.ModelViewSet):
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = TeacherModel.objects.all()
     serializer_class = TeacherModelSerializer
-    parser_classes = (MultiPartParser, FormParser)  # Agregamos soporte para archivos
+    
+    def get_permissions(self):
+        if self.action == 'create':
+            return []  # Sin permisos para crear
+        return [IsAuthenticated(), IsTeacher()]  # Permisos normales para otras acciones
 
     def get_queryset(self):
         queryset = TeacherModel.objects.all()
@@ -1453,74 +1468,54 @@ def text_to_speech(request):
 
 @extend_schema(
     request=LoginSerializer,
-    responses={200: LoginResponseSerializer}
+    responses={200: LoginResponseSerializer},
+    description="Inicio de sesión unificado para estudiantes y profesores"
 )
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([AllowAny])  # Importante: permitir acceso sin autenticación
 def unified_login(request):
+    print("\n=== Procesando solicitud de login ===")
+    print(f"Datos recibidos: {request.data}")
+    
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user_type = request.data.get('user_type')
+
     try:
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        # Intentar obtener el usuario por email
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({
-                'status': 'error',
-                'message': 'Credenciales inválidas'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-
-        # Autenticar al usuario
-        user = authenticate(username=user.username, password=password)
+        user = User.objects.get(username=username)
+        print(f"Usuario encontrado: {user}")
+        print(f"¿La contraseña es válida?: {user.check_password(password)}")
         
-        if user is not None:
-            # Verificar si es profesor
-            try:
-                teacher = TeacherModel.objects.get(user=user)
+        if user.check_password(password):
+            # Verificar el tipo de usuario
+            is_student = hasattr(user, 'studentmodel')
+            is_teacher = hasattr(user, 'teachermodel')
+            print(f"¿Es estudiante?: {is_student}")
+            print(f"¿Es profesor?: {is_teacher}")
+            
+            if (user_type == 'student' and is_student) or (user_type == 'teacher' and is_teacher):
                 refresh = RefreshToken.for_user(user)
                 return Response({
                     'status': 'success',
-                    'message': 'Inicio de sesión exitoso',
                     'token': str(refresh.access_token),
-                    'user_type': 'teacher',
-                    'user_data': {
-                        'id': teacher.id,
-                        'name': user.get_full_name(),
-                        'email': user.email,
-                        'profile_picture': teacher.profile_picture.url if teacher.profile_picture else None
-                    }
+                    'refresh': str(refresh),
+                    'user_type': user_type,
+                    'username': user.username
                 })
-            except TeacherModel.DoesNotExist:
-                # Si no es profesor, verificar si es estudiante
-                try:
-                    student = StudentModel.objects.get(user=user)
-                    refresh = RefreshToken.for_user(user)
-                    return Response({
-                        'status': 'success',
-                        'message': 'Inicio de sesión exitoso',
-                        'token': str(refresh.access_token),
-                        'user_type': 'student',
-                        'user_data': {
-                            'id': student.id,
-                            'name': user.get_full_name(),
-                            'email': user.email,
-                            'profile_picture': student.profile_picture.url if student.profile_picture else None
-                        }
-                    })
-                except StudentModel.DoesNotExist:
-                    return Response({
-                        'status': 'error',
-                        'message': 'El usuario no tiene un perfil válido'
-                    }, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({
-                'status': 'error',
-                'message': 'Credenciales inválidas'
-            }, status=status.HTTP_401_UNAUTHORIZED)
             
+        return Response({
+            'status': 'error',
+            'message': 'Credenciales inválidas'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+        
+    except User.DoesNotExist:
+        print(f"Usuario no encontrado: {username}")
+        return Response({
+            'status': 'error',
+            'message': 'Usuario no encontrado'
+        }, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as e:
-        print("Error en login:", str(e))  # Log para debugging
+        print(f"Error inesperado: {str(e)}")
         return Response({
             'status': 'error',
             'message': str(e)

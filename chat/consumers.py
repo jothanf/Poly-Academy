@@ -3,6 +3,9 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from dashboard.IA.openAI import AIService
 from django.core.exceptions import ObjectDoesNotExist
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -16,6 +19,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.scenario_id = self.scope['url_route']['kwargs'].get('scenario_id')
         self.room_group_name = f'chat_{self.room_name}'
+        
+        logger.debug(f"Intentando conectar a la sala: {self.room_group_name} con escenario: {self.scenario_id}")
 
         # Validar el scenario_id
         if self.scenario_id and self.scenario_id.isdigit():

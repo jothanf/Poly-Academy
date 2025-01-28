@@ -3,9 +3,12 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import tempfile
 import json
+import logging
 
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class AIService:
@@ -17,6 +20,7 @@ class AIService:
         self.client = OpenAI(api_key=api_key)
         
     def chat_with_gpt(self, user_message, conversation_history=None):
+        logger.debug(f"Chat con GPT iniciado con mensaje: {user_message}")
         try:
             if conversation_history is None:
                 conversation_history = []

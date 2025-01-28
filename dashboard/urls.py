@@ -92,4 +92,5 @@ urlpatterns = [
     path('api/search/', SearchView.as_view(), name='search'),
     path('api/login/', views.unified_login, name='unified-login'),
     path('api/logout/', UnifiedLogoutView.as_view(), name='unified-logout'),
+    path('api/teachers/', TeacherViewSet.as_view({'get': 'list', 'post': 'create'}), name='teachers-list'),
 ]
