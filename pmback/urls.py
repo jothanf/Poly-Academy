@@ -19,6 +19,7 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from django.conf import settings
 from django.conf.urls.static import static
+from dashboard.view.auth_views import UnifiedLogoutView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +30,5 @@ urlpatterns = [
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('dashboard/', include('dashboard.urls')),
     path('chat/', include('chat.urls')),
+    path('api/auth/logout/', UnifiedLogoutView.as_view(), name='unified-logout'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

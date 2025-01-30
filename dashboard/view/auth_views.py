@@ -14,6 +14,9 @@ from ..serializers import (
 )
 from rest_framework_simplejwt.exceptions import TokenError
 from django.core.exceptions import ObjectDoesNotExist
+import logging
+
+logger = logging.getLogger(__name__)
 
 @extend_schema(
     request=LoginSerializer,
@@ -97,38 +100,37 @@ class UnifiedLogoutView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UnifiedLogoutResponseSerializer
 
-    @extend_schema(
-        responses={
-            200: UnifiedLogoutResponseSerializer,
-            400: ErrorResponseSerializer,
-            500: ErrorResponseSerializer
-        },
-        description="Cierra la sesión del usuario invalidando sus tokens"
-    )
     def post(self, request):
         try:
+            # Obtener el refresh token
             refresh_token = request.data.get('refresh')
+            
+            # Validar que se proporcionó el token
             if not refresh_token:
                 return Response({
                     'status': 'error',
                     'message': 'El token de refresco es requerido'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Solo validamos que el formato del token sea correcto
-            if not isinstance(refresh_token, str):
-                return Response({
-                    'status': 'error',
-                    'message': 'Formato de token inválido'
-                }, status=status.HTTP_400_BAD_REQUEST)
+            # Intentar hacer blacklist del token
+            RefreshToken(refresh_token).blacklist()
 
             return Response({
                 'status': 'success',
                 'message': 'Sesión cerrada exitosamente'
-            })
+            }, status=status.HTTP_200_OK)
 
-        except Exception as e:
+        except TokenError:
+            # Error específico para tokens inválidos
             return Response({
                 'status': 'error',
-                'message': 'Error interno del servidor',
-                'detail': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+                'message': 'Token de refresco inválido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Cualquier otro error
+            print(f"Error en logout: {str(e)}")  # Para debug
+            return Response({
+                'status': 'error',
+                'message': 'Error al cerrar sesión'
+            }, status=status.HTTP_400_BAD_REQUEST) 
