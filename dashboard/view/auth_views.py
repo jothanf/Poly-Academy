@@ -107,43 +107,18 @@ class UnifiedLogoutView(GenericAPIView):
                     'message': 'El token de refresco es requerido'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Validar formato del token
+            # Solo validamos que el formato del token sea correcto
             if not isinstance(refresh_token, str):
                 return Response({
                     'status': 'error',
                     'message': 'Formato de token inválido'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Obtener y validar el token
-            try:
-                token = RefreshToken(refresh_token)
-                
-                # Invalidar el refresh token
-                token.blacklist()
-                
-                # Obtener y invalidar el access token asociado
-                access_token = str(token.access_token)
-                AccessToken(access_token)  # Validar el formato
-                
-                return Response({
-                    'status': 'success',
-                    'message': 'Sesión cerrada exitosamente'
-                })
-
-            except TokenError as e:
-                return Response({
-                    'status': 'error',
-                    'message': 'Token inválido o expirado',
-                    'detail': str(e)
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-        except ObjectDoesNotExist:
             return Response({
-                'status': 'error',
-                'message': 'Error con la base de datos de tokens',
-                'detail': 'Asegúrate de haber ejecutado las migraciones'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+                'status': 'success',
+                'message': 'Sesión cerrada exitosamente'
+            })
+
         except Exception as e:
             return Response({
                 'status': 'error',
