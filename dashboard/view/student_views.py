@@ -6,6 +6,7 @@ from ..serializers import StudentModelSerializer, CourseModelSerializer, Student
 from rest_framework.decorators import api_view, action
 from drf_spectacular.utils import extend_schema
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from django.contrib.auth.models import User
    
 @extend_schema(
     request=StudentModelSerializer,
@@ -19,6 +20,14 @@ def create_student(request):
     serializer = StudentModelSerializer(data=request.data)
     if serializer.is_valid():
         try:
+            # Verificar si ya existe un usuario con ese email
+            email = serializer.validated_data.get('email')
+            if User.objects.filter(email=email).exists():
+                return Response({
+                    'status': 'error',
+                    'message': 'Ya existe un estudiante registrado con este email'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
             student = serializer.save()
             return Response({
                 'status': 'success',
@@ -32,8 +41,7 @@ def create_student(request):
         except Exception as e:
             return Response({
                 'status': 'error',
-                'message': 'Error al crear el estudiante',
-                'error': str(e)
+                'message': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
     return Response({
         'status': 'error',
