@@ -34,7 +34,11 @@ class TeacherViewSet(viewsets.ModelViewSet):
             
             # Removemos el código de acceso de los datos antes de la serialización
             data.pop('access_code', None)
-            
+
+            # Aseguramos que el username sea igual al email si no se proporciona
+            if 'username' not in data:
+                data['username'] = data.get('email')  # Asignar el email como username
+
             # Si hay una imagen en la solicitud, la agregamos a los datos
             if 'profile_picture' in request.FILES:
                 data['profile_picture'] = request.FILES['profile_picture']
