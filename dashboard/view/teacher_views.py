@@ -47,7 +47,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
                     'message': 'Profesor creado exitosamente',
                     'data': {
                         'id': teacher.id,
-                        'username': teacher.user.username,
+                        'username': teacher.user.email,
                         'email': teacher.user.email,
                         'profile_picture': teacher.profile_picture.url if teacher.profile_picture else None
                     }
@@ -74,7 +74,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
                     'message': 'Profesor actualizado exitosamente',
                     'data': {
                         'id': teacher.id,
-                        'username': teacher.user.username,
+                        'username': teacher.user.email,
                         'email': teacher.user.email,
                         'profile_picture': teacher.profile_picture.url if teacher.profile_picture else None
                     }
