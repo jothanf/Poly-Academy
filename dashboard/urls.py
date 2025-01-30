@@ -24,7 +24,7 @@ from .view.class_views import  ClassModelViewSet, ClassDeleteView
 from .view.course_views import course_list, CourseView
 from .view.ai_views import AskOpenAIView
 from .view.scenario_views import ScenarioModelViewSet
-from .view.student_views import StudentViewSet, create_student, StudentNoteViewSet, VocabularyEntryViewSet, StudentCoursesView
+from .view.student_views import StudentViewSet, create_student, StudentNoteViewSet, VocabularyEntryViewSet, StudentCoursesView, StudentListView
 from .view.class_content_views import ClassContentModelViewSet
 from .view.teacher_views import TeacherViewSet
 from .view.ai_views import text_to_speech, AskOpenAIView, translate_message, img_gen, transcribe_audio
@@ -62,4 +62,5 @@ urlpatterns = [
     path('api/logout/', UnifiedLogoutView.as_view(), name='unified-logout'),
     path('api/teachers/', TeacherViewSet.as_view({'get': 'list', 'post': 'create'}), name='teachers-list'),
     path('api/translate-message/', translate_message, name='translate-message'),
+    path('api/students/list/', StudentListView.as_view(), name='students-list'),
 ]
