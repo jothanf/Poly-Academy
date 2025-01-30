@@ -46,8 +46,8 @@ def unified_login(request):
                 'details': {'password': 'La contraseña proporcionada no es válida'}
             }, status=status.HTTP_401_UNAUTHORIZED)
             
-        is_student = hasattr(user, 'studentmodel')
-        is_teacher = hasattr(user, 'teachermodel')
+        is_student = hasattr(user, 'studentmodel') and user.studentmodel is not None
+        is_teacher = hasattr(user, 'teachermodel') and user.teachermodel is not None
         
         if not (is_student or is_teacher):
             return Response({
@@ -55,6 +55,13 @@ def unified_login(request):
                 'message': 'Usuario no tiene un rol asignado',
                 'details': 'El usuario no está registrado como estudiante ni como profesor'
             }, status=status.HTTP_403_FORBIDDEN)
+        
+        if is_student and is_teacher:
+            return Response({
+                'status': 'error',
+                'message': 'Usuario con múltiples roles',
+                'details': 'El usuario está registrado como estudiante y profesor simultáneamente'
+            }, status=status.HTTP_409_CONFLICT)
         
         user_type = 'student' if is_student else 'teacher'
         refresh = RefreshToken.for_user(user)
