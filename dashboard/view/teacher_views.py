@@ -94,3 +94,25 @@ class TeacherViewSet(viewsets.ModelViewSet):
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def delete(self, request, *args, **kwargs):
+        teacher_id = kwargs.get('pk')
+        try:
+            instance = TeacherModel.objects.get(pk=teacher_id)
+            user = instance.user  # Guardamos referencia al usuario
+            instance.delete()     # Eliminamos el TeacherModel
+            user.delete()        # Eliminamos también el User asociado
+            return Response({
+                'status': 'success',
+                'message': 'Profesor eliminado exitosamente'
+            }, status=status.HTTP_200_OK)
+        except TeacherModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Profesor no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
