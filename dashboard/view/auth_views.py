@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema
 from ..serializers import (
@@ -13,6 +13,7 @@ from ..serializers import (
     ErrorResponseSerializer
 )
 from rest_framework_simplejwt.exceptions import TokenError
+from django.core.exceptions import ObjectDoesNotExist
 
 @extend_schema(
     request=LoginSerializer,
@@ -95,7 +96,7 @@ class UnifiedLogoutView(GenericAPIView):
             400: ErrorResponseSerializer,
             500: ErrorResponseSerializer
         },
-        description="Cierra la sesión del usuario invalidando su token"
+        description="Cierra la sesión del usuario invalidando sus tokens"
     )
     def post(self, request):
         try:
@@ -106,20 +107,46 @@ class UnifiedLogoutView(GenericAPIView):
                     'message': 'El token de refresco es requerido'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            token = RefreshToken(refresh_token)
-            token.blacklist()
+            # Validar formato del token
+            if not isinstance(refresh_token, str):
+                return Response({
+                    'status': 'error',
+                    'message': 'Formato de token inválido'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Obtener y validar el token
+            try:
+                token = RefreshToken(refresh_token)
+                
+                # Invalidar el refresh token
+                token.blacklist()
+                
+                # Obtener y invalidar el access token asociado
+                access_token = str(token.access_token)
+                AccessToken(access_token)  # Validar el formato
+                
+                return Response({
+                    'status': 'success',
+                    'message': 'Sesión cerrada exitosamente'
+                })
+
+            except TokenError as e:
+                return Response({
+                    'status': 'error',
+                    'message': 'Token inválido o expirado',
+                    'detail': str(e)
+                }, status=status.HTTP_400_BAD_REQUEST)
             
-            return Response({
-                'status': 'success',
-                'message': 'Sesión cerrada exitosamente'
-            })
-        except TokenError:
+        except ObjectDoesNotExist:
             return Response({
                 'status': 'error',
-                'message': 'Token inválido o expirado'
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': 'Error con la base de datos de tokens',
+                'detail': 'Asegúrate de haber ejecutado las migraciones'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
         except Exception as e:
             return Response({
                 'status': 'error',
-                'message': f'Error al cerrar sesión: {str(e)}'
+                'message': 'Error interno del servidor',
+                'detail': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
