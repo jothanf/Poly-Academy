@@ -5,13 +5,11 @@ class CourseFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseModel
 
-    course_name = factory.Sequence(lambda n: f'Curso de prueba {n}')
-    description = factory.Faker('text')
-    category = factory.Faker('word')
-    level = factory.Iterator(['Principiante', 'Intermedio', 'Avanzado'])
-    bullet_points = factory.List([
-        factory.Faker('sentence') for _ in range(3)
-    ])
+    course_name = factory.Sequence(lambda n: f'Course {n}')
+    description = factory.Sequence(lambda n: f'Description for course {n}')
+    category = 'Test'
+    level = 'Beginner'
+    bullet_points = ['punto 1', 'punto 2', 'punto 3']
 
 class ClassFactory(factory.django.DjangoModelFactory):
     class Meta:

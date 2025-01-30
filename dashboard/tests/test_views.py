@@ -1,23 +1,33 @@
-from django.test import TestCase, Client
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from dashboard.models import CourseModel, ClassModel
 from .factories import CourseFactory
 import json
 from django.db import transaction
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class CourseViewTest(APITestCase):
     def setUp(self):
-        self.client = Client()
+        self.client = APIClient()
         self.course_list_url = reverse('courses-list')
         self.course_data = {
             'course_name': 'Curso de Prueba API',
             'description': 'Descripción del curso de prueba',
             'category': 'Test API',
             'level': 'Principiante',
-            'bullet_points': json.dumps(['punto 1', 'punto 2', 'punto 3'])
+            'bullet_points': ['punto 1', 'punto 2', 'punto 3']
         }
+        
+        # Crear un usuario y obtener el token JWT
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass',
+            email='test@test.com'
+        )
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
 
     def test_create_course(self):
         response = self.client.post(
@@ -25,7 +35,6 @@ class CourseViewTest(APITestCase):
             self.course_data,
             format='json'
         )
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CourseModel.objects.count(), 1)
         self.assertEqual(CourseModel.objects.get().course_name, 'Curso de Prueba API')
@@ -54,22 +63,11 @@ class CourseViewTest(APITestCase):
             'level': course.level
         }
         
-        # Configurar los headers correctamente
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        
         response = self.client.put(
             reverse('courses-detail', kwargs={'pk': course.pk}),
             data=json.dumps(updated_data),
-            content_type='application/json',
-            **headers
+            content_type='application/json'
         )
-        
-        # Imprimir información de depuración
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         course.refresh_from_db()
@@ -80,19 +78,29 @@ class CourseViewTest(APITestCase):
         response = self.client.delete(
             reverse('courses-detail', kwargs={'pk': course.pk})
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(CourseModel.objects.count(), 0)
 
 class ClassViewTest(APITestCase):
     @transaction.atomic
     def setUp(self):
-        print("\nConfigurando test de ClassViewTest")  # Debug
-        self.client = Client()
+        print("\nConfigurando test de ClassViewTest")
+        self.client = APIClient()
+        
+        # Crear usuario y autenticar
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass',
+            email='test@test.com'
+        )
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+        
         self.course = CourseModel.objects.create(
             course_name="Test Course",
             description="Test Description"
         )
-        print(f"Curso creado con ID: {self.course.id}")  # Debug
+        print(f"Curso creado con ID: {self.course.id}")
         
         self.class_data = {
             'class_name': 'Test Class',
@@ -100,7 +108,7 @@ class ClassViewTest(APITestCase):
             'course_id': self.course.id,
             'bullet_points': ['punto 1', 'punto 2']
         }
-        print("Configuración completada")  # Debug
+        print("Configuración completada")
 
     @transaction.atomic
     def test_create_class(self):

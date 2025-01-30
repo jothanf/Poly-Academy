@@ -2,7 +2,7 @@ import pytest
 from django.test import TestCase, TransactionTestCase
 from channels.testing import WebsocketCommunicator
 from channels.db import database_sync_to_async
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 from dashboard.models import ScenarioModel, ClassModel, CourseModel
 from chat.consumers import ChatConsumer
 from dashboard.IA.openAI import AIService
@@ -10,6 +10,13 @@ import json
 from asgiref.sync import sync_to_async
 from pmback.asgi import application
 import asyncio
+from channels.layers import get_channel_layer
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+from channels.routing import URLRouter
+from django.urls import reverse
+from asgiref.sync import async_to_sync
+from unittest import mock
 
 pytestmark = pytest.mark.asyncio
 
@@ -81,94 +88,123 @@ class AIServiceChatTest(TestCase):
         self.assertIsNotNone(feedback)
         self.assertIsInstance(feedback, str)
 
-class ChatConsumerTest(TransactionTestCase):
-    async def asyncSetUp(self):
-        # Crear una clase para asociar con el escenario
-        self.class_model = await sync_to_async(ClassModel.objects.create)(
-            class_name='Clase de Prueba',
-            description='Descripción de la clase de prueba',
-            course_id=None  # Asignar si es necesario
+class TestAIService(MagicMock):
+    async def chat_with_context_and_check_end(self, *args, **kwargs):
+        return "Test response", False
+
+    async def generate_conversation_feedback(self, *args, **kwargs):
+        return "Test feedback"
+
+@pytest.mark.asyncio
+class ChatConsumerTest:
+
+    @pytest.fixture(autouse=True)
+    async def setup(self):
+        # Crear un escenario de prueba
+        self.class_model = ClassModel.objects.create(
+            class_name="Clase de Prueba",
+            description="Descripción de la clase de prueba",
+            course_id=None  # Asigna una instancia válida de CourseModel si es necesario
         )
-        
-        # Crear un escenario para las pruebas
-        self.scenario = await sync_to_async(ScenarioModel.objects.create)(
+        self.scenario = ScenarioModel.objects.create(
             class_id=self.class_model,
-            name='Escenario de Prueba',
-            description='Descripción del escenario de prueba',
-            goals='Metas del escenario',
-            objectives='Objetivos del escenario',
-            student_information='Información del estudiante',
-            role_polly='Profesor',
-            role_student='Estudiante',
-            conversation_starter='¡Hola! ¿Cómo estás?',
-            end_conversation='La conversación termina cuando se complete el objetivo',
-            end_conversation_saying='¡Gracias por la conversación!',
-            feedback='Feedback del escenario',
-            scoring='Criterios de puntuación'
+            name="Escenario de Prueba",
+            description="Descripción del escenario",
+            goals="Metas del escenario",
+            objectives="Objetivos del escenario",
+            student_information="Información del estudiante",
+            role_polly="Polly",
+            role_student="Estudiante",
+            conversation_starter="Hola, ¿cómo estás?",
+            end_conversation_saying="Adiós, hasta luego.",
+            feedback="Retroalimentación del escenario",
+            scoring="Sistema de puntuación",
+            additional_info="Información adicional"
         )
-        
-        # Inicializar el comunicador de WebSocket
-        self.communicator = WebsocketCommunicator(
-            application=application,
-            path=f"/ws/chat/test/?scenario_id={self.scenario.id}"
-        )
-        connected, subprotocol = await self.communicator.connect()
-        self.assertTrue(connected)
-        print(f"Escenario creado: {self.scenario.id} - {self.scenario.name}")
 
-    async def asyncTearDown(self):
-        await self.communicator.disconnect()
-        print("Desconexión completada.")
+        # Mockear AIService para evitar llamadas reales a OpenAI
+        self.ai_service_patcher = mock.patch('dashboard.IA.openAI.AIService')
+        self.mock_ai_service = self.ai_service_patcher.start()
+        self.mock_ai_service_instance = self.mock_ai_service.return_value
+        self.mock_ai_service_instance.get_scenario_context.return_value = {
+            "role": "system",
+            "content": "Contenido de contexto del escenario"
+        }
+        self.mock_ai_service_instance.get_initial_greeting.return_value = "Hola, ¿cómo puedo ayudarte hoy?"
+        self.mock_ai_service_instance.chat_with_context_and_check_end.return_value = ("Respuesta de prueba de la IA", False)
+        self.mock_ai_service_instance.generate_conversation_feedback.return_value = "Feedback de prueba"
 
-    @patch('chat.consumers.AIService')
-    async def test_connect(self, mock_ai_service):
-        print("Iniciando prueba de conexión...")
-        # La conexión ya se realiza en asyncSetUp
-        pass
+        yield
+        self.ai_service_patcher.stop()
 
-    @patch('chat.consumers.AIService')
-    async def test_disconnect(self, mock_ai_service):
-        print("Iniciando prueba de desconexión...")
-        await self.communicator.disconnect()
-        # Intentar desconectar nuevamente no debe causar errores
-        pass
+    @pytest.mark.asyncio
+    @pytest.mark.django_db
+    async def test_connect_initial_message(self):
+        communicator = WebsocketCommunicator(application, f"/ws/chat/{self.class_model.class_name}/1/")
+        connected, _ = await communicator.connect()
+        assert connected
 
-    @patch('chat.consumers.AIService')
-    async def test_receive_message(self, mock_ai_service):
-        print("Iniciando prueba de envío y recepción de mensajes...")
-        # Configurar el mock de AIService
-        mock_response = MagicMock()
-        mock_response.choices[0].message.content = "Respuesta de prueba"
-        mock_ai_service().chat_with_context_and_check_end.return_value = ("Respuesta de prueba", False)
-        
-        # Enviar un mensaje de prueba
-        await self.communicator.send_json_to({
-            "message": "Hola, ¿cómo estás?"
-        })
-        
-        # Recibir la respuesta
-        response = await self.communicator.receive_json_from()
-        self.assertIn('message', response)
-        self.assertEqual(response['message'], "Respuesta de prueba")
-        print(f"Mensaje recibido: {response['message']}")
+        # Verificar el mensaje inicial
+        response = await communicator.receive_json_from()
+        assert response['message'] == "Hola, ¿cómo puedo ayudarte hoy?"
+        assert response['message_type'] == 'assistant'
 
-    @patch('chat.consumers.AIService')
-    async def test_end_conversation(self, mock_ai_service):
-        print("Iniciando prueba de fin de conversación...")
-        # Configurar el mock de AIService
-        mock_response = MagicMock()
-        mock_response.choices[0].message.content = "Conversación terminada."
-        mock_ai_service().chat_with_context_and_check_end.return_value = ("Conversación terminada.", True)
+        await communicator.disconnect()
+
+    @pytest.mark.django_db
+    async def test_connect(self):
+        communicator = WebsocketCommunicator(application, f"/ws/chat/{self.class_model.class_name}/1/")
+        connected, _ = await communicator.connect()
+        assert connected
+
+        # Recibir el mensaje inicial
+        response = await communicator.receive_json_from()
+        assert response['message'] == "Hola, ¿cómo puedo ayudarte hoy?"
+        assert response['message_type'] == 'assistant'
+
+        await communicator.disconnect()
+
+    @pytest.mark.django_db
+    async def test_disconnect(self):
+        communicator = WebsocketCommunicator(application, f"/ws/chat/{self.class_model.class_name}/1/")
+        connected, _ = await communicator.connect()
+        assert connected
+
+        await communicator.disconnect()
+
+    @pytest.mark.asyncio
+    @pytest.mark.django_db
+    async def test_end_conversation(self):
+        communicator = WebsocketCommunicator(application, f"/ws/chat/{self.class_model.class_name}/1/")
+        connected, _ = await communicator.connect()
+        assert connected
+
+        # Enviar mensaje para finalizar conversación
+        end_message = {"message": "fin", "type": "end_conversation"}
+        await communicator.send_json_to(end_message)
+
+        # Recibir feedback
+        response = await communicator.receive_json_from()
+        assert response['message'] == "Feedback de prueba"
+        assert response['message_type'] == 'feedback'
+        assert response['can_end'] is True
+
+        await communicator.disconnect()
         
-        # Enviar un mensaje para terminar la conversación
-        await self.communicator.send_json_to({
-            "message": "Gracias, adiós",
-            "type": "end_conversation"
-        })
-        
-        # Recibir la respuesta
-        response = await self.communicator.receive_json_from()
-        self.assertIn('message', response)
-        self.assertEqual(response['message_type'], 'feedback')
-        self.assertTrue(response['can_end'])
-        print(f"Feedback recibido: {response['message']}")
+    @pytest.mark.django_db
+    async def test_send_receive_message(self):
+        communicator = WebsocketCommunicator(application, f"/ws/chat/{self.class_model.class_name}/1/")
+        connected, _ = await communicator.connect()
+        assert connected
+
+        # Enviar mensaje
+        test_message = {"message": "¿Cuál es la capital de Francia?", "type": "message"}
+        await communicator.send_json_to(test_message)
+
+        # Recibir respuesta
+        response = await communicator.receive_json_from()
+        assert response['message'] == "Respuesta de prueba de la IA"
+        assert response['message_type'] == 'assistant'
+        assert response['can_end'] is False
+
+        await communicator.disconnect()
