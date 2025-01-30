@@ -110,11 +110,12 @@ class StudentViewSet(generics.GenericAPIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, *args, **kwargs):
-        # Asegúrate de que el ID se está pasando correctamente
-        student_id = kwargs.get('pk')  # Obtén el ID de la URL
+        student_id = kwargs.get('pk')
         try:
-            instance = StudentModel.objects.get(pk=student_id)  # Busca el estudiante por ID
-            instance.delete()
+            instance = StudentModel.objects.get(pk=student_id)
+            user = instance.user  # Guardamos referencia al usuario
+            instance.delete()     # Eliminamos el StudentModel
+            user.delete()        # Eliminamos también el User asociado
             return Response({
                 'status': 'success',
                 'message': 'Estudiante eliminado exitosamente'
