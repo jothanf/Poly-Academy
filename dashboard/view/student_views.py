@@ -58,7 +58,7 @@ class StudentViewSet(generics.GenericAPIView):
     queryset = StudentModel.objects.all()
     serializer_class = StudentModelSerializer
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
 
     def get_object(self):
         return StudentModel.objects.get(user=self.request.user)
