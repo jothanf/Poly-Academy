@@ -1,0 +1,223 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Vistas de Profesores de PolyAcademy</h1>
+
+<h2>Descripción General</h2>
+<p>Las vistas de profesores proporcionan la funcionalidad necesaria para gestionar los perfiles de profesores, sus cursos, materiales didácticos y seguimiento de estudiantes en la plataforma. Estas vistas permiten una gestión efectiva del proceso de enseñanza y el monitoreo del progreso de los estudiantes.</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">Gestión de Perfil</h3>
+        <p class="model-description">
+            Como profesor, necesito poder crear y actualizar mi perfil profesional en la plataforma.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Registro de nuevo profesor</li>
+            <li class="field-item">Actualización de datos profesionales</li>
+            <li class="field-item">Gestión de especialidades</li>
+            <li class="field-item">Carga de credenciales académicas</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Gestión de Cursos</h3>
+        <p class="model-description">
+            Como profesor, necesito poder crear y administrar mis cursos.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Creación de nuevos cursos</li>
+            <li class="field-item">Edición de contenido existente</li>
+            <li class="field-item">Organización de módulos y lecciones</li>
+            <li class="field-item">Gestión de recursos didácticos</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Seguimiento de Estudiantes</h3>
+        <p class="model-description">
+            Como profesor, necesito monitorear el progreso de mis estudiantes.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Vista de lista de estudiantes</li>
+            <li class="field-item">Seguimiento de asistencia</li>
+            <li class="field-item">Evaluación de progreso</li>
+            <li class="field-item">Retroalimentación personalizada</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Material Didáctico</h3>
+        <p class="model-description">
+            Como profesor, necesito gestionar los recursos educativos de mis cursos.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Carga de materiales multimedia</li>
+            <li class="field-item">Creación de ejercicios</li>
+            <li class="field-item">Gestión de recursos descargables</li>
+            <li class="field-item">Organización de contenido</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Evaluaciones</h3>
+        <p class="model-description">
+            Como profesor, necesito crear y gestionar evaluaciones para mis estudiantes.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Creación de exámenes</li>
+            <li class="field-item">Calificación de actividades</li>
+            <li class="field-item">Registro de resultados</li>
+            <li class="field-item">Análisis de desempeño</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Características Técnicas</h3>
+        <p class="model-description">
+            Detalles técnicos importantes de la implementación
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Autenticación y autorización específica</li>
+            <li class="field-item">Gestión de archivos multimedia</li>
+            <li class="field-item">Respuestas estandarizadas con status</li>
+            <li class="field-item">Manejo robusto de errores</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Beneficios Clave</h2>
+<ul>
+    <li>Gestión integral del proceso educativo</li>
+    <li>Seguimiento efectivo del progreso estudiantil</li>
+    <li>Organización eficiente de recursos didácticos</li>
+    <li>Evaluación sistemática del aprendizaje</li>
+    <li>Control total sobre el contenido académico</li>
+</ul>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 2.5rem 0;
+        padding-left: 1rem;
+        border-left: 5px solid var(--primary-color);
+        background: linear-gradient(to right, var(--hover-color), transparent);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .model-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .model-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .model-title {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--hover-color);
+    }
+
+    .model-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .field-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .field-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .field-item::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        .model-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

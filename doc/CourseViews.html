@@ -1,0 +1,224 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Vistas de Cursos de PolyAcademy</h1>
+
+<h2>Descripción General</h2>
+<p>Las vistas de cursos proporcionan la funcionalidad necesaria para gestionar los cursos en la plataforma PolyAcademy. Estas vistas están diseñadas para satisfacer las necesidades tanto de profesores como de estudiantes.</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">CourseModelViewSet</h3>
+        <p class="model-description">
+            Vista principal para la gestión completa de cursos
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Como profesor</strong>, necesito crear nuevos cursos para compartir mi conocimiento</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito actualizar la información de mis cursos existentes</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito eliminar cursos que ya no sean relevantes</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver la lista de cursos disponibles</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver los detalles completos de un curso específico</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">CourseListView</h3>
+        <p class="model-description">
+            Vista especializada para listar cursos con filtros y búsqueda
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Como estudiante</strong>, necesito filtrar cursos por categoría para encontrar los que me interesan</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito buscar cursos por nombre o descripción</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver los cursos ordenados por diferentes criterios</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito ver la lista de mis cursos creados</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">CourseDetailView</h3>
+        <p class="model-description">
+            Vista para mostrar información detallada de un curso
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver toda la información del curso antes de inscribirme</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver la lista de clases incluidas en el curso</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver los requisitos y nivel del curso</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito ver las estadísticas de mi curso</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">CourseEnrollmentView</h3>
+        <p class="model-description">
+            Vista para gestionar la inscripción a cursos
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Como estudiante</strong>, necesito inscribirme en un curso de mi interés</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito cancelar mi inscripción a un curso</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito ver la lista de estudiantes inscritos</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito gestionar las solicitudes de inscripción</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">CourseProgressView</h3>
+        <p class="model-description">
+            Vista para seguimiento del progreso en los cursos
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver mi progreso general en el curso</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver qué clases he completado</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito ver el progreso de mis estudiantes</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito identificar áreas donde los estudiantes necesitan más apoyo</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">CourseReviewView</h3>
+        <p class="model-description">
+            Vista para gestionar las reseñas y valoraciones de los cursos
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Como estudiante</strong>, necesito dejar una reseña después de completar el curso</li>
+            <li class="field-item"><strong>Como estudiante</strong>, necesito ver las reseñas de otros estudiantes</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito ver las valoraciones de mi curso</li>
+            <li class="field-item"><strong>Como profesor</strong>, necesito responder a las reseñas de los estudiantes</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Características Principales</h2>
+<ul>
+    <li>Gestión completa de cursos (CRUD)</li>
+    <li>Sistema de inscripción y seguimiento</li>
+    <li>Filtrado y búsqueda avanzada</li>
+    <li>Seguimiento de progreso</li>
+    <li>Sistema de reseñas y valoraciones</li>
+</ul>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 2.5rem 0;
+        padding-left: 1rem;
+        border-left: 5px solid var(--primary-color);
+        background: linear-gradient(to right, var(--hover-color), transparent);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .model-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .model-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .model-title {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--hover-color);
+    }
+
+    .model-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .field-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .field-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .field-item::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        .model-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

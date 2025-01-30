@@ -1,0 +1,249 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Vistas Base de PolyAcademy</h1>
+
+<h2>Descripción General</h2>
+<p>Las vistas base de PolyAcademy proporcionan la estructura fundamental para gestionar las interacciones entre usuarios y el sistema. Estas vistas están diseñadas para satisfacer las necesidades tanto de estudiantes como de profesores.</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">BaseListView</h3>
+        <p class="model-description">
+            Como usuario, necesito ver listas de elementos (cursos, clases, etc.) de manera organizada y paginada.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Paginación automática de resultados</li>
+            <li class="field-item">Filtrado por parámetros de búsqueda</li>
+            <li class="field-item">Ordenamiento personalizable</li>
+            <li class="field-item">Caché de resultados para mejor rendimiento</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">BaseDetailView</h3>
+        <p class="model-description">
+            Como usuario, necesito ver los detalles completos de un elemento específico.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Recuperación de objeto individual</li>
+            <li class="field-item">Validación de permisos de acceso</li>
+            <li class="field-item">Inclusión de relaciones relevantes</li>
+            <li class="field-item">Manejo de objetos no encontrados</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">BaseCreateView</h3>
+        <p class="model-description">
+            Como usuario autorizado, necesito crear nuevos elementos en el sistema.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Validación de datos de entrada</li>
+            <li class="field-item">Asignación automática de usuario creador</li>
+            <li class="field-item">Manejo de archivos multimedia</li>
+            <li class="field-item">Respuestas personalizadas de éxito/error</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">BaseUpdateView</h3>
+        <p class="model-description">
+            Como usuario autorizado, necesito modificar elementos existentes.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Actualización parcial o completa</li>
+            <li class="field-item">Validación de permisos de edición</li>
+            <li class="field-item">Registro de cambios históricos</li>
+            <li class="field-item">Manejo de conflictos de concurrencia</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">BaseDeleteView</h3>
+        <p class="model-description">
+            Como usuario autorizado, necesito eliminar elementos del sistema.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Eliminación segura con confirmación</li>
+            <li class="field-item">Validación de dependencias</li>
+            <li class="field-item">Eliminación en cascada configurable</li>
+            <li class="field-item">Papelera de reciclaje temporal</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">BaseAuthView</h3>
+        <p class="model-description">
+            Como usuario, necesito autenticarme de forma segura en el sistema.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Gestión de tokens JWT</li>
+            <li class="field-item">Validación de credenciales</li>
+            <li class="field-item">Control de sesiones activas</li>
+            <li class="field-item">Renovación automática de tokens</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">BasePermissionView</h3>
+        <p class="model-description">
+            Como administrador, necesito gestionar los permisos de acceso.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Control granular de permisos</li>
+            <li class="field-item">Roles predefinidos y personalizados</li>
+            <li class="field-item">Herencia de permisos</li>
+            <li class="field-item">Registro de accesos y cambios</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">BaseErrorHandler</h3>
+        <p class="model-description">
+            Como desarrollador, necesito manejar errores de forma consistente.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Respuestas de error estandarizadas</li>
+            <li class="field-item">Logging detallado de errores</li>
+            <li class="field-item">Notificaciones de error configurables</li>
+            <li class="field-item">Recuperación automática cuando sea posible</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Beneficios Clave</h2>
+<ul>
+    <li>Consistencia en la interfaz de API</li>
+    <li>Reutilización de código común</li>
+    <li>Manejo estandarizado de errores</li>
+    <li>Seguridad integrada</li>
+    <li>Facilidad de mantenimiento</li>
+</ul>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 2.5rem 0;
+        padding-left: 1rem;
+        border-left: 5px solid var(--primary-color);
+        background: linear-gradient(to right, var(--hover-color), transparent);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .model-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .model-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .model-title {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--hover-color);
+    }
+
+    .model-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .field-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .field-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .field-item::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        .model-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

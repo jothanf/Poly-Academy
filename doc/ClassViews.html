@@ -1,0 +1,213 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Vistas de Clases de PolyAcademy</h1>
+
+<h2>Descripción General</h2>
+<p>Las vistas de clases proporcionan la funcionalidad necesaria para gestionar las clases dentro de los cursos de la plataforma. Estas vistas están diseñadas para satisfacer las necesidades tanto de profesores como de estudiantes.</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">ClassModelViewSet</h3>
+        <p class="model-description">
+            Como profesor, necesito gestionar las clases de mis cursos de manera integral.
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Listar Clases:</strong> Necesito ver todas las clases de un curso específico</li>
+            <li class="field-item"><strong>Filtrado:</strong> Debo poder filtrar las clases por curso usando course_id</li>
+            <li class="field-item"><strong>Crear Clase:</strong> Necesito crear nuevas clases asociadas a un curso específico</li>
+            <li class="field-item"><strong>Actualizar Clase:</strong> Debo poder modificar la información de las clases existentes</li>
+            <li class="field-item"><strong>Eliminar Clase:</strong> Necesito poder eliminar clases cuando sea necesario</li>
+            <li class="field-item"><strong>Respuestas:</strong> Debo recibir confirmaciones claras de las operaciones realizadas</li>
+        </ul>
+        <div class="endpoint-details">
+            <h4>Endpoints Disponibles:</h4>
+            <ul>
+                <li>GET /api/classes/ - Lista todas las clases</li>
+                <li>GET /api/classes/?course_id={id} - Lista clases de un curso específico</li>
+                <li>POST /api/classes/ - Crea una nueva clase</li>
+                <li>PUT /api/classes/{id}/ - Actualiza una clase existente</li>
+                <li>DELETE /api/classes/{id}/ - Elimina una clase</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ClassListView</h3>
+        <p class="model-description">
+            Como estudiante o profesor, necesito ver la lista de clases de un curso específico.
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Listado Filtrado:</strong> Ver solo las clases del curso seleccionado</li>
+            <li class="field-item"><strong>Organización:</strong> Visualizar las clases en orden secuencial</li>
+            <li class="field-item"><strong>Información Básica:</strong> Ver detalles esenciales de cada clase</li>
+        </ul>
+        <div class="endpoint-details">
+            <h4>Endpoint Disponible:</h4>
+            <ul>
+                <li>GET /api/courses/{course_id}/classes/ - Lista las clases de un curso</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ClassDeleteView</h3>
+        <p class="model-description">
+            Como profesor, necesito eliminar clases de manera segura y controlada.
+        </p>
+        <ul class="field-list">
+            <li class="field-item"><strong>Eliminación Segura:</strong> Confirmar la existencia de la clase antes de eliminar</li>
+            <li class="field-item"><strong>Confirmación:</strong> Recibir confirmación de la eliminación exitosa</li>
+            <li class="field-item"><strong>Manejo de Errores:</strong> Recibir mensajes claros si hay problemas</li>
+            <li class="field-item"><strong>Datos de Retorno:</strong> Obtener información de la clase eliminada</li>
+        </ul>
+        <div class="endpoint-details">
+            <h4>Endpoint Disponible:</h4>
+            <ul>
+                <li>DELETE /api/classes/{id}/delete/ - Elimina una clase específica</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<h2>Ejemplos de Uso</h2>
+
+<div class="example-container">
+    <div class="example-card">
+        <h3>Crear una Nueva Clase</h3>
+        <pre><code>
+POST /api/classes/
+{
+    "class_name": "Introducción a la Gramática",
+    "description": "Conceptos básicos de gramática inglesa",
+    "course": 1,
+    "bullet_points": ["Verbos", "Sustantivos", "Adjetivos"]
+}
+        </code></pre>
+    </div>
+
+    <div class="example-card">
+        <h3>Listar Clases de un Curso</h3>
+        <pre><code>
+GET /api/classes/?course_id=1
+        </code></pre>
+    </div>
+
+    <div class="example-card">
+        <h3>Eliminar una Clase</h3>
+        <pre><code>
+DELETE /api/classes/1/delete/
+        </code></pre>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+        --code-bg: #f8fafc;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1, h2, h3, h4 {
+        color: var(--primary-color);
+    }
+
+    .model-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .model-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .endpoint-details {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: var(--code-bg);
+        border-radius: 8px;
+    }
+
+    .example-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .example-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    pre {
+        background-color: var(--code-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+
+    code {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.9em;
+    }
+
+    .field-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .field-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+
+    .field-item::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        .model-container, .example-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CourseModel, ClassModel, LayoutModel, MultipleChoiceModel, TrueOrFalseModel, OrderingTaskModel, CategoriesTaskModel, FillInTheGapsTaskModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, MultimediaBlockVideoModel, ClassContentModel, ScenarioModel, FormattedTextModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel, StudentLoginRecord
+from .models import CourseModel, ClassModel, LayoutModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, ClassContentModel, ScenarioModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel, StudentLoginRecord
 from django.contrib.auth.models import User
 
 
@@ -26,36 +26,6 @@ class LayoutModelSerializer(serializers.ModelSerializer):
         fields = ['id', 'class_model', 'tittle', 'instructions', 'cover', 'audio', 'audio_script']
 
 
-class MultipleChoiceModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MultipleChoiceModel
-        fields = ['id', 'tittle', 'instructions', 'script', 'question', 'cover', 'audio', 'stats']
-
-
-class TrueOrFalseModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TrueOrFalseModel
-        fields = ['id','tittle', 'instructions', 'questions', 'order']
-
-
-class OrderingTaskModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderingTaskModel
-        fields = ['id', 'instructions', 'items', 'order']
-
-
-class CategoriesTaskModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CategoriesTaskModel
-        fields = ['id', 'tittle', 'instructions', 'categories', 'order']
-
-
-class FillInTheGapsTaskModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FillInTheGapsTaskModel
-        fields = ['id', 'tittle', 'instructions', 'text_with_gaps', 'keywords', 'order']
-
-
 class VideoLayoutModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = VideoLayoutModel
@@ -73,11 +43,6 @@ class MediaModelSerializer(serializers.ModelSerializer):
         model = MediaModel
         fields = ['id', 'media_type', 'file', 'description', 'created_at', 'updated_at']
 
-
-class MultimediaBlockVideoModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MultimediaBlockVideoModel
-        fields = ['id', 'video', 'script', 'cover']
 
 
 class ClassContentModelSerializer(serializers.ModelSerializer):
@@ -125,28 +90,6 @@ class ScenarioModelSerializer(serializers.ModelSerializer):
         # Eliminar la validación JSON de los campos TextField
         return data
 
-
-class FormattedTextModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FormattedTextModel
-        fields = [
-            'id', 'class_id', 'title', 'content', 
-            'instructions', 'order', 'created_at', 'updated_at'
-        ]
-
-    def validate(self, data):
-        # Validación adicional
-        if not data.get('content'):
-            raise serializers.ValidationError({
-                'content': 'El contenido no puede estar vacío'
-            })
-        
-        if not data.get('class_id'):
-            raise serializers.ValidationError({
-                'class_id': 'La clase es requerida'
-            })
-
-        return data
 
 
 class StudentModelSerializer(serializers.ModelSerializer):
@@ -278,7 +221,7 @@ class TranscribeAudioSerializer(serializers.Serializer):
     audio_file = serializers.FileField()
     
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     user_type = serializers.ChoiceField(choices=['student', 'teacher'])
 

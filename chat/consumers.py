@@ -4,6 +4,11 @@ from asgiref.sync import sync_to_async
 from dashboard.IA.openAI import AIService
 from django.core.exceptions import ObjectDoesNotExist
 import logging
+from .models import ConversationHistory
+from dashboard.models import ScenarioModel, StudentModel
+from channels.db import database_sync_to_async
+import asyncio
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -11,143 +16,144 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ai_service = AIService()
+        self.message_queue = asyncio.Queue()
+        self.is_processing = False
         self.conversation_history = []  # Para mantener el historial
         self.scenario = None
 
     async def connect(self):
-        from dashboard.models import ScenarioModel
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.scenario_id = self.scope['url_route']['kwargs'].get('scenario_id')
-        self.room_group_name = f'chat_{self.room_name}'
+        print("\n=== INICIO DE CONEXIÓN WEBSOCKET ===")
         
-        logger.debug(f"Intentando conectar a la sala: {self.room_group_name} con escenario: {self.scenario_id}")
-
-        # Validar el scenario_id
-        if self.scenario_id and self.scenario_id.isdigit():
-            try:
-                self.scenario = await sync_to_async(ScenarioModel.objects.get)(id=self.scenario_id)
-                print(f"Escenario obtenido: {self.scenario.name}")
-            # Asegúrate de que el contexto se esté generando correctamente
-                self.conversation_history = [await sync_to_async(self.ai_service.get_scenario_context)(self.scenario)]
-            except ObjectDoesNotExist:
-                # Si el escenario no existe, cerrar la conexión
-                await self.close()
-                return
-        else:
-            # Si el scenario_id no es válido, cerrar la conexión
-            await self.close()
-            return
-
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-        await self.accept()
-        print(f"Conexión aceptada para la sala: {self.room_group_name}")
-
-        # Agregar este nuevo código para iniciar la conversación
-        if self.scenario:
-            initial_message = await sync_to_async(self.ai_service.get_initial_greeting)(self.scenario)
+        # 1. Obtener IDs de la URL
+        self.scenario_id = self.scope['url_route']['kwargs']['scenario_id']
+        self.student_id = self.scope['url_route']['kwargs']['student_id']
+        self.room_name = f"room_{self.scenario_id}_{self.student_id}"
+        
+        print(f"Datos de conexión:")
+        print(f"- Scenario ID: {self.scenario_id}")
+        print(f"- Student ID: {self.student_id}")
+        print(f"- Room Name: {self.room_name}")
+        
+        try:
+            # 2. Verificar existencia de datos
+            print("Verificando existencia de datos...")
+            self.scenario = await database_sync_to_async(ScenarioModel.objects.get)(id=self.scenario_id)
+            print(f"- Escenario encontrado: {self.scenario.name}")
             
-            # Agregar el mensaje inicial al historial
-            self.conversation_history.append({
-                'role': 'assistant',
-                'content': initial_message
-            })
-
-            # Enviar el mensaje inicial
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': initial_message
-                }
+            self.student = await database_sync_to_async(StudentModel.objects.get)(id=self.student_id)
+            print(f"- Estudiante encontrado: {self.student.user.username}")
+            
+            # 3. Inicializar historial
+            print("Inicializando historial...")
+            history, created = await database_sync_to_async(ConversationHistory.objects.get_or_create)(
+                scenario=self.scenario,
+                student=self.student,
+                defaults={'messages': []}
             )
+            print(f"- Historial {'creado' if created else 'recuperado'}")
+            
+            self.conversation_history = history.messages
+            
+            # 4. Configurar canal
+            print("Configurando canal...")
+            await self.channel_layer.group_add(
+                self.room_name,
+                self.channel_name
+            )
+            
+            # 5. Aceptar conexión
+            await self.accept()
+            print("Conexión aceptada")
+            
+            # 6. Enviar mensaje inicial
+            await self.send_json({
+                'message': self.scenario.conversation_starter,
+                'role': 'assistant',
+                'message_type': 'message'
+            })
+            print("Mensaje inicial enviado")
+            
+        except Exception as e:
+            print(f"ERROR en conexión: {str(e)}")
+            print(f"Tipo de error: {type(e)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            await self.close()
+            return False
 
     async def disconnect(self, close_code):
-        # Abandonar el grupo
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-        print(f"Desconexión de la sala: {self.room_group_name}")
+        try:
+            if hasattr(self, 'room_name'):
+                await self.channel_layer.group_discard(
+                    self.room_name,
+                    self.channel_name
+                )
+        except Exception as e:
+            print(f"Error en desconexión: {str(e)}")
 
     async def receive(self, text_data):
         try:
-            text_data_json = json.loads(text_data)
-            message = text_data_json['message']
-            message_type = text_data_json.get('type', 'message')
+            data = json.loads(text_data)
+            message = data.get('message', '')
+            message_type = data.get('type', 'message')
             
-            if message_type == 'end_conversation':
-                feedback = await sync_to_async(self.ai_service.generate_conversation_feedback)(
-                    self.conversation_history,
-                    self.scenario
-                )
-                print(f"Conversación finalizada. Enviando feedback: {feedback}")
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'chat_message',
-                        'message': feedback,
-                        'message_type': 'feedback',
-                        'can_end': True
-                    }
-                )
-                return
+            print(f"Mensaje recibido en {self.room_name}: {text_data}")
 
-            # Agregar el mensaje del usuario al historial
+            # Añadir mensaje del usuario al historial
             self.conversation_history.append({
-                'role': 'user',
-                'content': message
+                "role": "user",
+                "content": message
             })
 
-            # Obtener respuesta y análisis de finalización
-            response, can_end = await sync_to_async(self.ai_service.chat_with_context_and_check_end)(
-                message, 
-                self.conversation_history, 
-                self.scenario
-            )
-            
-            print(f"Respuesta generada. Can end: {can_end}")
-            
-            # Agregar la respuesta del asistente al historial
-            self.conversation_history.append({
-                'role': 'assistant',
-                'content': response
-            })
-            
+            # Procesar con AI
+            try:
+                ai_service = AIService()
+                response = await database_sync_to_async(ai_service.chat_with_gpt)(
+                    message,
+                    self.conversation_history
+                )
+                
+                # Añadir respuesta al historial
+                self.conversation_history.append({
+                    "role": "assistant",
+                    "content": response
+                })
+
+                # Guardar historial actualizado
+                await database_sync_to_async(ConversationHistory.objects.filter(
+                    scenario=self.scenario,
+                    student=self.student
+                ).update)(messages=self.conversation_history)
+
+                print(f"Respuesta AI para {self.room_name}: {response}")
+
+            except Exception as e:
+                print(f"Error al comunicarse con OpenAI: {str(e)}")
+                response = "Lo siento, hubo un error procesando tu mensaje."
+
+            # Enviar respuesta al grupo
             await self.channel_layer.group_send(
-                self.room_group_name,
+                self.room_name,
                 {
                     'type': 'chat_message',
                     'message': response,
-                    'can_end': can_end,
-                    'message_type': 'assistant'
+                    'role': 'assistant',
+                    'message_type': message_type
                 }
             )
-            print(f"Mensaje enviado al grupo: {response}")
 
         except Exception as e:
             print(f"Error en receive: {str(e)}")
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chat_message',
-                    'message': f"Error: {str(e)}",
-                    'can_end': False
-                }
-            )
+            await self.send(text_data=json.dumps({
+                'message': "Error procesando el mensaje",
+                'role': 'assistant',
+                'message_type': 'error'
+            }))
 
     async def chat_message(self, event):
-        message = event['message']
-        can_end = event.get('can_end', False)
-        message_type = event.get('message_type', 'message')
-        
-        print(f"Enviando mensaje al WebSocket: {message}")
-        print(f"Estado can_end: {can_end}")
-        
+        # Enviar mensaje al WebSocket
         await self.send(text_data=json.dumps({
-            'message': message,
-            'can_end': can_end,
-            'message_type': message_type
+            'message': event['message'],
+            'role': event.get('role', 'assistant'),
+            'message_type': event.get('message_type', 'message')
         })) 

@@ -19,78 +19,47 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import api
-from .views import LayoutDetailView, ClasDeleteView, ClassTasksView, TaskLayoutDetailView, AskOpenAIView, ScenarioSuggestionsView, ScenarioModelViewSet, FormattedTextViewSet, StudentRegisterView, create_student, StudentViewSet, StudentNoteViewSet, VocabularyEntryViewSet, TeacherViewSet, text_to_speech, SearchView, UnifiedLogoutView
+from .view.sessions_views import StudentLoginRecordView, UnifiedLogoutView
+from .view.class_views import  ClassModelViewSet, ClassDeleteView
+from .view.course_views import course_list, CourseView
+from .view.ai_views import AskOpenAIView
+from .view.scenario_views import ScenarioModelViewSet
+from .view.student_views import StudentViewSet, create_student, StudentNoteViewSet, VocabularyEntryViewSet, StudentCoursesView
+from .view.class_content_views import ClassContentModelViewSet
+from .view.teacher_views import TeacherViewSet
+from .view.ai_views import text_to_speech, AskOpenAIView, translate_message, img_gen, transcribe_audio
+from .view.search_views import SearchView
+from .view.sessions_views import unified_login
 
-# Inicializa el router
 router = DefaultRouter()
 
 # Registra los viewsets
-router.register(r'courses', views.CourseView, 'courses')
-router.register(r'classes', views.ClassModelViewSet, basename='classes')
-router.register(r'layouts', api.LayoutModelViewSet)
-router.register(r'multiplechoice', api.MultipleChoiceModelViewSet)
-router.register(r'trueorfalse', api.TrueOrFalseModelViewSet)
-router.register(r'orderingtasks', api.OrderingTaskModelViewSet)
-router.register(r'categoriestasks', api.CategoriesTaskModelViewSet)
-router.register(r'fillinthegaps', api.FillInTheGapsTaskModelViewSet)
-router.register(r'multimediablockvideos', views.MultimediaBlockVideoViewSet, 'multimediablockvideos')
-router.register(r'class-contents', views.ClassContentModelViewSet, 'class-contents')
+router.register(r'courses', CourseView, 'courses')
+router.register(r'classes', ClassModelViewSet, basename='classes')
 router.register(r'scenarios', ScenarioModelViewSet, 'scenarios')
-router.register(r'formatted-texts', FormattedTextViewSet, 'formatted-texts')
 router.register(r'class-notes', StudentNoteViewSet, 'class-notes')
 router.register(r'vocabulary', VocabularyEntryViewSet, 'vocabulary')
 router.register(r'teachers', TeacherViewSet, 'teachers')
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('courses/', views.course_list, name='course_list'),
-    path('courses/<int:course_id>/classes/<int:class_id>/', views.ClassDetailView.as_view(), name='class_detail'),
-    path('api/courses/<int:course_id>/classes/', views.ClassModelViewSet.as_view({
-        'get': 'list',
-        'post': 'create'
-    }), name='course-classes-list'),
-    path('api/layouts/<int:pk>/', LayoutDetailView.as_view(), name='layout-detail'),
-    path('api/clases/delete/<int:pk>/', ClasDeleteView.as_view(), name='clas-delete'),
-    path('api/classes/<int:class_id>/tasks/', ClassTasksView.as_view(), name='class-tasks'),
-    path('api/task_layout/<int:layout_id>/', TaskLayoutDetailView.as_view(), name='task-layout-detail'),
-    path('api/class-contents/', views.ClassContentModelViewSet.as_view({
-        'get': 'list',
-        'post': 'create'
-    }), name='class-contents-list'),
-    path('api/class-contents/<int:pk>/', views.ClassContentModelViewSet.as_view({
-        'get': 'retrieve',
-        'put': 'update',
-        'patch': 'partial_update',
-        'delete': 'destroy'
-    }), name='class-contents-detail'),
-    path('api/classes/', views.ClassModelViewSet.as_view({
-        'get': 'list',
-        'post': 'create'
-    }), name='class-list'),
+    path('courses/', course_list, name='course_list'),
+    path('api/courses/<int:course_id>/classes/', ClassModelViewSet.as_view({'get': 'list','post': 'create'}), name='course-classes-list'),
+    path('api/classes/delete/<int:pk>/', ClassDeleteView.as_view(), name='class-delete'),
+    path('api/class-contents/', ClassContentModelViewSet.as_view({'get': 'list','post': 'create'}), name='class-contents-list'),
+    path('api/class-contents/<int:pk>/',ClassContentModelViewSet.as_view({'get': 'retrieve', 'put': 'update','patch': 'partial_update', 'delete': 'destroy'}), name='class-contents-detail'),
+    path('api/classes/', ClassModelViewSet.as_view({'get': 'list', 'post': 'create'}), name='class-list'),
     path('api/ask-openai/', AskOpenAIView.as_view(), name='ask-openai'),
-    path('api/audio-transcription/', views.transcribe_audio, name='audio-transcription'),
-    path('api/scenario-suggestions/', ScenarioSuggestionsView.as_view(), name='scenario-suggestions'),
-    path('api/formatted-texts/', FormattedTextViewSet.as_view({
-        'get': 'list',
-        'post': 'create'
-    }), name='formatted-texts-list'),
-    path('api/formatted-texts/<int:pk>/', FormattedTextViewSet.as_view({
-        'get': 'retrieve',
-        'put': 'update',
-        'patch': 'partial_update',
-        'delete': 'destroy'
-    }), name='formatted-texts-detail'),
-    path('api/img_gen/', views.img_gen, name='img_gen'),
-    path('prueva_json/', views.prueva_json, name='prueva_json'),
-    path('api/prueva_json/', views.prueva_json, name='prueva_json_api'),
-    path('prueba_classcontent/', views.prueba_classcontent, name='prueba_classcontent'),
+    path('api/audio-transcription/', transcribe_audio, name='audio-transcription'),
+    path('api/img_gen/', img_gen, name='img_gen'),
     path('api/students/', StudentViewSet.as_view(), name='student-list'),
     path('api/students/create/', create_student, name='student-create'),
-    path('api/students/<int:student_id>/courses/', views.StudentCoursesView.as_view(), name='student-courses'),
+    path('api/students/<int:student_id>/courses/', StudentCoursesView.as_view(), name='student-courses'),
     path('api/text-to-speech/', text_to_speech, name='text-to-speech'),
-    path('api/student-login-record/', views.StudentLoginRecordView.as_view(), name='student-login-record'),
+    path('api/student-login-record/', StudentLoginRecordView.as_view(), name='student-login-record'),
     path('api/search/', SearchView.as_view(), name='search'),
-    path('api/login/', views.unified_login, name='unified-login'),
+    path('api/login/', unified_login, name='unified-login'),
     path('api/logout/', UnifiedLogoutView.as_view(), name='unified-logout'),
     path('api/teachers/', TeacherViewSet.as_view({'get': 'list', 'post': 'create'}), name='teachers-list'),
+    path('api/translate-message/', translate_message, name='translate-message'),
 ]

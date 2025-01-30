@@ -1,0 +1,209 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Vistas de Inteligencia Artificial de PolyAcademy</h1>
+
+<h2>Descripción General</h2>
+<p>Las vistas de IA de PolyAcademy proporcionan funcionalidades avanzadas de procesamiento de lenguaje natural, generación de imágenes y conversión de texto a voz para mejorar la experiencia de aprendizaje.</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">AskOpenAIView</h3>
+        <p class="model-description">
+            Como usuario, necesito poder hacer preguntas al asistente de IA para recibir ayuda y orientación en mi aprendizaje.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Procesamiento de preguntas en lenguaje natural</li>
+            <li class="field-item">Respuestas contextualizadas y relevantes</li>
+            <li class="field-item">Manejo de errores y validación de entrada</li>
+            <li class="field-item">Integración con OpenAI GPT</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">TranslateMessageView</h3>
+        <p class="model-description">
+            Como estudiante, necesito poder traducir mensajes al español para mejorar mi comprensión del contenido.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Traducción precisa de textos</li>
+            <li class="field-item">Soporte para múltiples idiomas</li>
+            <li class="field-item">Respuestas rápidas y eficientes</li>
+            <li class="field-item">Manejo de errores de traducción</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ImageGenerationView</h3>
+        <p class="model-description">
+            Como usuario, necesito generar imágenes relacionadas con el contenido de aprendizaje mediante descripciones textuales.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Generación de imágenes basada en prompts</li>
+            <li class="field-item">URLs de imágenes generadas</li>
+            <li class="field-item">Validación de prompts</li>
+            <li class="field-item">Manejo de errores de generación</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">TextToSpeechView</h3>
+        <p class="model-description">
+            Como estudiante, necesito convertir texto a voz para practicar la pronunciación y mejorar mis habilidades auditivas.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Conversión de texto a audio MP3</li>
+            <li class="field-item">Selección de diferentes voces</li>
+            <li class="field-item">Almacenamiento temporal de archivos</li>
+            <li class="field-item">URLs de acceso a archivos de audio</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">TranscribeAudioView</h3>
+        <p class="model-description">
+            Como estudiante, necesito transcribir mis grabaciones de audio para evaluar mi pronunciación y recibir retroalimentación.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Transcripción precisa de audio</li>
+            <li class="field-item">Manejo de archivos temporales</li>
+            <li class="field-item">Retroalimentación detallada</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Beneficios Clave</h2>
+<ul>
+    <li>Aprendizaje interactivo y personalizado</li>
+    <li>Retroalimentación inmediata</li>
+    <li>Práctica de pronunciación guiada</li>
+    <li>Generación de contenido dinámico</li>
+    <li>Soporte multilingüe</li>
+</ul>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 2.5rem 0;
+        padding-left: 1rem;
+        border-left: 5px solid var(--primary-color);
+        background: linear-gradient(to right, var(--hover-color), transparent);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .model-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .model-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .model-title {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--hover-color);
+    }
+
+    .model-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .field-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .field-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .field-item::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        .model-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

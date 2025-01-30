@@ -1,0 +1,558 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Requerimientos Backend plataforma de aprendizaje de inglés PolyAcademy</h1>
+
+<h2>Arquitectura de la base de datos</h2>
+
+<p>La arquitectura de la base de datos está compuesta por las siguientes tablas:</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">UserModel</h3>
+        <p class="model-description">
+            Modelo que representa a los usuarios del sistema, heredado de Django.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">username: nombre de usuario único</li>
+            <li class="field-item">password: contraseña del usuario</li>
+            <li class="field-item">email: dirección de correo electrónico</li>
+            <li class="field-item">first_name: nombre de pila</li>
+            <li class="field-item">last_name: apellido</li>
+            <li class="field-item">is_active: estado del usuario (activo/inactivo)</li>
+            <li class="field-item">is_staff: indica si el usuario tiene acceso al panel de administración</li>
+            <li class="field-item">is_superuser: indica si el usuario tiene todos los permisos</li>
+            <li class="field-item">last_login: fecha y hora del último inicio de sesión</li>
+        </ul>
+    </div>
+    
+    <div class="model-card">
+        <h3 class="model-title">TeacherModel</h3>
+        <p class="model-description">
+            Almacena información sobre los profesores
+        </p>
+        <ul class="field-list">
+            <li class="field-item">user: usuario asociado <strong>Relación one-to-one</strong></li>
+            <li class="field-item">profile_picture: foto de perfil</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">StudentModel</h3>
+        <p class="model-description">
+            Almacena información sobre los estudiantes
+        </p>
+        <ul class="field-list">
+            <li class="field-item">user: usuario asociado <strong>Relación one-to-one</strong></li>
+            <li class="field-item">profile_picture: foto de perfil</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">MediaModel</h3>
+        <p class="model-description">
+            Almacena los diferentes tipos de medios
+        </p>
+        <ul class="field-list">
+            <li class="field-item">media_type: tipo de medio (imágenes, audio, video)</li>
+            <li class="field-item">file: archivo del medio</li>
+            <li class="field-item">description: descripción del medio</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+    
+    <div class="model-card">
+        <h3 class="model-title">CourseModel</h3>
+        <p class="model-description">
+            Contiene información sobre los cursos
+        </p>
+        <ul class="field-list">
+            <li class="field-item">cover: imagen de portada del curso</li>
+            <li class="field-item">course_name: nombre del curso</li>
+            <li class="field-item">description: descripción del curso</li>
+            <li class="field-item">category: categoría del curso</li>
+            <li class="field-item">level: nivel del curso</li>
+            <li class="field-item">bullet_points: puntos del curso</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ClassModel</h3>
+        <p class="model-description">
+            Representa las clases dentro de un curso, con su respectiva información.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">cover: imagen de portada de la clase</li>
+            <li class="field-item">class_name: nombre de la clase</li>
+            <li class="field-item">description: descripción de la clase</li>
+            <li class="field-item">course: curso al que pertenece la clase <strong>Relación many-to-one</strong></li>
+            <li class="field-item">bullet_points: puntos importantes de la clase</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">LayoutModel</h3>
+        <p class="model-description">
+            Define la estructura base de las clases, incluyendo instrucciones y medios asociados.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">class_model: clase a la que pertenece el layout <strong>Relación many-to-one</strong></li>
+            <li class="field-item">tittle: título del layout</li>
+            <li class="field-item">instructions: instrucciones del layout</li>
+            <li class="field-item">cover: imagen de portada del layout</li>
+            <li class="field-item">audio: audio del layout</li>
+            <li class="field-item">audio_script: script del audio</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">TextBlockLayoutModel</h3>
+        <p class="model-description">
+            Gestiona los bloques de texto dentro de las clases
+        </p>
+        <ul class="field-list">
+            <li class="field-item">lesson: clase a la que pertenece el bloque <strong>Relación many-to-one</strong></li>
+            <li class="field-item">tittle: título del bloque de texto</li>
+            <li class="field-item">instructions: instrucciones del bloque</li>
+            <li class="field-item">content: contenido del texto</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">VideoLayoutModel</h3>
+        <p class="model-description">
+            Gestiona los videos dentro de las clases
+        </p>
+        <ul class="field-list">
+            <li class="field-item">class_model: clase a la que pertenece el video <strong>Relación many-to-one</strong></li>
+            <li class="field-item">tittle: título del video</li>
+            <li class="field-item">instructions: instrucciones del video</li>
+            <li class="field-item">video_file: archivo de video</li>
+            <li class="field-item">script: transcripción del video</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ScenarioModel</h3>
+        <p class="model-description">
+            Define los escenarios de práctica conversacional
+        </p>
+        <ul class="field-list">
+            <li class="field-item">class_id: clase a la que pertenece <strong>Relación many-to-one</strong></li>
+            <li class="field-item">cover: imagen de portada</li>
+            <li class="field-item">name: nombre del escenario</li>
+            <li class="field-item">description: descripción del escenario</li>
+            <li class="field-item">goals: metas del escenario</li>
+            <li class="field-item">objectives: objetivos específicos</li>
+            <li class="field-item">student_information: información para el estudiante</li>
+            <li class="field-item">role_polly: rol del asistente IA</li>
+            <li class="field-item">role_student: rol del estudiante</li>
+            <li class="field-item">conversation_starter: inicio de la conversación</li>
+            <li class="field-item">vocabulary: vocabulario relevante</li>
+            <li class="field-item">key_expressions: expresiones clave</li>
+            <li class="field-item">end_conversation: condiciones de finalización</li>
+            <li class="field-item">end_conversation_saying: mensaje de finalización</li>
+            <li class="field-item">feedback: retroalimentación</li>
+            <li class="field-item">scoring: sistema de puntuación</li>
+            <li class="field-item">additional_info: información adicional</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">StudentProgressModel</h3>
+        <p class="model-description">
+            Registra el progreso de los estudiantes en el contenido
+        </p>
+        <ul class="field-list">
+            <li class="field-item">student: estudiante <strong>Relación many-to-one</strong></li>
+            <li class="field-item">class_content: contenido de la clase <strong>Relación many-to-one</strong></li>
+            <li class="field-item">completed: estado de finalización</li>
+            <li class="field-item">score: puntuación obtenida</li>
+            <li class="field-item">attempts: número de intentos</li>
+            <li class="field-item">last_attempt: fecha del último intento</li>
+            <li class="field-item">answers: respuestas del estudiante</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">StudentNoteModel</h3>
+        <p class="model-description">
+            Gestiona las notas personales de los estudiantes
+        </p>
+        <ul class="field-list">
+            <li class="field-item">student: estudiante <strong>Relación many-to-one</strong></li>
+            <li class="field-item">class_id: clase relacionada <strong>Relación many-to-one</strong></li>
+            <li class="field-item">title: título de la nota</li>
+            <li class="field-item">content: contenido de la nota</li>
+            <li class="field-item">note_type: tipo de nota (vocabulario, gramática, expresiones, general)</li>
+            <li class="field-item">tags: etiquetas de categorización</li>
+            <li class="field-item">highlighted: estado destacado</li>
+            <li class="field-item">color: código de color</li>
+            <li class="field-item">related_url: URL relacionada</li>
+            <li class="field-item">related_content: contenido relacionado</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">VocabularyEntryModel</h3>
+        <p class="model-description">
+            Gestiona el vocabulario personal de cada estudiante
+        </p>
+        <ul class="field-list">
+            <li class="field-item">student: estudiante <strong>Relación many-to-one</strong></li>
+            <li class="field-item">class_model: clase relacionada <strong>Relación many-to-one</strong></li>
+            <li class="field-item">term: palabra o frase a aprender</li>
+            <li class="field-item">translation: traducción al idioma nativo</li>
+            <li class="field-item">context: ejemplo de uso en contexto</li>
+            <li class="field-item">notes: notas personales sobre el uso</li>
+            <li class="field-item">entry_type: tipo de entrada (palabra, frase, expresión, modismo, frase hecha)</li>
+            <li class="field-item">tags: etiquetas para organizar el vocabulario</li>
+            <li class="field-item">category: categoría temática</li>
+            <li class="field-item">proficiency_level: nivel de dominio actual (1-5)</li>
+            <li class="field-item">times_practiced: número de veces practicada</li>
+            <li class="field-item">last_practiced: última fecha de práctica</li>
+            <li class="field-item">next_review: fecha sugerida para próxima revisión</li>
+            <li class="field-item">audio_pronunciation: audio de pronunciación</li>
+            <li class="field-item">image: imagen relacionada</li>
+            <li class="field-item">is_favorite: marcado como favorito</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">CourseProgressModel</h3>
+        <p class="model-description">
+            Registra el progreso general de los estudiantes en los cursos
+        </p>
+        <ul class="field-list">
+            <li class="field-item">student: estudiante <strong>Relación many-to-one</strong></li>
+            <li class="field-item">course: curso <strong>Relación many-to-one</strong></li>
+            <li class="field-item">progress_percentage: porcentaje de progreso</li>
+            <li class="field-item">average_score: puntuación promedio</li>
+            <li class="field-item">completed: estado de finalización</li>
+            <li class="field-item">last_activity: última actividad registrada</li>
+            <li class="field-item">started_at: fecha de inicio</li>
+            <li class="field-item">completed_at: fecha de finalización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ClassProgressModel</h3>
+        <p class="model-description">
+            Registra el progreso de los estudiantes en clases específicas
+        </p>
+        <ul class="field-list">
+            <li class="field-item">student: estudiante <strong>Relación many-to-one</strong></li>
+            <li class="field-item">class_model: clase <strong>Relación many-to-one</strong></li>
+            <li class="field-item">progress_percentage: porcentaje de progreso</li>
+            <li class="field-item">average_score: puntuación promedio</li>
+            <li class="field-item">completed: estado de finalización</li>
+            <li class="field-item">last_activity: última actividad registrada</li>
+            <li class="field-item">started_at: fecha de inicio</li>
+            <li class="field-item">completed_at: fecha de finalización</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">StudentActivityLogModel</h3>
+        <p class="model-description">
+            Registra todas las actividades realizadas por los estudiantes
+        </p>
+        <ul class="field-list">
+            <li class="field-item">student: estudiante <strong>Relación many-to-one</strong></li>
+            <li class="field-item">class_content: contenido de la clase <strong>Relación many-to-one</strong></li>
+            <li class="field-item">activity_type: tipo de actividad (inicio_contenido, completó_contenido, envió_respuesta, reintentó_contenido, vio_retroalimentación)</li>
+            <li class="field-item">score: puntuación obtenida</li>
+            <li class="field-item">details: detalles específicos de la actividad</li>
+            <li class="field-item">timestamp: fecha y hora de la actividad</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">StudentLoginRecord</h3>
+        <p class="model-description">
+            Registra el historial de inicio de sesión de los estudiantes
+        </p>
+        <ul class="field-list">
+            <li class="field-item">student: estudiante <strong>Relación many-to-one</strong></li>
+            <li class="field-item">login_date: fecha de inicio de sesión</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ChatRoomModel</h3>
+        <p class="model-description">
+            Gestiona las salas de chat
+        </p>
+        <ul class="field-list">
+            <li class="field-item">name: nombre de la sala</li>
+            <li class="field-item">participants: usuarios participantes <strong>Relación many-to-many</strong></li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">MessageModel</h3>
+        <p class="model-description">
+            Almacena los mensajes de chat
+        </p>
+        <ul class="field-list">
+            <li class="field-item">room: sala de chat <strong>Relación many-to-one</strong></li>
+            <li class="field-item">sender: usuario que envía <strong>Relación many-to-one</strong></li>
+            <li class="field-item">content: contenido del mensaje</li>
+            <li class="field-item">timestamp: fecha y hora del mensaje</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ConversationHistory</h3>
+        <p class="model-description">
+            Almacena el historial de conversaciones entre estudiantes y escenarios
+        </p>
+        <ul class="field-list">
+            <li class="field-item">scenario: escenario relacionado <strong>Relación many-to-one</strong></li>
+            <li class="field-item">student: estudiante relacionado <strong>Relación many-to-one</strong></li>
+            <li class="field-item">messages: lista de mensajes en formato JSON</li>
+            <li class="field-item">created_at: fecha de creación</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">ClassContentModel</h3>
+        <p class="model-description">
+            Contiene el contenido de las clases, incluyendo multimedia y texto formateado
+        </p>
+        <ul class="field-list">
+            <li class="field-item">class_id: clase a la que pertenece <strong>Relación many-to-one</strong></li>
+            <li class="field-item">content_type: tipo de contenido (multiple_choice, true_false, fill_gaps, etc.)</li>
+            <li class="field-item">tittle: título del contenido</li>
+            <li class="field-item">instructions: instrucciones</li>
+            <li class="field-item">content_details: detalles del contenido en formato JSON</li>
+            <li class="field-item">multimedia: contenido multimedia en formato JSON</li>
+            <li class="field-item">image: imagen del contenido</li>
+            <li class="field-item">video: archivo de video</li>
+            <li class="field-item">video_transcription: transcripción del video</li>
+            <li class="field-item">embed_video: URL de video embebido</li>
+            <li class="field-item">audio: archivo de audio</li>
+            <li class="field-item">audio_transcription: transcripción del audio</li>
+            <li class="field-item">pdf: archivo PDF</li>
+            <li class="field-item">order: orden de aparición</li>
+            <li class="field-item">stats: estado de estadísticas</li>
+            <li class="field-item">created_at: fecha de creación</li>
+            <li class="field-item">updated_at: fecha de actualización</li>
+        </ul>
+    </div>
+</div>
+
+<p>Las relaciones entre las tablas permiten una gestión eficiente de los datos y facilitan la creación de un sistema de aprendizaje interactivo.</p>
+
+
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 2.5rem 0;
+        padding-left: 1rem;
+        border-left: 5px solid var(--primary-color);
+        background: linear-gradient(to right, var(--hover-color), transparent);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .model-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .model-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+        transform: scale(0.95);
+        overflow: hidden;
+        max-height: 50px;
+        transition: max-height 0.3s ease;
+    }
+
+    .model-card:hover {
+        transform: scale(1);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .model-title {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--hover-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .model-title::before {
+        content: '📦';
+        font-size: 1.2rem;
+    }
+
+    .model-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .field-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .field-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .field-item::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
+    }
+
+    .relation-tag {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        background-color: #dbeafe;
+        color: var(--primary-color);
+        border-radius: 4px;
+        margin-left: 0.5rem;
+    }
+
+    .navigation {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .nav-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .nav-item {
+        padding: 0.3rem 0;
+    }
+
+    .nav-link {
+        color: var(--text-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .nav-link:hover {
+        color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        .model-container {
+            grid-template-columns: 1fr;
+        }
+
+        .navigation {
+            display: none;
+        }
+    }
+</style>

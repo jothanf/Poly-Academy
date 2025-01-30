@@ -192,8 +192,8 @@ ASGI_APPLICATION = 'pmback.asgi.application'
 
 # Configuración de channel layers
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
 
@@ -229,4 +229,11 @@ SPECTACULAR_SETTINGS = {
         {'name': 'auth', 'description': 'Operaciones de autenticación'},
         {'name': 'dashboard', 'description': 'Operaciones del dashboard'},
     ],
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
 }

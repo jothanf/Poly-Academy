@@ -1,0 +1,210 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Vistas de Sesiones de PolyAcademy</h1>
+
+<h2>Descripción General</h2>
+<p>Las vistas de sesiones proporcionan la funcionalidad necesaria para gestionar la autenticación y el seguimiento de sesiones de usuarios en la plataforma. Estas vistas permiten el inicio de sesión unificado para estudiantes y profesores, así como el registro y gestión de las sesiones.</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">Inicio de Sesión Unificado</h3>
+        <p class="model-description">
+            Como usuario, necesito poder iniciar sesión en la plataforma con mis credenciales.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Autenticación por email y contraseña</li>
+            <li class="field-item">Identificación automática del tipo de usuario</li>
+            <li class="field-item">Generación de tokens de acceso</li>
+            <li class="field-item">Validación de credenciales</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Registro de Sesiones</h3>
+        <p class="model-description">
+            Como administrador, necesito mantener un registro de las sesiones de los estudiantes.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Registro de fecha y hora de inicio de sesión</li>
+            <li class="field-item">Filtrado por estudiante específico</li>
+            <li class="field-item">Ordenamiento cronológico de registros</li>
+            <li class="field-item">Historial completo de accesos</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Cierre de Sesión</h3>
+        <p class="model-description">
+            Como usuario, necesito poder cerrar mi sesión de forma segura.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Invalidación de tokens activos</li>
+            <li class="field-item">Confirmación de cierre exitoso</li>
+            <li class="field-item">Manejo de errores en el proceso</li>
+            <li class="field-item">Protección de rutas autenticadas</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Validación de Usuarios</h3>
+        <p class="model-description">
+            Como sistema, necesito validar el tipo y permisos de cada usuario.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Verificación de roles (estudiante/profesor)</li>
+            <li class="field-item">Validación de usuarios activos</li>
+            <li class="field-item">Control de acceso basado en roles</li>
+            <li class="field-item">Manejo de usuarios sin rol asignado</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Características Técnicas</h3>
+        <p class="model-description">
+            Detalles técnicos importantes de la implementación
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Uso de JWT para autenticación</li>
+            <li class="field-item">Respuestas estandarizadas con status</li>
+            <li class="field-item">Documentación con drf-spectacular</li>
+            <li class="field-item">Manejo robusto de errores</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Beneficios Clave</h2>
+<ul>
+    <li>Sistema de autenticación unificado</li>
+    <li>Gestión segura de sesiones</li>
+    <li>Trazabilidad de accesos</li>
+    <li>Control granular de permisos</li>
+    <li>Experiencia de usuario mejorada</li>
+</ul>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 2.5rem 0;
+        padding-left: 1rem;
+        border-left: 5px solid var(--primary-color);
+        background: linear-gradient(to right, var(--hover-color), transparent);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .model-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .model-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .model-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .model-title {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--hover-color);
+    }
+
+    .model-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .field-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .field-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .field-item::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        .model-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

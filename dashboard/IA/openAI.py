@@ -144,93 +144,41 @@ class AIService:
             print(f"Error detallado en transcribe_audio: {str(e)}")
             return f"Error al procesar el audio: {str(e)}"
 
-    def generate_scenario_suggestions(self, scenario_info):
-        try:
-            prompt = f"""Based on this English practice scenario information:
-            - Name: {scenario_info.get('nombre', '')}
-            - Level: {scenario_info.get('nivel', '')}
-            - Type: {scenario_info.get('tipo', '')}
-            - Location: {scenario_info.get('lugar', '')}
-            - Description: {scenario_info.get('descripcion', '')}
-
-            Please suggest appropriate content for:
-            1. AI Character role and characteristics
-            2. Student role and context
-            3. Grammar structures and semantic fields
-            4. Useful expressions
-
-            Provide the response in a clean JSON format without markdown formatting."""
-
-            response = self.client.chat.completions.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are a language teaching expert. Provide suggestions in clean JSON format."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7
-            )
-            
-            # Limpiar la respuesta de cualquier formato markdown
-            response_text = response.choices[0].message.content.strip()
-            # Eliminar cualquier bloque de código markdown si existe
-            if response_text.startswith("```json"):
-                response_text = response_text.replace("```json", "").replace("```", "")
-            
-            # Asegurarse de que es JSON válido
-            return json.loads(response_text)
-        except Exception as e:
-            print(f"Error en generate_scenario_suggestions: {str(e)}")
-            return {
-                "error": "No se pudieron generar sugerencias",
-                "details": str(e)
-            }
-
     def get_scenario_context(self, scenario):
-        """
-        Genera el contexto del escenario para OpenAI basado en el modelo ScenarioModel
-        """
         try:
-            # Obtener el nivel del estudiante
-            student_level = scenario.class_id.course.level if scenario.class_id and scenario.class_id.course else "Desconocido"
-
+            student_level = scenario.class_id.course.level if scenario.class_id and scenario.class_id.course else "Unknown"
+            
             context = {
                 "role": "system",
-                "content": f"""Eres un asistente de idiomas con las siguientes características específicas:
+                "content": f"""You are a language assistant with the following specific characteristics:
 
-IDENTIDAD Y ROL:
-- Tu nombre/rol es: {scenario.role_polly}
-- Debes mantener este rol consistentemente durante toda la conversación
-- Siempre inicia la conversación exactamente con: "{scenario.conversation_starter}"
-- Debes terminar la conversación con: "{scenario.end_conversation_saying}"
+IDENTITY AND ROLE:
+- Your name/role is: {scenario.role_polly}
+- You must maintain this role consistently throughout the conversation
+- Always start the conversation exactly with: "{scenario.conversation_starter}"
+- You must end the conversation with: "{scenario.end_conversation_saying}"
 
-OBJETIVOS DE LA CONVERSACIÓN:
-- Metas principales: {scenario.goals}
-- Objetivos específicos: {scenario.objectives}
+IMPORTANT RULES:
+1. ALWAYS respond in English, regardless of the language used in these instructions
+2. Keep responses appropriate for {student_level} level English
+3. Maintain the role and personality consistently
+4. Use specified vocabulary and expressions
+5. End conversation only under specified conditions
 
-CONTEXTO DEL ESTUDIANTE:
-- El estudiante actúa como: {scenario.role_student}
-- Nivel del estudiante: {student_level}
-- Información relevante del estudiante: {scenario.student_information}
+CONVERSATION GOALS:
+- Main goals: {scenario.goals}
+- Specific objectives: {scenario.objectives}
 
-CONTENIDO LINGÜÍSTICO:
-- Vocabulario a enfatizar: {scenario.vocabulary}
-- Expresiones clave a utilizar: {scenario.key_expressions}
+STUDENT CONTEXT:
+- Student acts as: {scenario.role_student}
+- Student level: {student_level}
+- Relevant student information: {scenario.student_information}
 
-DIRECTRICES DE INTERACCIÓN:
-- Descripción del escenario: {scenario.description}
-- Criterios para terminar la conversación: {scenario.end_conversation}
-- Retroalimentación: {scenario.feedback}
-- Sistema de puntuación: {scenario.scoring}
+LINGUISTIC CONTENT:
+- Vocabulary to emphasize: {scenario.vocabulary}
+- Key expressions to use: {scenario.key_expressions}
 
-REGLAS ESTRICTAS:
-1. SIEMPRE inicia con el saludo exacto especificado
-2. Mantén el rol y personalidad consistentes
-3. Utiliza el vocabulario y expresiones especificadas
-4. Proporciona retroalimentación según los criterios establecidos
-5. Termina la conversación solo bajo las condiciones especificadas
-6. Usa el cierre de conversación exacto cuando sea apropiado
-
-Información adicional: {scenario.additional_info}"""
+Additional information: {scenario.additional_info}"""
             }
             
             return context
@@ -347,9 +295,6 @@ Información adicional: {scenario.additional_info}"""
             return str(e), False
             
     def generate_conversation_feedback(self, conversation_history, scenario):
-        """
-        Genera retroalimentación final de la conversación
-        """
         try:
             feedback_prompt = f"""
             Basado en los siguientes criterios de retroalimentación:
@@ -361,16 +306,19 @@ Información adicional: {scenario.additional_info}"""
             Analiza esta conversación:
             {conversation_history}
             
-            Proporciona:
-            1. Una evaluación detallada
-            2. Puntos fuertes
-            3. Áreas de mejora
+            IMPORTANTE: Proporciona la retroalimentación EN ESPAÑOL, incluyendo:
+            1. Una evaluación detallada del desempeño del estudiante
+            2. Puntos fuertes de la conversación
+            3. Áreas específicas de mejora
             4. Puntuación según los criterios establecidos
             """
             
             response = self.client.chat.completions.create(
                 model="gpt-4",
-                messages=[{"role": "user", "content": feedback_prompt}],
+                messages=[
+                    {"role": "system", "content": "Eres un profesor de inglés que proporciona retroalimentación detallada en español."},
+                    {"role": "user", "content": feedback_prompt}
+                ],
                 max_tokens=500
             )
             
@@ -378,4 +326,19 @@ Información adicional: {scenario.additional_info}"""
             
         except Exception as e:
             return f"Error generando retroalimentación: {str(e)}"
+
+    def translate_to_spanish(self, text):
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "Eres un traductor experto de inglés a español."},
+                    {"role": "user", "content": f"Traduce el siguiente texto al español: {text}"}
+                ],
+                temperature=0.7
+            )
+            
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"Error en la traducción: {str(e)}"
 
