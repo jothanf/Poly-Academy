@@ -24,6 +24,17 @@ class TeacherViewSet(viewsets.ModelViewSet):
             # Manejamos los datos del formulario y la imagen
             data = request.data.dict() if hasattr(request.data, 'dict') else request.data
             
+            # Verificamos el código de acceso
+            access_code = data.get('access_code')
+            if access_code != 'MyPolyAdmins0000':
+                return Response({
+                    'status': 'error',
+                    'message': 'Código de acceso inválido'
+                }, status=status.HTTP_403_FORBIDDEN)
+            
+            # Removemos el código de acceso de los datos antes de la serialización
+            data.pop('access_code', None)
+            
             # Si hay una imagen en la solicitud, la agregamos a los datos
             if 'profile_picture' in request.FILES:
                 data['profile_picture'] = request.FILES['profile_picture']
