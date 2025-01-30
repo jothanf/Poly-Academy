@@ -13,7 +13,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return []  # Sin permisos para crear
-        return [IsAuthenticated(), IsTeacher()]  # Permisos normales para otras acciones
+        return []  # Permisos normales para otras acciones
 
     def get_queryset(self):
         queryset = TeacherModel.objects.all()
