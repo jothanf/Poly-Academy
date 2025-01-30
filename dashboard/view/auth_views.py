@@ -12,6 +12,7 @@ from ..serializers import (
     UnifiedLogoutResponseSerializer,
     ErrorResponseSerializer
 )
+from rest_framework_simplejwt.exceptions import TokenError
 
 @extend_schema(
     request=LoginSerializer,
@@ -91,21 +92,34 @@ class UnifiedLogoutView(GenericAPIView):
     @extend_schema(
         responses={
             200: UnifiedLogoutResponseSerializer,
+            400: ErrorResponseSerializer,
             500: ErrorResponseSerializer
         },
         description="Cierra la sesión del usuario invalidando su token"
     )
     def post(self, request):
         try:
-            if request.auth:
-                request.auth.delete()
+            refresh_token = request.data.get('refresh')
+            if not refresh_token:
+                return Response({
+                    'status': 'error',
+                    'message': 'El token de refresco es requerido'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            token = RefreshToken(refresh_token)
+            token.blacklist()
             
             return Response({
                 'status': 'success',
                 'message': 'Sesión cerrada exitosamente'
             })
+        except TokenError:
+            return Response({
+                'status': 'error',
+                'message': 'Token inválido o expirado'
+            }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': f'Error al cerrar sesión: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
