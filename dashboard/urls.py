@@ -61,6 +61,8 @@ urlpatterns = [
     path('api/login/', unified_login, name='unified-login'),
     path('api/logout/', UnifiedLogoutView.as_view(), name='unified-logout'),
     path('api/teachers/', TeacherViewSet.as_view({'get': 'list', 'post': 'create'}), name='teachers-list'),
+    path('api/teachers/<int:pk>/', TeacherViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='teacher-detail'),
     path('api/translate-message/', translate_message, name='translate-message'),
     path('api/students/list/', StudentListView.as_view(), name='students-list'),
+    path('api/students/<int:pk>/', StudentViewSet.as_view(), name='student-detail'),
 ]

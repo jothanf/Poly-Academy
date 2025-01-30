@@ -101,6 +101,25 @@ class StudentViewSet(generics.GenericAPIView):
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def delete(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance.delete()
+            return Response({
+                'status': 'success',
+                'message': 'Estudiante eliminado exitosamente'
+            }, status=status.HTTP_200_OK)
+        except StudentModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Estudiante no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class StudentCoursesView(generics.GenericAPIView):
     serializer_class = StudentCoursesSerializer
 
