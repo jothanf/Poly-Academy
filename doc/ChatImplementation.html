@@ -1,0 +1,181 @@
+<h1>Implementación del Chat en Tiempo Real</h1>
+
+<div class="chat-implementation">
+    <h2>Arquitectura WebSocket</h2>
+    <div class="implementation-card">
+        <h3>ChatConsumer</h3>
+        <p class="implementation-description">
+            Implementación asíncrona del consumidor WebSocket para manejar comunicaciones en tiempo real.
+        </p>
+        <div class="feature-section">
+            <h4>Características Principales</h4>
+            <ul class="feature-list">
+                <li>Conexión asíncrona con WebSocket</li>
+                <li>Manejo de sesiones por escenario y estudiante</li>
+                <li>Historial de conversación persistente</li>
+                <li>Integración con AIService para respuestas en tiempo real</li>
+            </ul>
+        </div>
+        
+        <div class="workflow-section">
+            <h4>Flujo de Trabajo</h4>
+            <ol class="workflow-list">
+                <li>
+                    <strong>Conexión Inicial</strong>
+                    <ul>
+                        <li>Validación de IDs de escenario y estudiante</li>
+                        <li>Creación de sala única por conversación</li>
+                        <li>Inicialización del historial</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Manejo de Mensajes</strong>
+                    <ul>
+                        <li>Procesamiento asíncrono de mensajes</li>
+                        <li>Integración con IA para respuestas</li>
+                        <li>Actualización del historial en tiempo real</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Desconexión</strong>
+                    <ul>
+                        <li>Limpieza de recursos</li>
+                        <li>Persistencia del historial</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <h2>Sistema de Chat con IA</h2>
+    <div class="implementation-card">
+        <h3>Integración con IA</h3>
+        <p class="implementation-description">
+            Sistema de chat que integra IA para proporcionar respuestas contextuales y mantener conversaciones.
+        </p>
+        
+        <div class="feature-section">
+            <h4>Características del Chat IA</h4>
+            <ul class="feature-list">
+                <li>Manejo de sesiones persistentes</li>
+                <li>Historial de conversación contextual</li>
+                <li>Integración con OpenAI GPT</li>
+                <li>Sistema de roles y escenarios</li>
+            </ul>
+        </div>
+
+        <div class="technical-section">
+            <h4>Detalles Técnicos</h4>
+            <ul class="technical-list">
+                <li>
+                    <strong>Gestión de Sesiones</strong>
+                    <p>Mantiene el estado de la conversación usando Django sessions</p>
+                </li>
+                <li>
+                    <strong>Manejo de Contexto</strong>
+                    <p>Sistema de roles y prompts específicos por escenario</p>
+                </li>
+                <li>
+                    <strong>Seguridad</strong>
+                    <p>Protección CSRF y validación de datos</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-implementation {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.implementation-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.implementation-description {
+    color: #4b5563;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.feature-section, .workflow-section, .technical-section {
+    margin-top: 1.5rem;
+}
+
+.feature-list, .workflow-list, .technical-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.feature-list li, .technical-list li {
+    margin-bottom: 0.8rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.feature-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+}
+
+.workflow-list {
+    counter-reset: workflow-counter;
+}
+
+.workflow-list > li {
+    counter-increment: workflow-counter;
+    margin-bottom: 1.5rem;
+}
+
+.workflow-list > li::before {
+    content: counter(workflow-counter);
+    background: #3b82f6;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    display: inline-block;
+    text-align: center;
+    line-height: 24px;
+    margin-right: 0.5rem;
+}
+
+.technical-list strong {
+    color: #1f2937;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.technical-list p {
+    margin: 0;
+    color: #6b7280;
+}
+
+h2 {
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+h3 {
+    color: #2563eb;
+    margin-bottom: 1rem;
+}
+
+h4 {
+    color: #374151;
+    margin-bottom: 1rem;
+}
+</style> 

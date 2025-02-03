@@ -1,0 +1,974 @@
+<nav>
+    <ul>
+        <li><a href="Models.html">Models</a></li>
+        <li><a href="views.html">Views</a></li>
+    </ul>
+</nav>
+
+<h1>Funcionalidades de Poly Academy Frontend Administrador</h1>
+
+<div class="section general">
+    <h2>General</h2>
+    <ul class="requirements-list">
+        <li>Todo el sistema debe ser responsivo.</li>
+    </ul>
+</div>
+
+<div class="section users">
+    <h2>Usuarios</h2>
+    <ul class="requirements-list">
+        <li>Estudiante</li>
+        <li>Administrador</li>
+    </ul>
+</div>
+
+<div class="section admin">
+    <h2>Administrador</h2>
+    
+    <div class="subsection">
+        <h3>1. Gestión de Cursos</h3>
+        
+        <div class="feature-card">
+            <h4>Crear Cursos</h4>
+            <p class="description">Formulario con los siguientes campos:</p>
+            <ul class="field-list">
+                <li>Nombre del curso</li>
+                <li>Descripción del curso 
+                    <ul class="sublist">
+                        <li>Editor de texto con opciones: color de letra, cursiva, negrita, párrafo, citas, encabezados, links, atrás, adelante, lista ordenada y desordenada</li>
+                    </ul>
+                </li>
+                <li>Cover (imagen del curso)
+                    <ul class="sublist">
+                        <li class="not-started">Crop</li>
+                        <li class="not-started">Swap</li>
+                        <li class="not-started">Delete</li>
+                    </ul>
+                </li>
+                <li>Publicar (on/off)</li>
+                <li>Definir nivel y categoría (campo select)</li>
+                <li>Puntos clave
+                    <ul class="sublist">
+                        <li>Agregar punto clave</li>
+                        <li>Eliminar punto clave</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4 class="not-started">Eliminar Cursos</h4>
+            <p class="description">Se accede al formulario de creación de cursos, donde hay un botón Eliminar.</p>
+            <p class="description">Al hacer clic en Eliminar, se muestra una alerta de confirmación:</p>
+            <ul class="field-list">
+                <li>Si se confirma, se elimina el curso.</li>
+                <li>Si se cancela, el curso no debe ser eliminado.</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>Consultar Cursos</h4>
+            <p class="description">Se deben listar todos los cursos en la página.</p>
+            <p class="description">Cada curso debe mostrar:</p>
+            <ul class="field-list">
+                <li>Nivel</li>
+                <li>Categoría</li>
+                <li>Nombre</li>
+                <li>Imagen</li>
+            </ul>
+            <p class="description">Funcionalidades:</p>
+            <ul class="field-list">
+                <li class="not-started">Publicar: Esconder o mostrar el curso a los estudiantes</li>
+                <li class="not-started">Estudiantes: Ver los estudiantes inscritos en el curso</li>
+                <li>Lecciones: Ver las lecciones creadas dentro del curso.</li>
+                <li>Preview: Ver el curso como estudiante.</li>
+                <li class="not-started">Editar: Modificar la información del curso</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>Editar Cursos</h4>
+            <p class="description">Se muestra el mismo formulario de creación con opción de edición.</p>
+            <p class="description">Funcionalidades:</p>
+            <ul class="field-list">
+                <li>Modificar nombre, descripción, cover, nivel, categoría y puntos clave.</li>
+                <li>Mantener las mismas opciones de edición de texto y de imagen.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>2. Gestión de Clases</h3>
+        
+        <div class="feature-card">
+            <h4>Crear Clases</h4>
+            <p class="description">Botón Add Lesson o Create New Lesson.</p>
+            <p class="description">Formulario con los siguientes campos:</p>
+            <ul class="field-list">
+                <li>Título de la clase</li>
+                <li>Descripción 
+                    <ul class="sublist">
+                        <li>Editor de texto con las mismas funcionalidades que el de cursos.</li>
+                    </ul>
+                </li>
+                <li>Cover con opciones:
+                    <ul class="sublist">
+                        <li>Crop</li>
+                        <li>Swap</li>
+                        <li>Delete</li>
+                    </ul>
+                </li>
+                <li>Puntos clave dinámicos:
+                    <ul class="sublist">
+                        <li>Agregar punto clave</li>
+                        <li>Eliminar punto clave</li>
+                    </ul>
+                </li>
+                <li>Opciones de guardado:
+                    <ul class="sublist">
+                        <li>Crear clase</li>
+                        <li>Cancelar creación</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>Consultar Clases</h4>
+            <p class="description">Se deben listar todas las clases creadas.</p>
+            <p class="description">Cada clase debe mostrar:</p>
+            <ul class="field-list">
+                <li>Número ordinal (iniciando en 0)</li>
+                <li>Nombre</li>
+                <li>Imagen</li>
+            </ul>
+            <p class="description">Funcionalidades:</p>
+            <ul class="field-list">
+                <li class="not-started">Editar: Dirigir a la página de edición de tareas</li>
+                <li>Preview: Vista previa de la clase modo estudiante.</li>
+                <li class="not-started">Ocultar: Ocultar la clase para los estudiantes</li>
+                <li class="not-started">Publicar: Hacer visible la clase para los estudiantes</li>
+                <li class="not-started">Settings: Editar descripción, imagen y puntos clave</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>Eliminar Clases</h4>
+            <p class="description">Botón Eliminar.</p>
+            <p class="description">Se muestra una alerta de confirmación:</p>
+            <ul class="field-list">
+                <li>Si se confirma, se elimina la clase.</li>
+                <li>Si se cancela, la clase no debe ser eliminada.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>3. Gestión de Tareas</h3>
+        
+        <div class="feature-card">
+            <h4>Creación de Tareas</h4>
+            <p class="description">El administrador debe poder crear tareas desde un menú de navegación con las siguientes opciones:</p>
+            <ul class="field-list">
+                <li>Layout Block</li>
+                <li>Video Block</li>
+                <li>Text Block</li>
+                <li>Info Box</li>
+                <li>Gallery Layout</li>
+                <li>AI Chat</li>
+                <li>Multimedia Block</li>
+                <li>Knowledge Check</li>
+            </ul>
+            <p class="description">Para guardar la tarea, todos los formularios deben estar completos. Si hay campos vacíos, el botón de guardar no se habilita.</p>
+            <p class="description">Toda la información debe quedar guardada en la base de datos.</p>
+        </div>
+
+        <div class="feature-card">
+            <h4>Tipos de Bloques</h4>
+            <p class="description">1. Layout Block</p>
+            <p class="description">Formulario con:</p>
+            <ul class="field-list">
+                <li>Título</li>
+                <li>Descripción</li>
+                <li>Cover</li>
+                <li>Audio</li>
+                <li class="not-started">Script del audio</li>
+                <li class="not-started">Speech to text</li>
+                <li>Tareas del bloque (con funcionalidad Drag and Drop y opción de incluir estadísticas):
+                    <ul class="sublist">
+                        <li>Multiple Choice: Formulario dinámico con pregunta y respuesta, con checklist para seleccionar la respuesta correcta.</li>
+                        <li>True/False: Formulario con campo de texto y select para elegir la opción correcta.</li>
+                        <li>Categories: Similar a Multiple Choice sin checklist.</li>
+                        <li>Fill in the Gaps: Formulario con campo para escribir el ejercicio y botones funcionales para agregar opciones.</li>
+                        <li>Word Bank: Formulario con palabras adicionales para completar un ejercicio.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>2. Multimedia Block</h4>
+            <p class="description">Video Block: Formulario para subir un video con título, descripción, subtítulos y opciones de tamaño (S, M, L).</p>
+            <p class="description">Audio Block: Formulario para subir un audio con título, descripción y subtítulos.</p>
+        </div>
+
+        <div class="feature-card">
+            <h4>3. Text Block</h4>
+            <p class="description">Formulario con:</p>
+            <ul class="field-list">
+                <li>Título</li>
+                <li>Descripción</li>
+                <li>Opciones:
+                    <ul class="sublist">
+                        <li>Plain Text: Cuadro de texto con editor.</li>
+                        <li>Info Box: Formulario con opciones de visualización:
+                            <ul class="sublist">
+                                <li>Attention</li>
+                                <li>Grammar</li>
+                                <li>Tip</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>4. Gallery Layout</h4>
+            <p class="description">Formulario con:</p>
+            <ul class="field-list">
+                <li>Título</li>
+                <li>Descripción</li>
+                <li>Subida de imágenes con:
+                    <ul class="sublist">
+                        <li>Título de la imagen</li>
+                        <li>Descripción</li>
+                        <li>Botón Eliminar para remover la imagen</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>5. AI Chat (Scenarios)</h4>
+            <p class="description">Formulario con:</p>
+            <ul class="field-list">
+                <li>1. Subida de imagen de fondo </li>
+                <li class="not-started">(crop, eliminar, cambiar, IA generativa).</li>
+                <li>2. Goals and Objectives: Campos de texto.</li>
+                <li>3. Información sobre el estudiante (nivel y limitaciones de lenguaje).</li>
+                <li>4. Rol de ChatGPT.</li>
+                <li>5. Rol del estudiante.</li>
+                <li>6. Conversation Starter.</li>
+                <li>7. Flujo de conversación:
+                    <ul class="sublist">
+                        <li>Uso de vocabulario objetivo.</li>
+                        <li>Respuestas naturales a preguntas.</li>
+                    </ul>
+                </li>
+                <li>8. Cierre de conversación.</li>
+                <li>9. Evaluación y feedback.</li>
+                <li>10. Cálculo de puntaje sobre 100.</li>
+                <li>11. Agregar prompts adicionales.</li>
+            </ul>
+            <p class="description">Funcionalidad de paginación:</p>
+            <ul class="field-list">
+                <li>Atrás</li>
+                <li>Siguiente</li>
+                <li>Botón Crear Escenario</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>6. Knowledge Check</h4>
+            <p class="description">Campos comunes:</p>
+            <ul class="field-list">
+                <li>Título</li>
+                <li>Descripción</li>
+                <li>Tipos de ejercicios:
+                    <ul class="sublist">
+                        <li>Multiple Choice</li>
+                        <li>True/False</li>
+                        <li>Categories</li>
+                        <li>Fill in the Gaps</li>
+                        <li>Word Bank</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Administración de Contenido y Tareas</h3>
+        
+        <div class="feature-card">
+            <h4>Visualización del Contenido Creado</h4>
+            <p class="description">El administrador debe poder visualizar el contenido creado en la plataforma.</p>
+        </div>
+
+        <div class="feature-card">
+            <h4>Consulta de Tareas en Modo Profesor</h4>
+            <p class="description">El administrador debe poder ver las tareas creadas con sus respuestas correctas y su formato correspondiente:</p>
+            <ul class="field-list">
+                <li>Multiple Choice: Visualizar la tarea con las respuestas correctas.</li>
+                <li>Info Box Tip: Cuadro de texto verde con el formato de texto creado.</li>
+                <li>Info Box Grammar: Cuadro de texto azul con el formato de texto creado.</li>
+                <li>Info Box Attention: Cuadro de texto rojo con el formato de texto creado.</li>
+                <li>True or False: Ver la tarea con las respuestas correctas.</li>
+                <li>Fill in the Gaps: Ver la tarea con las respuestas correctas.</li>
+                <li>Categories: Ver la tarea con las respuestas correctas.</li>
+                <li>Word Bank: Ver la tarea con las respuestas correctas.</li>
+                <li>Video: Mostrar el video sobre el background.</li>
+                <li>Audio: Mostrar el audio asociado.</li>
+                <li>Scenarios:
+                    <ul class="sublist">
+                        <li>Listar los escenarios creados, visualizados como tarjetas.</li>
+                        <li>Desde clase: Escenario específico de la clase.</li>
+                        <li>Desde el panel del profesor (opción "Scenario"): Se listan todos los escenarios en general con los siguientes datos: nombre, categoría, nivel e imagen.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>Funcionalidades Adicionales</h4>
+            <p class="description">Editar Escenario: Permite editar los elementos del formulario inicial</p>
+            <p class="description">Publicar/Ocultar: Permite mostrar u ocultar el escenario a los estudiantes</p>
+            <p class="description">Preview: Ver el escenario en modo estudiante (según especificaciones del rol de estudiante)</p>
+            <p class="description">Text Block Column: Mostrar el texto creado</p>
+            <p class="description">Gallery Layout: Mostrar imagen con título y descripción (3 por fila)</p>
+            <p class="description">Layout Block: Si la tarea es de tipo "Layout Block", debe visualizarse con imagen, audio o ambos</p>
+        </div>
+
+        <div class="feature-card">
+            <h4>Actualización de Tareas</h4>
+            <p class="description">El administrador debe poder actualizar cualquier tarea mediante las siguientes opciones:</p>
+            <ul class="field-list">
+                <li class="not-started">Edit Block: Mostrar el formulario correspondiente para editar y actualizar la tarea</li>
+                <li class="not-started">Copy Block: Copiar un bloque para ser pegado en otra clase</li>
+                <li class="not-started">Move To: Mover un bloque a otra clase</li>
+                <li class="not-started">Delete Block: Eliminar la tarea</li>
+                <li class="not-started">Crear Tareas Entre Bloques: Permitir la creación de nuevas tareas dentro de bloques</li>
+                <li class="not-started">Drag and Drop: Reposicionar las tareas mediante arrastrar y soltar</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>Visualización de Estudiantes</h4>
+            <p class="description">El administrador debe poder visualizar la lista de estudiantes sin restricciones por curso.</p>
+            <p class="description">Lista de Estudiantes:</p>
+            <ul class="field-list">
+                <li>Nombre.</li>
+                <li>Fecha de inicio (capturada al momento de la creación del estudiante).</li>
+                <li>Average Score: Puntaje conglomerado según el avance del estudiante.</li>
+                <li>Bloquear Estudiante: Limitar el acceso sin eliminarlo de la base de datos.</li>
+                <li>Eliminar Estudiante: Eliminar estudiante de la base de datos.</li>
+                <li>Ver Información del Estudiante:
+                    <ul class="sublist">
+                        <li>Nombre, teléfono, correo, avatar, niveles realizados, estado (activo/inactivo).</li>
+                        <li>Ajustes: Redirige a la página de estadísticas del estudiante.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Creación de Usuario Administrador</h3>
+        
+        <div class="feature-card">
+            <h4>1. Formulario con los siguientes campos:</h4>
+            <ul class="field-list">
+                <li>Correo.</li>
+                <li>Nombre.</li>
+                <li>Contraseña.</li>
+                <li>Código de registro.</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>2. El sistema proporcionará el código de registro e invalidará su uso una vez se registre.</h4>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Login Administrador</h3>
+        
+        <div class="feature-card">
+            <h4>Formulario con los campos correo y contraseña.</h4>
+            <p class="description">Si el usuario no está autenticado, se redirige a la página de inicio de sesión o landing page.</p>
+            <p class="description">Si el usuario no existe, se muestra un mensaje para contactar al personal de Polyacademy.</p>
+            <p class="description">Si la contraseña es errónea, se muestra un mensaje informativo indicando que no es válida.</p>
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Recuperación de Contraseña</h3>
+        
+        <div class="feature-card">
+            <h4 class="not-started">Recuperación de Contraseña</h4>
+            
+            <div class="feature-card">
+                <h4 class="not-started">1. Opcion Recuperar Contraseña.</h4>
+            </div>
+
+
+            <div class="feature-card">
+                <h4 class="not-started">2. El usuario proporciona su correo registrado en la plataforma.</h4>
+            </div>
+
+
+            <div class="feature-card">
+                <h4 class="not-started">3. La plataforma envía un correo electrónico con un enlace temporal para cambiar la contraseña.</h4>
+            </div>
+
+
+            <div class="feature-card">
+                <h4 class="not-started">4. Formulario de cambio de contraseña</h4>
+                <ul class="field-list">
+                    <li class="not-started">Ingresar la nueva contraseña</li>
+                    <li class="not-started">Confirmar la nueva contraseña</li>
+                    <li class="not-started">Opción Guardar</li>
+
+
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h4 class="not-started">5. Mensajes del sistema</h4>
+                <p class="description">La plataforma muestra un mensaje informativo sobre el cambio de contraseña.</p>
+                <p class="description">Si es exitoso, redirige al login.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="subsection">
+        <h3>Funcionalidades Adicionales</h3>
+        
+        <div class="feature-card">
+            <h4 class="not-started">Buscador Inteligente</h4>
+            <p class="description">Barra de búsqueda con las siguientes características:</p>
+            <ul class="field-list">
+                <li>Búsqueda en tiempo real</li>
+
+                <li>Filtros por categorías</li>
+                <li>Sugerencias inteligentes</li>
+                <li>Historial de búsquedas</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h4>Generación de Imágenes con IA</h4>
+            <p class="description">Sistema integrado de generación de imágenes con IA:</p>
+            <ul class="field-list">
+                <li>Interfaz de prompt</li>
+                <li>Opciones de personalización</li>
+                <li>Galería de resultados</li>
+                <li>Descarga y edición de imágenes generadas</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section student-role">
+        <h2>Rol Estudiante</h2>
+        
+        <div class="feature-card">
+            <h3>1. Sistema de Autenticación y Perfil</h3>
+            <h4>Registro y Login</h4>
+            <ul class="field-list">
+                <li>Registro con email y contraseña</li>
+                <li>Login con credenciales</li>
+                <li>Recuperación de contraseña</li>
+                <li>Verificación de email</li>
+                <li>Login con Google</li>
+            </ul>
+            
+            <h4>Gestión de Perfil</h4>
+            <ul class="field-list">
+                <li class="not-started">Editar información personal (nombre, email, teléfono)</li>
+                <li class="not-started">Subir/editar avatar</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <h3>2. Dashboard Principal</h3>
+            
+            <div class="subsection">
+                <h4>Vista General</h4>
+                <ul class="field-list">
+                    <li>Cursos y clases activos:
+                        <ul class="sublist">
+                            <li>Nombre, imagen del curso</li>
+                            <li>Funcionalidades:
+                                <ul class="sublist">
+                                    <li class="not-started">Cambiar curso</li>
+                                    <li >Ver detalles del curso</li>
+                                    <li >Mostrar ID de la clase en curso</li>
+                                    <li class="not-started">Esconder curso</li>
+                                    <li class="not-started">Marcar como finalizada</li>
+                                    <li class="not-started">Continuar con última clase</li>
+
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Visualización de clases (solo para estudiantes inscritos):
+                        <ul class="sublist">
+                            <li>Un estudiante solo puede ver sus propias clases</li>
+                            <li>Datos mostrados:
+                                <ul class="sublist">
+                                    <li>Número ordinal</li>
+                                    <li>Nombre de la clase</li>
+                                    <li>Imagen y descripción</li>
+                                    <li>Indicador de estado: Completado / En curso / Sin empezar</li>
+                                    <li>Opción para repetir clase</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Entrar a una clase:
+                        <ul class="sublist">
+                            <li>Popup de información:
+                                <ul class="sublist">
+                                    <li>Título, descripción, imagen, palabras clave</li>
+                                </ul>
+                            </li>
+                            <li>Funcionalidades:
+                                <ul class="sublist">
+                                    <li>Botón Atrás</li>
+                                    <li>Empezar curso (redirige a la página de tareas)</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4>Tareas</h4>
+                <p class="not-started">Las tareas deben tener puntuación si se incluyen las calificaciones por el profesor</p>
+                <ul class="field-list">
+                    <li>Multiple Choice: Selección de una o varias opciones correctas</li>
+                    <li>True/False</li>
+
+                    <li class="started">Categories: Drag and Drop para categorizar según el ejercicio</li>
+                    <li>Fill in the gaps: Completar frases con palabras correctas</li>
+                    <li>Word Bank: Arrastrar palabras correctas al párrafo correspondiente</li>
+                    <li>Videos y Audios: Reproducción con fondo</li>
+                    <li class="started">Galería de Imágenes: Título y contraseña</li>
+                    <li>Cuadros Informativos:
+                        <ul class="sublist">
+                            <li>Grammar Box (azul)</li>
+
+                            <li>Tip Box (verde)</li>
+                            <li>Attention Box (rojo)</li>
+                        </ul>
+                    </li>
+                    <li>Text Column: Texto en una sola columna</li>
+                    <li>Scenarios:
+                        <ul class="sublist">
+                            <li class="not-started">Text-to-Speech y Speech-to-Text</li>
+                            <li>Enviar mensajes escritos</li>
+                            <li>Explicación de la actividad</li>
+                            <li>Start Conversation:
+                                <ul class="sublist">
+                                    <li>Imagen de fondo del profesor cubriendo toda la pantalla</li>
+                                    <li>Avatar del profesor simulando diálogo</li>
+                                    <li>Mensaje inicial con título, descripción y botón de inicio</li>
+                                    <li class="not-started">Mensajes de Polly:
+                                        <ul class="sublist">
+                                            <li class="not-started">Guardar notas</li>
+                                            <li class="not-started">Traducción</li>
+                                            <li class="not-started">Repetir frase en voz alta</li>
+                                        </ul>
+                                    </li>
+
+                                    <li>Opciones del estudiante:
+                                        <ul class="sublist">
+                                            <li class="not-started">"Ayúdame a responder" (sugerencias IA)</li>
+                                            <li>Enviar mensaje o grabar voz</li>
+                                        </ul>
+                                    </li>
+
+                                </ul>
+                            </li>
+                            <li>Finalización:
+                                <ul class="sublist">
+                                    <li class="started">Feedback en pronunciación, fluidez, gramática, respuestas largas y errores</li>
+                                    <li class="started">Botones: Terminar, Repetir, Continuar</li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4 class="not-started">Métricas de Aprendizaje</h4>
+                <ul class="field-list">
+                    <li class="not-started">Tiempo total de estudio</li>
+                    <li class="not-started">Porcentaje de completitud por curso</li>
+                    <li class="not-started">Puntuación promedio</li>
+                    <li class="not-started">Racha de días estudiando</li>
+
+                    <li class="not-started">Horas de estudio semanales</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="feature-card">
+            <h3>3. Gestión de Cursos</h3>
+            
+            <div class="subsection">
+                <h4>Catálogo de Cursos</h4>
+                <ul class="field-list">
+                    <li>Explorar cursos disponibles</li>
+                    <li>Ver detalles del curso</li>
+                    <li class="not-started">Inscribirse en cursos</li>
+                </ul>
+            </div>
+
+
+            <div class="subsection">
+                <h4 class="not-started">Progreso de Cursos</h4>
+                <ul class="field-list">
+                    <li class="not-started">Vista de lecciones completadas/pendientes</li>
+                    <li class="not-started">Porcentaje de avance por curso</li>
+                    <li class="not-started">Puntuaciones obtenidas</li>
+                    <li class="not-started">Tiempo dedicado por curso</li>
+
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <h3>4. Sistema de Lecciones</h3>
+            
+            <div class="subsection">
+                <h4>Navegación de Lecciones</h4>
+                <ul class="field-list">
+                    <li>Lista de lecciones por curso</li>
+                    <li>Estado de cada lección (completada/pendiente)</li>
+                    <li class="not-started">Progreso dentro de cada lección</li>
+                    <li class="not-started">Sistema de prerequisitos</li>
+                </ul>
+            </div>
+
+
+            <div class="subsection">
+                <h4>Interacción con Contenido</h4>
+                <ul class="field-list">
+                    <li>Reproducción de videos/audios</li>
+                    <li>Seguimiento de Ejercicios:
+                        <ul class="sublist">
+                            <li>Ver respuestas correctas/incorrectas</li>
+                            <li class="not-started">Intentos permitidos</li>
+                            <li class="not-started">Tiempo dedicado por ejercicio</li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <h3 class="not-started">5. Sistema de Vocabulario</h3>
+            
+
+            <div class="subsection">
+                <h4 class="not-started">Diccionario Personal</h4>
+                <ul class="field-list">
+                    <li class="not-started">Guardar palabras nuevas</li>
+
+                    <li class="not-started">Categorizar palabras</li>
+                    <li class="not-started">Añadir notas personales</li>
+                </ul>
+
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <h3>6. Sistema de Chat AI</h3>
+            
+            <div class="subsection">
+                <h4>Interacción con AI</h4>
+                <ul class="field-list">
+                    <li>Conversaciones generales con un agente preestablecido</li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h4 class="not-started">Análisis de Progreso</h4>
+                <ul class="field-list">
+                    <li class="not-started">Gráficos de progreso</li>
+                    <li class="not-started">Estadísticas detalladas</li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <h3 class="not-started">7. Inscripción a Cursos</h3>
+            <ul class="field-list">
+                <li class="not-started">El estudiante, de forma gratuita, puede ver la mitad de un curso</li>
+
+                <li class="not-started">Barra de buscador inteligente</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --text-color: #1f2937;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --hover-color: #dbeafe;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --error-color: #ef4444;
+        --info-color: #3b82f6;
+        --border-color: #e5e7eb;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        line-height: 1.7;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        scroll-behavior: smooth;
+    }
+
+    nav {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    nav ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        gap: 1rem;
+        margin: 0;
+    }
+
+    nav a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    nav a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+
+    .section {
+        margin-bottom: 3rem;
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 2.5rem 0;
+        padding-left: 1rem;
+        border-left: 5px solid var(--primary-color);
+        background: linear-gradient(to right, var(--hover-color), transparent);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+    }
+
+    h3 {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        margin: 2rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--hover-color);
+    }
+
+    h4 {
+        color: var(--secondary-color);
+        font-size: 1.2rem;
+        margin: 1.5rem 0 1rem;
+    }
+
+    .feature-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .requirements-list, .field-list {
+        list-style: none;
+        padding-left: 1.5rem;
+    }
+
+    .requirements-list li, .field-list li {
+        position: relative;
+        padding: 0.5rem 0;
+        margin: 0.5rem 0;
+    }
+
+    .requirements-list li::before, .field-list li::before {
+        content: '▹';
+        color: var(--primary-color);
+        position: absolute;
+        left: -1.5rem;
+    }
+
+    .sublist {
+        list-style: none;
+        padding-left: 2rem;
+        margin: 0.5rem 0;
+    }
+
+    .sublist li::before {
+        content: '○';
+        color: var(--secondary-color);
+        margin-right: 0.5rem;
+    }
+
+    .description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin: 1rem 0;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .info-box {
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+    }
+
+    .info-box.tip {
+        background-color: rgba(16, 185, 129, 0.1);
+        border-left: 4px solid var(--success-color);
+    }
+
+    .info-box.grammar {
+        background-color: rgba(59, 130, 246, 0.1);
+        border-left: 4px solid var(--info-color);
+    }
+
+    .info-box.attention {
+        background-color: rgba(239, 68, 68, 0.1);
+        border-left: 4px solid var(--error-color);
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            padding: 1rem 0;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        .feature-card {
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        nav {
+            padding: 0.5rem;
+        }
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg-color: #1f2937;
+            --text-color: #f3f4f6;
+            --card-bg: #374151;
+            --border-color: #4b5563;
+            --hover-color: #2563eb20;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+        }
+
+        .description {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .not-started {
+        background-color: #e6cf09;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        opacity: 0.7;
+    }
+    .started {
+        background-color: #19e7bb;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        opacity: 0.7;
+    }
+
+</style>
+

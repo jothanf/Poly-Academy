@@ -7,6 +7,85 @@
 
 <h1>Documentación de Auth Views</h1>
 
+<h2>Descripción General</h2>
+<p>Las vistas de autenticación proporcionan la funcionalidad necesaria para gestionar el acceso seguro de usuarios a la plataforma. Estas vistas permiten un sistema de autenticación unificado para estudiantes y profesores, asegurando que solo los usuarios autorizados puedan acceder a los recursos protegidos.</p>
+
+<div class="model-container">
+    <div class="model-card">
+        <h3 class="model-title">Inicio de Sesión Unificado</h3>
+        <p class="model-description">
+            Como usuario, necesito poder iniciar sesión en la plataforma de manera segura.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Autenticación por email y contraseña</li>
+            <li class="field-item">Validación de credenciales</li>
+            <li class="field-item">Identificación automática del rol</li>
+            <li class="field-item">Generación de tokens JWT</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Cierre de Sesión</h3>
+        <p class="model-description">
+            Como usuario, necesito poder cerrar mi sesión de forma segura.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Invalidación de tokens activos</li>
+            <li class="field-item">Blacklist de refresh tokens</li>
+            <li class="field-item">Confirmación de cierre exitoso</li>
+            <li class="field-item">Manejo de errores en el proceso</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Validación de Roles</h3>
+        <p class="model-description">
+            Como sistema, necesito validar el tipo de usuario que intenta acceder.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Verificación de rol estudiante</li>
+            <li class="field-item">Verificación de rol profesor</li>
+            <li class="field-item">Prevención de roles duplicados</li>
+            <li class="field-item">Manejo de usuarios sin rol</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Gestión de Errores</h3>
+        <p class="model-description">
+            Como sistema, necesito manejar los errores de autenticación de forma clara.
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Validación de campos requeridos</li>
+            <li class="field-item">Mensajes de error personalizados</li>
+            <li class="field-item">Códigos de estado HTTP apropiados</li>
+            <li class="field-item">Logging de errores del sistema</li>
+        </ul>
+    </div>
+
+    <div class="model-card">
+        <h3 class="model-title">Características Técnicas</h3>
+        <p class="model-description">
+            Detalles técnicos importantes de la implementación
+        </p>
+        <ul class="field-list">
+            <li class="field-item">Autenticación basada en JWT</li>
+            <li class="field-item">Documentación con drf-spectacular</li>
+            <li class="field-item">Respuestas estandarizadas</li>
+            <li class="field-item">Manejo de permisos DRF</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Beneficios Clave</h2>
+<ul>
+    <li>Sistema de autenticación unificado</li>
+    <li>Gestión segura de sesiones</li>
+    <li>Control granular de roles</li>
+    <li>Experiencia de usuario mejorada</li>
+    <li>Manejo robusto de errores</li>
+</ul>
+
 <h2>Unificado Login</h2>
 <p>Permite a los estudiantes y profesores iniciar sesión en la plataforma.</p>
 <ul>
@@ -42,8 +121,6 @@
         </ul>
     </li>
 </ul>
-
-<p>Las vistas de autenticación permiten gestionar el acceso de los usuarios a la plataforma, asegurando que solo los usuarios autenticados puedan acceder a los recursos protegidos.</p>
 
 <style>
     /* Estilos similares a los de Models.html y AIViews.html */

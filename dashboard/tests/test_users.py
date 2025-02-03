@@ -8,6 +8,9 @@ import json
 import os
 from PIL import Image
 import io
+from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 class UserAuthenticationTest(APITestCase):
     def setUp(self):
@@ -41,6 +44,7 @@ class UserAuthenticationTest(APITestCase):
             'username': 'profesor_test',
             'email': 'profesor@test.com',
             'password': 'contraseña123',
+            'access_code': 'MyPolyAdmins0000'
         }
         print("\nIntentando registrar profesor con datos:", teacher_data)
         response = self.client.post(
@@ -83,7 +87,7 @@ class UserAuthenticationTest(APITestCase):
         
         # 3. Intentar login
         login_data = {
-            'username': student_data['username'],
+            'email': student_data['email'],
             'password': student_data['password'],
             'user_type': 'student'
         }
@@ -197,10 +201,17 @@ class LogoutTest(APITestCase):
             username='test_user',
             password='test123'
         )
+        # Obtener el token de refresco al autenticar el usuario
+        refresh = RefreshToken.for_user(self.user)
+        self.refresh_token = str(refresh)
         self.client.force_authenticate(user=self.user)
 
     def test_unified_logout(self):
         """Prueba el cierre de sesión unificado"""
-        response = self.client.post(reverse('unified-logout'))
+        response = self.client.post(
+            reverse('unified-logout'),
+            {'refresh': self.refresh_token},  # Incluir el token de refresco en la solicitud
+            format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'success') 

@@ -1,0 +1,171 @@
+<h1>Historias de Usuario - Sistema de Notas y Vocabulario</h1>
+
+<div class="user-stories-container">
+    <section class="story-section">
+        <h2>Gestión de Notas del Estudiante</h2>
+        
+        <div class="user-story">
+            <h3>Como estudiante, quiero gestionar mis notas de clase</h3>
+            <div class="story-details">
+                <h4>Para poder:</h4>
+                <ul>
+                    <li>Mantener un registro organizado de mi aprendizaje</li>
+                    <li>Acceder a mis anotaciones en cualquier momento</li>
+                    <li>Mejorar mi proceso de estudio</li>
+                </ul>
+                
+                <h4>Funcionalidades:</h4>
+                <ul class="feature-list">
+                    <li>Ver todas mis notas personales</li>
+                    <li>Crear nuevas notas durante la clase</li>
+                    <li>Editar notas existentes</li>
+                    <li>Eliminar notas que ya no necesito</li>
+                    <li>Filtrar notas por clase específica</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="story-section">
+        <h2>Gestión de Vocabulario Personal</h2>
+        
+        <div class="user-story">
+            <h3>Como estudiante, quiero mantener mi propio diccionario de vocabulario</h3>
+            <div class="story-details">
+                <h4>Para poder:</h4>
+                <ul>
+                    <li>Expandir mi vocabulario en inglés</li>
+                    <li>Recordar palabras y frases nuevas</li>
+                    <li>Organizar mi aprendizaje de vocabulario</li>
+                </ul>
+                
+                <h4>Funcionalidades:</h4>
+                <ul class="feature-list">
+                    <li>Agregar nuevas palabras o frases</li>
+                    <li>Incluir traducciones y ejemplos</li>
+                    <li>Marcar entradas como favoritas</li>
+                    <li>Ver solo vocabulario favorito</li>
+                    <li>Filtrar vocabulario por clase</li>
+                    <li>Editar o eliminar entradas existentes</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="story-section">
+        <h3>Criterios de Aceptación Generales</h3>
+        <div class="acceptance-criteria">
+            <ul>
+                <li>
+                    <strong>Seguridad:</strong>
+                    <p>Solo usuarios autenticados pueden acceder a las funcionalidades</p>
+                </li>
+                <li>
+                    <strong>Privacidad:</strong>
+                    <p>Cada estudiante solo puede ver y gestionar sus propias notas y vocabulario</p>
+                </li>
+                <li>
+                    <strong>Respuestas del Sistema:</strong>
+                    <p>Todas las operaciones deben proporcionar retroalimentación clara sobre su éxito o fracaso</p>
+                </li>
+                <li>
+                    <strong>Organización:</strong>
+                    <p>Las notas y el vocabulario deben poder filtrarse por clase para mejor organización</p>
+                </li>
+            </ul>
+        </div>
+    </section>
+</div>
+
+<style>
+.user-stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.story-section {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+}
+
+h1 {
+    color: #1f2937;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+h2 {
+    color: #2563eb;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+h3 {
+    color: #374151;
+    margin-bottom: 1rem;
+}
+
+h4 {
+    color: #4b5563;
+    margin: 1rem 0;
+}
+
+.user-story {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.story-details ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.story-details ul li {
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.story-details ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #2563eb;
+}
+
+.feature-list li {
+    color: #4b5563;
+}
+
+.acceptance-criteria ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.acceptance-criteria li {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.acceptance-criteria strong {
+    color: #2563eb;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.acceptance-criteria p {
+    margin: 0;
+    color: #4b5563;
+}
+</style>

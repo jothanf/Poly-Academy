@@ -85,6 +85,51 @@
     <li>Soporte multilingüe</li>
 </ul>
 
+<h2>Implementación Técnica</h2>
+<div class="implementation-container">
+    <div class="implementation-card">
+        <h3 class="implementation-title">AIService</h3>
+        <p class="implementation-description">
+            Clase principal que maneja la integración con OpenAI para diferentes servicios de IA.
+        </p>
+        <ul class="feature-list">
+            <li class="feature-item">Integración con GPT-4 para chat interactivo</li>
+            <li class="feature-item">Análisis y retroalimentación estructurada</li>
+            <li class="feature-item">Transcripción de audio usando Whisper</li>
+            <li class="feature-item">Generación de voz con múltiples voces disponibles</li>
+            <li class="feature-item">Manejo de contexto y escenarios de conversación</li>
+            <li class="feature-item">Sistema de retroalimentación personalizado</li>
+        </ul>
+    </div>
+
+    <div class="implementation-card">
+        <h3 class="implementation-title">ImageGenerator</h3>
+        <p class="implementation-description">
+            Servicio especializado para la generación de imágenes usando DALL-E 3.
+        </p>
+        <ul class="feature-list">
+            <li class="feature-item">Generación de imágenes de alta calidad (1024x1024)</li>
+            <li class="feature-item">Procesamiento de prompts en lenguaje natural</li>
+            <li class="feature-item">Manejo de errores robusto</li>
+            <li class="feature-item">Integración con el API más reciente de OpenAI</li>
+        </ul>
+    </div>
+
+    <div class="implementation-card">
+        <h3 class="implementation-title">Características Técnicas</h3>
+        <p class="implementation-description">
+            Detalles de la implementación y configuración del sistema.
+        </p>
+        <ul class="feature-list">
+            <li class="feature-item">Gestión segura de API keys mediante variables de entorno</li>
+            <li class="feature-item">Sistema de logging para debugging y monitoreo</li>
+            <li class="feature-item">Manejo de archivos temporales para audio y transcripciones</li>
+            <li class="feature-item">Respuestas en formato JSON estructurado</li>
+            <li class="feature-item">Validación de entrada y manejo de errores</li>
+        </ul>
+    </div>
+</div>
+
 <style>
     :root {
         --primary-color: #2563eb;
@@ -205,5 +250,64 @@
         .model-container {
             grid-template-columns: 1fr;
         }
+    }
+
+    .implementation-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+
+    .implementation-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .implementation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .implementation-title {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--hover-color);
+    }
+
+    .implementation-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8fafc;
+        border-radius: 6px;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .feature-item {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .feature-item::before {
+        content: '→';
+        color: var(--primary-color);
+        position: absolute;
+        left: 0;
     }
 </style>

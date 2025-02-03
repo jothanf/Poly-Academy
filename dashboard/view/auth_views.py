@@ -18,6 +18,7 @@ import logging
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
+from ..models import StudentModel
 
 logger = logging.getLogger(__name__)
 
@@ -205,8 +206,8 @@ def google_login(request):
             # Crear el nuevo usuario
             user = User.objects.create_user(username=username, email=email, password=password)
             
-            # Aquí puedes agregar lógica para crear el modelo StudentModel si es necesario
-            # StudentModel.objects.create(user=user)
+            # Crear el StudentModel asociado
+            StudentModel.objects.create(user=user)
 
             # Generar tokens JWT
             refresh = RefreshToken.for_user(user)
