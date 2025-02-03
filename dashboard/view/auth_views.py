@@ -209,7 +209,7 @@ def google_login(request):
             # Crear el StudentModel asociado
             StudentModel.objects.create(user=user)
 
-            # Generar tokens JWT
+        
             refresh = RefreshToken.for_user(user)
             
             return Response({
