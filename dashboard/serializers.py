@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class CourseModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseModel
-        fields = ['id', 'course_name', 'description', 'category', 'level', 'bullet_points', 'cover', 'created_at', 'updated_at']
+        fields = ['id', 'course_name', 'description', 'category', 'level', 'bullet_points', 'cover', 'publish', 'created_at', 'updated_at']
 
 
 class ClassModelSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class ClassModelSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ClassModel
-        fields = ['id', 'class_name', 'description', 'course_id', 'bullet_points', 'cover', 'created_at', 'updated_at']
+        fields = ['id', 'class_name', 'description', 'course_id', 'bullet_points', 'cover', 'publish', 'created_at', 'updated_at']
 
 
 class LayoutModelSerializer(serializers.ModelSerializer):
@@ -72,6 +72,21 @@ class ClassContentModelSerializer(serializers.ModelSerializer):
         Crear una instancia de ClassContentModel con los datos validados
         """
         return ClassContentModel.objects.create(**validated_data)
+
+    def to_representation(self, instance):
+        """Personalizar la representación de la respuesta"""
+        data = super().to_representation(instance)
+        return {
+            'id': data['id'],
+            'tittle': data['tittle'],
+            'instructions': data['instructions'],
+            'content_type': data['content_type'],
+            'class_id': data['class_id'],
+            'order': data['order'],
+            'content_details': data.get('content_details', {}),
+            'created_at': data['created_at'],
+            'updated_at': data['updated_at']
+        }
 
 
 class ScenarioModelSerializer(serializers.ModelSerializer):

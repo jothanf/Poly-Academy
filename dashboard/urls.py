@@ -40,6 +40,7 @@ router.register(r'scenarios', ScenarioModelViewSet, 'scenarios')
 router.register(r'class-notes', StudentNoteViewSet, 'class-notes')
 router.register(r'vocabulary', VocabularyEntryViewSet, 'vocabulary')
 router.register(r'teachers', TeacherViewSet, 'teachers')
+router.register(r'class-contents', ClassContentModelViewSet, 'classcontent')
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -65,4 +66,7 @@ urlpatterns = [
     path('api/translate-message/', translate_message, name='translate-message'),
     path('api/students/list/', StudentListView.as_view(), name='students-list'),
     path('api/students/<int:pk>/', StudentViewSet.as_view(), name='student-detail'),
+    path('api/vocabulary/by-class/', VocabularyEntryViewSet.as_view({'get': 'by_class'}), name='vocabulary-by-class'),
+    path('api/vocabulary/favorites/', VocabularyEntryViewSet.as_view({'get': 'favorites'}), name='vocabulary-favorites'),
+    path('api/vocabulary/<int:pk>/toggle-favorite/', VocabularyEntryViewSet.as_view({'post': 'toggle_favorite'}), name='vocabulary-toggle-favorite'),
 ]

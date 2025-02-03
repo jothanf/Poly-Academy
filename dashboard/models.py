@@ -51,8 +51,10 @@ class CourseModel(models.Model):
     category = models.CharField(max_length=100, null=True, blank=True)
     level = models.CharField(max_length=100, null=True, blank=True)
     bullet_points = models.JSONField(help_text="Formato: ['punto 1', 'punto 2', ...]", null=True, blank=True)
+    publish = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.course_name
@@ -63,6 +65,7 @@ class ClassModel(models.Model):
     description = models.TextField(null=True, blank=True)
     course = models.ForeignKey(CourseModel, on_delete=models.CASCADE, related_name="classes")
     bullet_points = models.JSONField(help_text="Formato: ['punto 1', 'punto 2', ...]", blank=True, null=True)
+    publish = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
