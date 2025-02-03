@@ -151,7 +151,6 @@ class UnifiedLogoutView(GenericAPIView):
 @permission_classes([AllowAny])
 def google_login(request):
     try:
-        # Obtener el token de ID de Google del request
         google_token = request.data.get('token')
         
         if not google_token:
@@ -160,13 +159,17 @@ def google_login(request):
                 'message': 'Token de Google no proporcionado'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # Verificar el token con Google
+        # Add more lenient clock skew tolerance
         idinfo = id_token.verify_oauth2_token(
             google_token, 
             requests.Request(), 
-            settings.GOOGLE_OAUTH2_CLIENT_ID
+            settings.GOOGLE_OAUTH2_CLIENT_ID,
+            clock_skew_in_seconds=300  # Allow 5 minutes of clock skew
         )
 
+        # Add debug logging
+        logger.debug(f"Google token verification successful. Email: {idinfo.get('email')}")
+        
         # Obtener el email del usuario desde el token verificado
         email = idinfo['email']
         
@@ -226,15 +229,15 @@ def google_login(request):
             })
 
     except ValueError as e:
-        # Token inválido
+        logger.error(f"Google token validation error: {str(e)}")
         return Response({
             'status': 'error',
-            'message': 'Token de Google inválido',
+            'message': 'Error de validación del token de Google',
             'details': str(e)
         }, status=status.HTTP_401_UNAUTHORIZED)
         
     except Exception as e:
-        logger.error(f"Error en google_login: {str(e)}")
+        logger.error(f"Unexpected error in google_login: {str(e)}")
         return Response({
             'status': 'error',
             'message': 'Error interno del servidor',
