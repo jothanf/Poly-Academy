@@ -198,11 +198,31 @@ def google_login(request):
             })
             
         except User.DoesNotExist:
+            # Si el usuario no existe, crear uno nuevo
+            username = email.split('@')[0]  # Usar la parte del email como nombre de usuario
+            password = 'ContraseñaGenérica123!'  # Contraseña genérica
+
+            # Crear el nuevo usuario
+            user = User.objects.create_user(username=username, email=email, password=password)
+            
+            # Aquí puedes agregar lógica para crear el modelo StudentModel si es necesario
+            # StudentModel.objects.create(user=user)
+
+            # Generar tokens JWT
+            refresh = RefreshToken.for_user(user)
+            
             return Response({
-                'status': 'error',
-                'message': 'Usuario no registrado',
-                'details': f'No existe una cuenta registrada con el email: {email}'
-            }, status=status.HTTP_404_NOT_FOUND)
+                'status': 'success',
+                'message': 'Usuario creado y sesión iniciada exitosamente',
+                'token': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user_type': 'student',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                }
+            })
 
     except ValueError as e:
         # Token inválido
