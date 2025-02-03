@@ -118,7 +118,7 @@ class StudentModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentModel
         fields = ['id', 'username', 'email', 'password', 'user_username', 
-                 'user_email', 'profile_picture', 'created_at', 'updated_at']
+                 'user_email', 'profile_picture', 'courses', 'created_at', 'updated_at']
 
     def create(self, validated_data):
         username = validated_data.pop('username')

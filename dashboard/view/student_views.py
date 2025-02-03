@@ -1,7 +1,7 @@
 from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import StudentModel, StudentLoginRecord, StudentNoteModel, VocabularyEntryModel
+from ..models import StudentModel, StudentLoginRecord, StudentNoteModel, VocabularyEntryModel, CourseModel
 from ..serializers import StudentModelSerializer, CourseModelSerializer, StudentCoursesSerializer, StudentLoginRecordSerializer, StudentNoteModelSerializer, VocabularyEntryModelSerializer
 from rest_framework.decorators import api_view, action
 from drf_spectacular.utils import extend_schema
@@ -135,6 +135,9 @@ class StudentCoursesView(generics.GenericAPIView):
     serializer_class = StudentCoursesSerializer
 
     def get(self, request, student_id):
+        """
+        Obtiene la lista de cursos en los que está inscrito el estudiante
+        """
         try:
             student = StudentModel.objects.get(id=student_id)
             courses = student.courses.all()
@@ -148,6 +151,94 @@ class StudentCoursesView(generics.GenericAPIView):
             return Response({
                 'status': 'error',
                 'message': 'Estudiante no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request, student_id):
+        """
+        Inscribe al estudiante en un curso
+        """
+        try:
+            student = StudentModel.objects.get(id=student_id)
+            course_id = request.data.get('course_id')
+            
+            if not course_id:
+                return Response({
+                    'status': 'error',
+                    'message': 'Se requiere el ID del curso'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            course = CourseModel.objects.get(id=course_id)
+            
+            if course in student.courses.all():
+                return Response({
+                    'status': 'error',
+                    'message': 'El estudiante ya está inscrito en este curso'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            student.courses.add(course)
+            return Response({
+                'status': 'success',
+                'message': 'Inscripción exitosa'
+            }, status=status.HTTP_201_CREATED)
+
+        except StudentModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Estudiante no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except CourseModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Curso no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, student_id):
+        """
+        Elimina la inscripción de un estudiante a un curso
+        """
+        try:
+            student = StudentModel.objects.get(id=student_id)
+            course_id = request.data.get('course_id')
+            
+            if not course_id:
+                return Response({
+                    'status': 'error',
+                    'message': 'Se requiere el ID del curso'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            course = CourseModel.objects.get(id=course_id)
+            
+            if course not in student.courses.all():
+                return Response({
+                    'status': 'error',
+                    'message': 'El estudiante no está inscrito en este curso'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            student.courses.remove(course)
+            return Response({
+                'status': 'success',
+                'message': 'Inscripción eliminada exitosamente'
+            }, status=status.HTTP_200_OK)
+
+        except StudentModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Estudiante no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except CourseModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Curso no encontrado'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({

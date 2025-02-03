@@ -20,13 +20,6 @@ class TeacherModel(models.Model):
     def __str__(self):
         return self.user.email
 
-class StudentModel(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    profile_picture = models.ImageField(upload_to='student_profile_pictures/', null=True, blank=True)
-
-
 class MediaModel(models.Model):
     MEDIA_TYPES = [
         ('image', 'Image'),
@@ -71,6 +64,15 @@ class ClassModel(models.Model):
 
     def __str__(self):
         return self.class_name
+    
+
+class StudentModel(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    courses = models.ManyToManyField(CourseModel, related_name='enrolled_students', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    profile_picture = models.ImageField(upload_to='student_profile_pictures/', null=True, blank=True)
+
 
 class LayoutModel(models.Model):
     class_model = models.ForeignKey(ClassModel, on_delete=models.CASCADE, related_name='layouts')
