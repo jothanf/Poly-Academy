@@ -243,3 +243,5 @@ CACHES = {
         "LOCATION": "unique-snowflake",
     }
 }
+
+GOOGLE_OAUTH2_CLIENT_ID = '812601186913-sp0e8hfnarjmbvqi51bpgfsj6tmeq0sf.apps.googleusercontent.com'

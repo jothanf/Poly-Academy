@@ -15,6 +15,9 @@ from ..serializers import (
 from rest_framework_simplejwt.exceptions import TokenError
 from django.core.exceptions import ObjectDoesNotExist
 import logging
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -134,3 +137,85 @@ class UnifiedLogoutView(GenericAPIView):
                 'status': 'error',
                 'message': 'Error al cerrar sesión'
             }, status=status.HTTP_400_BAD_REQUEST) 
+
+@extend_schema(
+    description="Login con Google para estudiantes",
+    responses={
+        200: LoginResponseSerializer,
+        400: ErrorResponseSerializer,
+        401: ErrorResponseSerializer
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def google_login(request):
+    try:
+        # Obtener el token de ID de Google del request
+        google_token = request.data.get('token')
+        
+        if not google_token:
+            return Response({
+                'status': 'error',
+                'message': 'Token de Google no proporcionado'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar el token con Google
+        idinfo = id_token.verify_oauth2_token(
+            google_token, 
+            requests.Request(), 
+            settings.GOOGLE_OAUTH2_CLIENT_ID
+        )
+
+        # Obtener el email del usuario desde el token verificado
+        email = idinfo['email']
+        
+        try:
+            # Buscar si existe el usuario
+            user = User.objects.get(email=email)
+            
+            # Verificar si es estudiante
+            if not hasattr(user, 'studentmodel'):
+                return Response({
+                    'status': 'error',
+                    'message': 'El correo electrónico no está registrado como estudiante',
+                    'details': 'Esta cuenta no tiene permisos de estudiante'
+                }, status=status.HTTP_403_FORBIDDEN)
+            
+            # Generar tokens JWT
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Inicio de sesión con Google exitoso',
+                'token': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user_type': 'student',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                }
+            })
+            
+        except User.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Usuario no registrado',
+                'details': f'No existe una cuenta registrada con el email: {email}'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+    except ValueError as e:
+        # Token inválido
+        return Response({
+            'status': 'error',
+            'message': 'Token de Google inválido',
+            'details': str(e)
+        }, status=status.HTTP_401_UNAUTHORIZED)
+        
+    except Exception as e:
+        logger.error(f"Error en google_login: {str(e)}")
+        return Response({
+            'status': 'error',
+            'message': 'Error interno del servidor',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 

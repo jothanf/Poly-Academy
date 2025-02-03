@@ -30,6 +30,7 @@ from .view.teacher_views import TeacherViewSet
 from .view.ai_views import text_to_speech, AskOpenAIView, translate_message, img_gen, transcribe_audio
 from .view.search_views import SearchView
 from .view.sessions_views import unified_login
+from .view.auth_views import google_login
 
 router = DefaultRouter()
 
@@ -69,4 +70,5 @@ urlpatterns = [
     path('api/vocabulary/by-class/', VocabularyEntryViewSet.as_view({'get': 'by_class'}), name='vocabulary-by-class'),
     path('api/vocabulary/favorites/', VocabularyEntryViewSet.as_view({'get': 'favorites'}), name='vocabulary-favorites'),
     path('api/vocabulary/<int:pk>/toggle-favorite/', VocabularyEntryViewSet.as_view({'post': 'toggle_favorite'}), name='vocabulary-toggle-favorite'),
+    path('api/google-login/', google_login, name='google-login'),
 ]
