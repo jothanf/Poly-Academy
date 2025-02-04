@@ -110,16 +110,25 @@ class StudentViewSet(generics.GenericAPIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, *args, **kwargs):
-        student_id = kwargs.get('pk')
         try:
-            instance = StudentModel.objects.get(pk=student_id)
+            instance = self.get_object()
+            
+            # Verificar si el usuario tiene permisos para eliminar
+            if not request.user.is_staff and request.user != instance.user:
+                return Response({
+                    'status': 'error',
+                    'message': 'No tienes permiso para eliminar este estudiante'
+                }, status=status.HTTP_403_FORBIDDEN)
+                
             user = instance.user  # Guardamos referencia al usuario
             instance.delete()     # Eliminamos el StudentModel
-            user.delete()        # Eliminamos también el User asociado
+            user.delete()         # Eliminamos también el User asociado
+            
             return Response({
                 'status': 'success',
                 'message': 'Estudiante eliminado exitosamente'
             }, status=status.HTTP_200_OK)
+            
         except StudentModel.DoesNotExist:
             return Response({
                 'status': 'error',
