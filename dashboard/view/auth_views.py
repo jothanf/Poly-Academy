@@ -19,6 +19,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
 from ..models import StudentModel
+from ..utils.password_utils import generate_secure_password
+from .email_views import send_welcome_email
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +206,8 @@ def google_login(request):
         except User.DoesNotExist:
             # Si el usuario no existe, crear uno nuevo
             username = email.split('@')[0]  # Usar la parte del email como nombre de usuario
-            password = 'ContraseñaGenérica123!'  # Contraseña genérica
+            # Generar contraseña segura
+            password = generate_secure_password(username)
 
             # Crear el nuevo usuario
             user = User.objects.create_user(username=username, email=email, password=password)
@@ -212,7 +215,11 @@ def google_login(request):
             # Crear el StudentModel asociado
             StudentModel.objects.create(user=user)
 
-        
+            # Enviar email con credenciales
+            email_sent = send_welcome_email(email, username, password)
+            if not email_sent:
+                logger.warning(f"No se pudo enviar el email de bienvenida a {email}")
+
             refresh = RefreshToken.for_user(user)
             
             return Response({
