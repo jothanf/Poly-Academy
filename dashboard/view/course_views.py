@@ -4,8 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from ..models import CourseModel
-from ..serializers import CourseModelSerializer
+from ..serializers import CourseModelSerializer, StudentModelSerializer
 from django.shortcuts import render
+from rest_framework import generics
+
 
 
 class CourseView(viewsets.ModelViewSet):
@@ -40,3 +42,37 @@ class CourseView(viewsets.ModelViewSet):
 def course_list(request):
     courses = CourseModel.objects.all().order_by('-created_at')
     return render(request, 'course_list.html', {'courses': courses}) 
+
+
+class CourseStudentsView(generics.GenericAPIView):
+    serializer_class = StudentModelSerializer
+
+    def get(self, request, course_id):
+        """
+        Obtiene la lista de estudiantes inscritos en un curso específico
+        """
+        try:
+            course = CourseModel.objects.get(id=course_id)
+            students = course.enrolled_students.all()
+            serializer = self.get_serializer(students, many=True)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Estudiantes obtenidos exitosamente',
+                'data': {
+                    'course_name': course.course_name,
+                    'total_students': students.count(),
+                    'students': serializer.data
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except CourseModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Curso no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

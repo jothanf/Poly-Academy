@@ -21,7 +21,7 @@ from . import views
 from . import api
 from .view.sessions_views import StudentLoginRecordView, UnifiedLogoutView
 from .view.class_views import  ClassModelViewSet, ClassDeleteView
-from .view.course_views import course_list, CourseView
+from .view.course_views import course_list, CourseView, CourseStudentsView
 from .view.ai_views import AskOpenAIView
 from .view.scenario_views import ScenarioModelViewSet
 from .view.student_views import StudentViewSet, create_student, StudentNoteViewSet, VocabularyEntryViewSet, StudentCoursesView, StudentListView
@@ -73,4 +73,5 @@ urlpatterns = [
     path('api/vocabulary/favorites/', VocabularyEntryViewSet.as_view({'get': 'favorites'}), name='vocabulary-favorites'),
     path('api/vocabulary/<int:pk>/toggle-favorite/', VocabularyEntryViewSet.as_view({'post': 'toggle_favorite'}), name='vocabulary-toggle-favorite'),
     path('api/google-login/', google_login, name='google-login'),
+    path('api/courses/<int:course_id>/students/', CourseStudentsView.as_view(), name='course-students'),
 ]
