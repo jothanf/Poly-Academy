@@ -77,6 +77,7 @@ def send_welcome_email(destinatario, username, password):
     """
     Envía un correo de bienvenida con las credenciales del usuario
     """
+    logger.info(f"Iniciando envío de email de bienvenida para: {destinatario}")
     asunto = "Bienvenido a PolyAcademy - Tus credenciales de acceso"
     
     contenido_html = f"""
@@ -96,6 +97,7 @@ def send_welcome_email(destinatario, username, password):
     """
 
     try:
+        logger.debug(f"Configurando mensaje para: {destinatario}")
         msg = MIMEMultipart()
         msg['Subject'] = asunto
         msg['From'] = remitente
@@ -104,13 +106,19 @@ def send_welcome_email(destinatario, username, password):
         html_part = MIMEText(contenido_html, 'html')
         msg.attach(html_part)
 
+        logger.debug("Iniciando conexión SMTP")
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
-        server.login(remitente, password)
+        
+        logger.debug(f"Intentando autenticar con email: {remitente}")
+        server.login(remitente, os.getenv('USER_PASSWORD_EMAIL'))  # Usar la contraseña correcta del email
+        
+        logger.debug("Enviando email...")
         server.sendmail(remitente, destinatario, msg.as_string())
         server.quit()
+        logger.info(f"Email enviado exitosamente a: {destinatario}")
         
         return True
     except Exception as e:
-        logger.error(f"Error enviando email de bienvenida a {destinatario}: {str(e)}")
+        logger.error(f"Error detallado enviando email a {destinatario}: {str(e)}")
         return False

@@ -178,6 +178,7 @@ def google_login(request):
         try:
             # Buscar si existe el usuario
             user = User.objects.get(email=email)
+            logger.info(f"Usuario existente encontrado: {email}")
             
             # Verificar si es estudiante
             if not hasattr(user, 'studentmodel'):
@@ -205,20 +206,26 @@ def google_login(request):
             
         except User.DoesNotExist:
             # Si el usuario no existe, crear uno nuevo
-            username = email.split('@')[0]  # Usar la parte del email como nombre de usuario
-            # Generar contraseña segura
+            logger.info(f"Creando nuevo usuario para: {email}")
+            username = email.split('@')[0]
             password = generate_secure_password(username)
+            logger.debug(f"Contraseña generada para {username}")
 
             # Crear el nuevo usuario
             user = User.objects.create_user(username=username, email=email, password=password)
+            logger.info(f"Usuario creado exitosamente: {username}")
             
             # Crear el StudentModel asociado
             StudentModel.objects.create(user=user)
+            logger.info(f"Modelo de estudiante creado para: {username}")
 
             # Enviar email con credenciales
+            logger.info(f"Intentando enviar email de bienvenida a: {email}")
             email_sent = send_welcome_email(email, username, password)
             if not email_sent:
-                logger.warning(f"No se pudo enviar el email de bienvenida a {email}")
+                logger.error(f"Fallo al enviar email de bienvenida a {email}")
+            else:
+                logger.info(f"Email de bienvenida enviado exitosamente a {email}")
 
             refresh = RefreshToken.for_user(user)
             
