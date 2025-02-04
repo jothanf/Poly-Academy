@@ -66,10 +66,13 @@ class StudentViewSet(generics.GenericAPIView):
     queryset = StudentModel.objects.all()
     serializer_class = StudentModelSerializer
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return StudentModel.objects.get(user=self.request.user)
+        try:
+            return StudentModel.objects.get(user=self.request.user)
+        except StudentModel.DoesNotExist:
+            raise StudentModel.DoesNotExist('Student not found for this user')
 
     def patch(self, request, *args, **kwargs):
         print(f"\nRecibida solicitud PATCH para actualizar perfil")
