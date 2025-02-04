@@ -221,11 +221,14 @@ def google_login(request):
 
             # Enviar email con credenciales
             logger.info(f"Intentando enviar email de bienvenida a: {email}")
-            email_sent = send_welcome_email(email, username, password)
-            if not email_sent:
-                logger.error(f"Fallo al enviar email de bienvenida a {email}")
-            else:
-                logger.info(f"Email de bienvenida enviado exitosamente a {email}")
+            try:
+                email_sent = send_welcome_email(email, username, password)
+                if not email_sent:
+                    logger.error(f"Fallo al enviar email de bienvenida a {email}")
+                else:
+                    logger.info(f"Email de bienvenida enviado exitosamente a {email}")
+            except Exception as e:
+                logger.error(f"Error al enviar email de bienvenida: {str(e)}")
 
             refresh = RefreshToken.for_user(user)
             

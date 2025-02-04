@@ -26,52 +26,7 @@ if not remitente or not password:
 asunto = "PolyAcademy email"  # Simplificamos el asunto sin usar Header
 
 
-destinatarios = [
-    'jothanferney@gmail.com',
-]
-
-sends_cuantity = 0
-address_sends = []
-
-# Contenido del correo de prueba
-contenido_html = """
-<html>
-<body>
-    <h1>Correo de Prueba</h1>
-    <p>Este es un correo de prueba enviado desde Python.</p>
-</body>
-</html>
-"""
-
-# Modificar el código de envío de correo
-for destinatario in destinatarios:
-    msg = MIMEMultipart()  # Cambiamos a MIMEMultipart simple
-    msg['Subject'] = asunto
-    msg['From'] = remitente
-    msg['To'] = destinatario
-
-    # Crear la parte HTML del mensaje
-    html_part = MIMEText(contenido_html, 'html')
-    msg.attach(html_part)
-
-    try:
-        # Enviar el correo
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        
-        # Imprimir para debug (eliminar en producción)
-        print(f"Intentando autenticar con: {remitente}")
-        
-        server.login(remitente, password)
-        server.sendmail(remitente, destinatario, msg.as_string())
-        server.quit()
-        sends_cuantity += 1
-        address_sends.append(destinatario)
-        print(f"Correo enviado exitosamente a {destinatario}")
-    except Exception as e:
-        print(f"Error al enviar el correo a {destinatario}: {str(e)}")
-
-print(address_sends)
+# Eliminar la lista de destinatarios y el código de prueba que está enviando correos genéricos
 
 def send_welcome_email(destinatario, username, password):
     """
