@@ -123,13 +123,23 @@ class StudentViewSet(generics.GenericAPIView):
                     'message': 'No tienes permiso para eliminar este estudiante'
                 }, status=status.HTTP_403_FORBIDDEN)
                 
+            # Limpiar relaciones antes de eliminar
+            instance.courses.clear()  # Eliminar relaciones con cursos
+            instance.notes.all().delete()  # Eliminar notas
+            instance.vocabulary.all().delete()  # Eliminar vocabulario
+            instance.progress.all().delete()  # Eliminar progreso
+            instance.course_progress.all().delete()  # Eliminar progreso de cursos
+            instance.class_progress.all().delete()  # Eliminar progreso de clases
+            instance.activity_logs.all().delete()  # Eliminar logs de actividad
+            instance.login_records.all().delete()  # Eliminar registros de login
+            
             user = instance.user  # Guardamos referencia al usuario
             instance.delete()     # Eliminamos el StudentModel
             user.delete()         # Eliminamos también el User asociado
             
             return Response({
                 'status': 'success',
-                'message': 'Estudiante eliminado exitosamente'
+                'message': 'Estudiante y todos sus datos relacionados eliminados exitosamente'
             }, status=status.HTTP_200_OK)
             
         except StudentModel.DoesNotExist:
