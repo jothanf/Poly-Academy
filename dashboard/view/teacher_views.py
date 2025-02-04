@@ -12,9 +12,12 @@ class TeacherViewSet(viewsets.ModelViewSet):
     serializer_class = TeacherModelSerializer
     
     def get_permissions(self):
+        """
+        Allow creation without authentication, require IsTeacher for other actions
+        """
         if self.action == 'create':
-            return []  # Sin permisos para crear
-        return [IsTeacher()]  # Usar IsTeacher para otras acciones
+            return []  # No permissions required for create action
+        return [IsAuthenticated(), IsTeacher()]  # Both authentication and IsTeacher for other actions
 
     def get_queryset(self):
         queryset = TeacherModel.objects.all()
