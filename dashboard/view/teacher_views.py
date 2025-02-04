@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from ..permissions import IsTeacher
 from rest_framework import status
 from rest_framework.response import Response
+from django.contrib.auth.models import User
   
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = TeacherModel.objects.all()
@@ -21,6 +22,14 @@ class TeacherViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
+            # Verificamos si ya existe un usuario con ese email
+            email = request.data.get('email')
+            if User.objects.filter(email=email).exists():
+                return Response({
+                    'status': 'error',
+                    'message': 'Ya existe un usuario con este correo electrónico'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
             # Manejamos los datos del formulario y la imagen
             data = request.data.dict() if hasattr(request.data, 'dict') else request.data
             
