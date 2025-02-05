@@ -31,6 +31,8 @@ from .view.ai_views import text_to_speech, AskOpenAIView, translate_message, img
 from .view.search_views import SearchView
 from .view.sessions_views import unified_login
 from .view.auth_views import google_login
+from .view.password_views import change_password, request_password_reset, confirm_password_reset
+from .view.note_views import StudentNoteViewSet, VocabularyEntryViewSet, StudentWordsViewSet
 
 router = DefaultRouter()
 
@@ -42,6 +44,7 @@ router.register(r'class-notes', StudentNoteViewSet, 'class-notes')
 router.register(r'vocabulary', VocabularyEntryViewSet, 'vocabulary')
 router.register(r'teachers', TeacherViewSet, 'teachers')
 router.register(r'class-contents', ClassContentModelViewSet, 'classcontent')
+router.register(r'student-words', StudentWordsViewSet, 'student-words')
 
 urlpatterns = [
     path('api/', include(router.urls)),
@@ -74,4 +77,7 @@ urlpatterns = [
     path('api/vocabulary/<int:pk>/toggle-favorite/', VocabularyEntryViewSet.as_view({'post': 'toggle_favorite'}), name='vocabulary-toggle-favorite'),
     path('api/google-login/', google_login, name='google-login'),
     path('api/courses/<int:course_id>/students/', CourseStudentsView.as_view(), name='course-students'),
+    path('api/change-password/', change_password, name='change-password'),
+    path('api/request-password-reset/', request_password_reset, name='request-password-reset'),
+    path('api/confirm-password-reset/', confirm_password_reset, name='confirm-password-reset'),
 ]

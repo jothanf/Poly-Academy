@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from ..models import StudentNoteModel, VocabularyEntryModel
-from ..serializers import StudentNoteModelSerializer, VocabularyEntryModelSerializer
+from ..models import StudentNoteModel, VocabularyEntryModel, StudentWordsModel
+from ..serializers import StudentNoteModelSerializer, VocabularyEntryModelSerializer, StudentWordsModelSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class StudentNoteViewSet(viewsets.ModelViewSet):
@@ -259,6 +259,143 @@ class VocabularyEntryViewSet(viewsets.ModelViewSet):
             })
         except Exception as e:
             print(f"Error en by_class_vocabulary: {str(e)}")  # Debug
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class StudentWordsViewSet(viewsets.ModelViewSet):
+    queryset = StudentWordsModel.objects.all()
+    serializer_class = StudentWordsModelSerializer
+    permission_classes = [IsAuthenticated]
+    model_name = 'palabra de estudiante'
+
+    def get_queryset(self):
+        # Filtrar palabras por estudiante actual
+        return self.queryset.filter(student=self.request.user.student)
+
+    def perform_create(self, serializer):
+        # Asignar automáticamente el estudiante actual
+        serializer.save(student=self.request.user.student)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({
+                'status': 'success',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response({
+                'status': 'success',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response({
+                'status': 'success',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({
+                'status': 'success',
+                'message': 'Palabra eliminada exitosamente'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'])
+    def toggle_favorite(self, request, pk=None):
+        try:
+            word = self.get_object()
+            word.favorite = not word.favorite
+            word.save()
+            serializer = self.get_serializer(word)
+            return Response({
+                'status': 'success',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'])
+    def toggle_learned(self, request, pk=None):
+        try:
+            word = self.get_object()
+            word.learned = not word.learned
+            word.save()
+            serializer = self.get_serializer(word)
+            return Response({
+                'status': 'success',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def favorites(self, request):
+        try:
+            queryset = self.get_queryset().filter(favorite=True)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({
+                'status': 'success',
+                'data': serializer.data
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def learned(self, request):
+        try:
+            queryset = self.get_queryset().filter(learned=True)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({
+                'status': 'success',
+                'data': serializer.data
+            })
+        except Exception as e:
             return Response({
                 'status': 'error',
                 'message': str(e)

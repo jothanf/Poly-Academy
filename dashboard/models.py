@@ -351,6 +351,20 @@ class StudentNoteModel(models.Model):
 
     def __str__(self):
         return f"Note from {self.student.user.username}: {self.title}"
+    
+class StudentWordsModel(models.Model):
+    student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='words')
+    english_word = models.CharField(max_length=200)
+    spanish_word = models.CharField(max_length=200)
+    favorite = models.BooleanField(default=False)
+    learned = models.BooleanField(default=False)
+    audio = models.FileField(upload_to='words_audio/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.english_word} - {self.spanish_word}"
+
 
 
 
@@ -500,3 +514,14 @@ class StudentActivityLogModel(models.Model):
 class StudentLoginRecord(models.Model):
     student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='login_records')
     login_date = models.DateField(auto_now_add=True)
+
+class PasswordResetCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expiry = models.DateTimeField()
+    used = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Código de recuperación de contraseña'
+        verbose_name_plural = 'Códigos de recuperación de contraseña'

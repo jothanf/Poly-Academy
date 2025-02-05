@@ -219,7 +219,6 @@ def google_login(request):
             StudentModel.objects.create(user=user)
             logger.info(f"Modelo de estudiante creado para: {username}")
 
-            # Enviar email con credenciales
             logger.info(f"Intentando enviar email de bienvenida a: {email}")
             try:
                 email_sent = send_welcome_email(email, username, password)

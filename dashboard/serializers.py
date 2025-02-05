@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CourseModel, ClassModel, LayoutModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, ClassContentModel, ScenarioModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel, StudentLoginRecord
+from .models import CourseModel, ClassModel, LayoutModel, VideoLayoutModel, TextBlockLayoutModel, MediaModel, ClassContentModel, ScenarioModel, StudentModel, StudentNoteModel, VocabularyEntryModel, TeacherModel, StudentLoginRecord, StudentWordsModel
 from django.contrib.auth.models import User
 
 
@@ -287,3 +287,29 @@ class LogoutResponseSerializer(serializers.Serializer):
 class UnifiedLogoutResponseSerializer(serializers.Serializer):
     status = serializers.CharField()
     message = serializers.CharField()
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=8)
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    code = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=8)
+
+class StudentWordsModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentWordsModel
+        fields = [
+            'id', 'student', 'english_word', 'spanish_word', 
+            'favorite', 'learned', 'audio', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def validate(self, data):
+        if not StudentModel.objects.filter(id=data['student'].id).exists():
+            raise serializers.ValidationError("El estudiante especificado no existe")
+        return data

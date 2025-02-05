@@ -77,3 +77,41 @@ def send_welcome_email(destinatario, username, password):
     except Exception as e:
         logger.error(f"Error detallado enviando email a {destinatario}: {str(e)}")
         return False
+
+def send_reset_code_email(destinatario, codigo):
+    """
+    Envía un correo con el código de recuperación de contraseña
+    """
+    asunto = "Código de recuperación de contraseña - PolyAcademy"
+    
+    contenido_html = f"""
+    <html>
+    <body>
+        <h1>Recuperación de contraseña</h1>
+        <p>Has solicitado recuperar tu contraseña en PolyAcademy.</p>
+        <p>Tu código de recuperación es: <strong>{codigo}</strong></p>
+        <p>Este código expirará en 1 hora.</p>
+        <p>Si no solicitaste este cambio, ignora este correo.</p>
+    </body>
+    </html>
+    """
+
+    try:
+        msg = MIMEMultipart()
+        msg['Subject'] = asunto
+        msg['From'] = remitente
+        msg['To'] = destinatario
+
+        html_part = MIMEText(contenido_html, 'html')
+        msg.attach(html_part)
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(remitente, os.getenv('USER_PASSWORD_EMAIL'))
+        server.sendmail(remitente, destinatario, msg.as_string())
+        server.quit()
+        
+        return True
+    except Exception as e:
+        logger.error(f"Error enviando email de recuperación a {destinatario}: {str(e)}")
+        return False

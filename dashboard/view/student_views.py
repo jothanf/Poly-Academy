@@ -352,7 +352,6 @@ class StudentNoteViewSet(viewsets.ModelViewSet):
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class VocabularyEntryViewSet(viewsets.ModelViewSet):
     serializer_class = VocabularyEntryModelSerializer
     parser_classes = (MultiPartParser, FormParser, JSONParser)
