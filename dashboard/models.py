@@ -354,8 +354,8 @@ class StudentNoteModel(models.Model):
     
 class StudentWordsModel(models.Model):
     student = models.ForeignKey(StudentModel, on_delete=models.CASCADE, related_name='words')
-    english_word = models.CharField(max_length=200)
-    spanish_word = models.CharField(max_length=200)
+    english_word = models.CharField(max_length=200, null=True, blank=True)
+    spanish_word = models.CharField(max_length=200, null=True, blank=True)
     favorite = models.BooleanField(default=False)
     learned = models.BooleanField(default=False)
     audio = models.FileField(upload_to='words_audio/', null=True, blank=True)

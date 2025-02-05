@@ -3,7 +3,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from ..models import StudentNoteModel, VocabularyEntryModel, StudentWordsModel
 from ..serializers import StudentNoteModelSerializer, VocabularyEntryModelSerializer, StudentWordsModelSerializer
+from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
+from ..IA.openAI import AIService
+import os
+import uuid
+
 
 class StudentNoteViewSet(viewsets.ModelViewSet):
     queryset = StudentNoteModel.objects.all()
@@ -271,12 +276,58 @@ class StudentWordsViewSet(viewsets.ModelViewSet):
     model_name = 'palabra de estudiante'
 
     def get_queryset(self):
-        # Filtrar palabras por estudiante actual
         return self.queryset.filter(student=self.request.user.student)
 
     def perform_create(self, serializer):
-        # Asignar automáticamente el estudiante actual
-        serializer.save(student=self.request.user.student)
+        try:
+            data = serializer.validated_data
+            english_word = data.get('english_word')
+            spanish_word = data.get('spanish_word')
+            
+            # Inicializar el servicio AI
+            ai_service = AIService()
+            
+            # Si falta alguna traducción, usar OpenAI para obtenerla
+            if english_word and not spanish_word:
+                spanish_word = ai_service.translate_to_spanish(english_word)
+            elif spanish_word and not english_word:
+                # Para traducir de español a inglés
+                response = ai_service.client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "Eres un traductor experto de español a inglés."},
+                        {"role": "user", "content": f"Traduce al inglés: {spanish_word}"}
+                    ],
+                    temperature=0.7
+                )
+                english_word = response.choices[0].message.content.strip()
+
+            # Generar el audio para la palabra en inglés
+            if english_word:
+                # Crear un nombre de archivo único para el audio
+                audio_filename = f"words_audio/word_{uuid.uuid4()}.mp3"
+                audio_path = os.path.join('media', audio_filename)
+                
+                # Asegurarse de que el directorio existe
+                os.makedirs(os.path.dirname(audio_path), exist_ok=True)
+                
+                # Generar el audio
+                ai_service.text_to_speech(
+                    text=english_word,
+                    voice="alloy",
+                    output_file=audio_path
+                )
+                
+                # Guardar todo en la base de datos
+                serializer.save(
+                    student=self.request.user.student,
+                    english_word=english_word,
+                    spanish_word=spanish_word,
+                    audio=audio_filename
+                )
+            
+        except Exception as e:
+            raise serializers.ValidationError(f"Error al procesar la palabra: {str(e)}")
 
     def list(self, request, *args, **kwargs):
         try:
