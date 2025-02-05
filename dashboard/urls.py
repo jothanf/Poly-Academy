@@ -44,7 +44,7 @@ router.register(r'class-notes', StudentNoteViewSet, 'class-notes')
 router.register(r'vocabulary', VocabularyEntryViewSet, 'vocabulary')
 router.register(r'teachers', TeacherViewSet, 'teachers')
 router.register(r'class-contents', ClassContentModelViewSet, 'classcontent')
-router.register(r'student-words', StudentWordsViewSet, 'student-words')
+router.register(r'students/(?P<student_id>\d+)/words', StudentWordsViewSet, 'student-words')
 
 urlpatterns = [
     path('api/', include(router.urls)),

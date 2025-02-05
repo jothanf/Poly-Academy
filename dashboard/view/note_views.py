@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from ..models import StudentNoteModel, VocabularyEntryModel, StudentWordsModel
+from ..models import StudentNoteModel, VocabularyEntryModel, StudentWordsModel, StudentModel
 from ..serializers import StudentNoteModelSerializer, VocabularyEntryModelSerializer, StudentWordsModelSerializer
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
@@ -270,16 +270,23 @@ class VocabularyEntryViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class StudentWordsViewSet(viewsets.ModelViewSet):
-    queryset = StudentWordsModel.objects.all()
     serializer_class = StudentWordsModelSerializer
     permission_classes = [IsAuthenticated]
     model_name = 'palabra de estudiante'
 
     def get_queryset(self):
-        return self.queryset.filter(student=self.request.user.student)
+        student_id = self.kwargs['student_id']
+        return StudentWordsModel.objects.filter(student_id=student_id)
 
     def perform_create(self, serializer):
         try:
+            student_id = self.kwargs['student_id']
+            student = StudentModel.objects.get(id=student_id)
+            
+            # Verificar que el usuario autenticado es el dueño de las palabras
+            if student.user != self.request.user:
+                raise serializers.ValidationError("No tienes permiso para crear palabras para este estudiante")
+            
             data = serializer.validated_data
             english_word = data.get('english_word')
             spanish_word = data.get('spanish_word')
@@ -291,7 +298,6 @@ class StudentWordsViewSet(viewsets.ModelViewSet):
             if english_word and not spanish_word:
                 spanish_word = ai_service.translate_to_spanish(english_word)
             elif spanish_word and not english_word:
-                # Para traducir de español a inglés
                 response = ai_service.client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
@@ -304,28 +310,26 @@ class StudentWordsViewSet(viewsets.ModelViewSet):
 
             # Generar el audio para la palabra en inglés
             if english_word:
-                # Crear un nombre de archivo único para el audio
                 audio_filename = f"words_audio/word_{uuid.uuid4()}.mp3"
                 audio_path = os.path.join('media', audio_filename)
                 
-                # Asegurarse de que el directorio existe
                 os.makedirs(os.path.dirname(audio_path), exist_ok=True)
                 
-                # Generar el audio
                 ai_service.text_to_speech(
                     text=english_word,
                     voice="alloy",
                     output_file=audio_path
                 )
                 
-                # Guardar todo en la base de datos
                 serializer.save(
-                    student=self.request.user.student,
+                    student=student,
                     english_word=english_word,
                     spanish_word=spanish_word,
                     audio=audio_filename
                 )
             
+        except StudentModel.DoesNotExist:
+            raise serializers.ValidationError("Estudiante no encontrado")
         except Exception as e:
             raise serializers.ValidationError(f"Error al procesar la palabra: {str(e)}")
 
