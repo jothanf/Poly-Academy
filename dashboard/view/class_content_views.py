@@ -24,13 +24,19 @@ class ClassContentModelViewSet(BaseModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            print("Datos recibidos:", request.data)  # Debug
+            print("\n=== INICIO DE CREACIÓN DE CONTENIDO ===")
+            print("Datos recibidos en request.data:", request.data)
+            print("Archivos recibidos en request.FILES:", request.FILES)
+
             # Validar el content_details si está presente
             if 'content_details' in request.data:
+                print("Validando content_details...")
                 try:
                     if isinstance(request.data['content_details'], str):
-                        json.loads(request.data['content_details'])
-                except json.JSONDecodeError:
+                        content_details = json.loads(request.data['content_details'])
+                        print("content_details parseado:", content_details)
+                except json.JSONDecodeError as e:
+                    print("Error al parsear content_details:", str(e))
                     return Response({
                         'status': 'error',
                         'message': 'Error en la validación de datos',
@@ -40,20 +46,51 @@ class ClassContentModelViewSet(BaseModelViewSet):
                         'tipo_error': 'validación'
                     }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Procesar los archivos multimedia si están presentes
-            multimedia_files = request.FILES.getlist('multimedia')
-            
-            # Crear el contenido usando el método de la clase padre
+            # Procesar los archivos multimedia
+            if request.FILES:
+                print("\nProcesando archivos multimedia...")
+                multimedia_data = []
+                
+                # Procesar imagen de portada
+                if 'cover' in request.FILES:
+                    print("Procesando imagen de portada...")
+                    cover_file = request.FILES['cover']
+                    instance = ClassContentModel()
+                    cover_info = instance.save_multimedia_file(cover_file, 'image')
+                    print("Información de portada guardada:", cover_info)
+                    multimedia_data.append({
+                        'media_type': 'image',
+                        'file_info': cover_info
+                    })
+
+                # Procesar audio
+                if 'audio' in request.FILES:
+                    print("Procesando archivo de audio...")
+                    audio_file = request.FILES['audio']
+                    instance = ClassContentModel()
+                    audio_info = instance.save_multimedia_file(audio_file, 'audio')
+                    print("Información de audio guardada:", audio_info)
+                    multimedia_data.append({
+                        'media_type': 'audio',
+                        'file_info': audio_info
+                    })
+
+                if multimedia_data:
+                    print("Datos multimedia procesados:", multimedia_data)
+                    request.data['multimedia'] = multimedia_data
+
+            print("\nCreando contenido usando el método de la clase padre...")
             response = super().create(request, *args, **kwargs)
-            
-            # Si llegamos aquí, la creación fue exitosa
+            print("Respuesta de creación:", response.data)
+
             return Response({
                 'status': 'success',
                 'message': 'Contenido de clase creado exitosamente',
                 'data': response.data
             }, status=status.HTTP_201_CREATED)
-            
+
         except ValidationError as e:
+            print("Error de validación:", str(e))
             return Response({
                 'status': 'error',
                 'message': 'Error de validación',
@@ -62,7 +99,8 @@ class ClassContentModelViewSet(BaseModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             import traceback
-            print("Error detallado:", traceback.format_exc())  # Debug
+            print("Error inesperado:", str(e))
+            print("Traceback completo:", traceback.format_exc())
             return Response({
                 'status': 'error',
                 'message': 'Error al crear el contenido de clase',
