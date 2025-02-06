@@ -28,12 +28,15 @@ class ClassContentModelViewSet(BaseModelViewSet):
             print("Datos recibidos en request.data:", request.data)
             print("Archivos recibidos en request.FILES:", request.FILES)
 
+            # Crear una copia mutable de request.data
+            mutable_data = request.data.copy()
+
             # Validar el content_details si está presente
-            if 'content_details' in request.data:
+            if 'content_details' in mutable_data:
                 print("Validando content_details...")
                 try:
-                    if isinstance(request.data['content_details'], str):
-                        content_details = json.loads(request.data['content_details'])
+                    if isinstance(mutable_data['content_details'], str):
+                        content_details = json.loads(mutable_data['content_details'])
                         print("content_details parseado:", content_details)
                 except json.JSONDecodeError as e:
                     print("Error al parsear content_details:", str(e))
@@ -47,46 +50,45 @@ class ClassContentModelViewSet(BaseModelViewSet):
                     }, status=status.HTTP_400_BAD_REQUEST)
 
             # Procesar los archivos multimedia
-            if request.FILES:
-                print("\nProcesando archivos multimedia...")
-                multimedia_data = []
-                
-                # Procesar imagen de portada
-                if 'cover' in request.FILES:
-                    print("Procesando imagen de portada...")
-                    cover_file = request.FILES['cover']
-                    instance = ClassContentModel()
-                    cover_info = instance.save_multimedia_file(cover_file, 'image')
-                    print("Información de portada guardada:", cover_info)
-                    multimedia_data.append({
-                        'media_type': 'image',
-                        'file_info': cover_info
-                    })
+            multimedia_data = []
+            if 'image' in request.FILES:
+                print("Procesando imagen...")
+                image_file = request.FILES['image']
+                instance = ClassContentModel()
+                image_info = instance.save_multimedia_file(image_file, 'image')
+                print("Información de imagen guardada:", image_info)
+                multimedia_data.append({
+                    'media_type': 'image',
+                    'file_info': image_info
+                })
 
-                # Procesar audio
-                if 'audio' in request.FILES:
-                    print("Procesando archivo de audio...")
-                    audio_file = request.FILES['audio']
-                    instance = ClassContentModel()
-                    audio_info = instance.save_multimedia_file(audio_file, 'audio')
-                    print("Información de audio guardada:", audio_info)
-                    multimedia_data.append({
-                        'media_type': 'audio',
-                        'file_info': audio_info
-                    })
+            if 'audio' in request.FILES:
+                print("Procesando archivo de audio...")
+                audio_file = request.FILES['audio']
+                instance = ClassContentModel()
+                audio_info = instance.save_multimedia_file(audio_file, 'audio')
+                print("Información de audio guardada:", audio_info)
+                multimedia_data.append({
+                    'media_type': 'audio',
+                    'file_info': audio_info
+                })
 
-                if multimedia_data:
-                    print("Datos multimedia procesados:", multimedia_data)
-                    request.data['multimedia'] = multimedia_data
+            if multimedia_data:
+                print("Datos multimedia procesados:", multimedia_data)
+                # Convertir multimedia_data a string JSON antes de asignarlo
+                mutable_data['multimedia'] = json.dumps(multimedia_data)
 
             print("\nCreando contenido usando el método de la clase padre...")
-            response = super().create(request, *args, **kwargs)
-            print("Respuesta de creación:", response.data)
-
+            # Usar mutable_data en lugar de request.data
+            serializer = self.get_serializer(data=mutable_data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            
+            print("Contenido creado exitosamente")
             return Response({
                 'status': 'success',
                 'message': 'Contenido de clase creado exitosamente',
-                'data': response.data
+                'data': serializer.data
             }, status=status.HTTP_201_CREATED)
 
         except ValidationError as e:
