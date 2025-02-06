@@ -48,12 +48,26 @@ class MediaModelSerializer(serializers.ModelSerializer):
 class ClassContentModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassContentModel
-        fields = ['id', 'class_id', 'content_type', 'tittle', 
-                  'instructions', 'content_details', 'multimedia', 
-                  'image', 'video', 'video_transcription', 
-                  'embed_video', 'audio', 'audio_transcription', 
-                  'pdf', 'order', 'stats', 
-                  'created_at', 'updated_at']
+        fields = [
+            'id', 
+            'class_id', 
+            'content_type', 
+            'tittle', 
+            'instructions', 
+            'content_details', 
+            'multimedia',
+            'image',
+            'video',
+            'video_transcription',
+            'embed_video',
+            'audio',
+            'audio_transcription',
+            'pdf',
+            'order',
+            'stats',
+            'created_at',
+            'updated_at'
+        ]
 
     def validate_content_details(self, value):
         """
@@ -74,19 +88,14 @@ class ClassContentModelSerializer(serializers.ModelSerializer):
         return ClassContentModel.objects.create(**validated_data)
 
     def to_representation(self, instance):
-        """Personalizar la representación de la respuesta"""
+        """Asegurar que todos los campos estén presentes en la respuesta"""
         data = super().to_representation(instance)
-        return {
-            'id': data['id'],
-            'tittle': data['tittle'],
-            'instructions': data['instructions'],
-            'content_type': data['content_type'],
-            'class_id': data['class_id'],
-            'order': data['order'],
-            'content_details': data.get('content_details', {}),
-            'created_at': data['created_at'],
-            'updated_at': data['updated_at']
-        }
+        # Asegurar que todos los campos estén presentes, incluso si son nulos
+        all_fields = self.Meta.fields
+        for field in all_fields:
+            if field not in data:
+                data[field] = None
+        return data
 
 
 class ScenarioModelSerializer(serializers.ModelSerializer):
@@ -114,6 +123,11 @@ class StudentModelSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source='user.username', read_only=True)
     user_email = serializers.EmailField(source='user.email', read_only=True)
     profile_picture = serializers.ImageField(required=False)
+    courses = serializers.PrimaryKeyRelatedField(
+        many=True, 
+        required=False,
+        queryset=CourseModel.objects.all()
+    )
 
     class Meta:
         model = StudentModel
@@ -125,6 +139,7 @@ class StudentModelSerializer(serializers.ModelSerializer):
         email = validated_data.pop('email')
         password = validated_data.pop('password')
         profile_picture = validated_data.pop('profile_picture', None)
+        courses = validated_data.pop('courses', [])  # Extraer los cursos si existen
 
         try:
             user = User.objects.create_user(
@@ -138,6 +153,11 @@ class StudentModelSerializer(serializers.ModelSerializer):
                 profile_picture=profile_picture,
                 **validated_data
             )
+
+            # Asignar los cursos después de crear el estudiante
+            if courses:
+                student.courses.set(courses)
+                
             return student
         except Exception as e:
             raise serializers.ValidationError(f"Error al registrar estudiante: {str(e)}")
@@ -307,9 +327,7 @@ class StudentWordsModelSerializer(serializers.ModelSerializer):
             'id', 'student', 'english_word', 'spanish_word', 
             'favorite', 'learned', 'audio', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'student']
 
     def validate(self, data):
-        if not StudentModel.objects.filter(id=data['student'].id).exists():
-            raise serializers.ValidationError("El estudiante especificado no existe")
         return data
