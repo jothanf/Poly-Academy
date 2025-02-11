@@ -365,9 +365,6 @@ class StudentWordsModel(models.Model):
     def __str__(self):
         return f"{self.english_word} - {self.spanish_word}"
 
-
-
-
 class VocabularyEntryModel(models.Model):
     PROFICIENCY_LEVELS = [
         (1, 'Principiante'),      # Apenas conoce la palabra

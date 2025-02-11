@@ -281,56 +281,49 @@ class StudentWordsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         try:
             student_id = self.kwargs['student_id']
-            student = StudentModel.objects.get(id=student_id)
+            student = StudentModel.objects.get(user=self.request.user)
             
-            # Verificar que el usuario autenticado es el dueño de las palabras
-            if student.user != self.request.user:
+            if student.id != int(student_id):
                 raise serializers.ValidationError("No tienes permiso para crear palabras para este estudiante")
-            
-            data = serializer.validated_data
-            english_word = data.get('english_word')
-            spanish_word = data.get('spanish_word')
-            
-            # Inicializar el servicio AI
+
+            # Obtener las palabras del request
+            english_word = serializer.validated_data.get('english_word')
+            spanish_word = serializer.validated_data.get('spanish_word')
+
             ai_service = AIService()
-            
+
             # Si falta alguna traducción, usar OpenAI para obtenerla
             if english_word and not spanish_word:
                 spanish_word = ai_service.translate_to_spanish(english_word)
+                serializer.validated_data['spanish_word'] = spanish_word
             elif spanish_word and not english_word:
-                response = ai_service.client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": "Eres un traductor experto de español a inglés."},
-                        {"role": "user", "content": f"Traduce al inglés: {spanish_word}"}
-                    ],
-                    temperature=0.7
-                )
-                english_word = response.choices[0].message.content.strip()
+                prompt = f"Translate this Spanish text to English: {spanish_word}"
+                english_word = ai_service.chat_with_gpt(prompt)
+                serializer.validated_data['english_word'] = english_word
 
             # Generar el audio para la palabra en inglés
             if english_word:
-                audio_filename = f"words_audio/word_{uuid.uuid4()}.mp3"
-                audio_path = os.path.join('media', audio_filename)
+                # Crear el directorio temporal si no existe
+                audio_dir = 'media/words_audio'
+                os.makedirs(audio_dir, exist_ok=True)
                 
-                os.makedirs(os.path.dirname(audio_path), exist_ok=True)
+                # Generar un nombre único para el archivo
+                file_uuid = uuid.uuid4()
+                output_file = f"{audio_dir}/word_{file_uuid}.mp3"
                 
-                ai_service.text_to_speech(
-                    text=english_word,
-                    voice="alloy",
-                    output_file=audio_path
-                )
+                # Generar el audio
+                audio_file = ai_service.text_to_speech(english_word, voice='alloy', output_file=output_file)
                 
-                serializer.save(
-                    student=student,
-                    english_word=english_word,
-                    spanish_word=spanish_word,
-                    audio=audio_filename
-                )
+                if audio_file:
+                    # Asignar el archivo de audio al modelo
+                    serializer.validated_data['audio'] = f"words_audio/word_{file_uuid}.mp3"
+
+            serializer.save(student=student)
             
         except StudentModel.DoesNotExist:
             raise serializers.ValidationError("Estudiante no encontrado")
         except Exception as e:
+            print(f"Error en perform_create: {str(e)}")
             raise serializers.ValidationError(f"Error al procesar la palabra: {str(e)}")
 
     def list(self, request, *args, **kwargs):

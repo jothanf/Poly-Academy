@@ -18,6 +18,7 @@ class AIService:
             raise ValueError("No se encontró OPENAI_API_KEY en las variables de entorno")
         print(f"Inicializando AIService con API key: {api_key[:5]}...")  # Solo muestra los primeros 5 caracteres por seguridad
         self.client = OpenAI(api_key=api_key)
+        self.model = "gpt-3.5-turbo"  # Variable para el modelo de OpenAI
         
     def chat_with_gpt(self, user_message, conversation_history=None):
         logger.debug(f"Chat con GPT iniciado con mensaje: {user_message}")
@@ -34,7 +35,7 @@ class AIService:
             
             print(f"Enviando mensaje a OpenAI: {user_message}")
             response = self.client.chat.completions.create(
-                model="gpt-4",
+                model=self.model,
                 messages=conversation_history,
                 max_tokens=500,
                 temperature=0.7
@@ -207,7 +208,7 @@ Additional information: {scenario.additional_info}"""
                 conversation_history = [conversation_history[0]] + conversation_history[-9:]
 
             response = self.client.chat.completions.create(
-                model="gpt-4",  # Asegúrate de usar el modelo correcto
+                model=self.model,
                 messages=conversation_history,
                 max_tokens=500
             )
@@ -280,7 +281,7 @@ Additional information: {scenario.additional_info}"""
             """
             
             can_end_response = self.client.chat.completions.create(
-                model="gpt-4",
+                model=self.model,
                 messages=[{"role": "user", "content": analysis_prompt}],
                 max_tokens=10,
                 temperature=0
@@ -314,7 +315,7 @@ Additional information: {scenario.additional_info}"""
             """
             
             response = self.client.chat.completions.create(
-                model="gpt-4",
+                model=self.model,
                 messages=[
                     {"role": "system", "content": "Eres un profesor de inglés que proporciona retroalimentación detallada en español."},
                     {"role": "user", "content": feedback_prompt}

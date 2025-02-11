@@ -7,11 +7,14 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 import json
 from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
+import uuid
+from rest_framework import viewsets
 
-class ClassContentModelViewSet(BaseModelViewSet):
+class ClassContentModelViewSet(viewsets.ModelViewSet):
     queryset = ClassContentModel.objects.all()
     serializer_class = ClassContentModelSerializer
-    model_name = 'contenido de clase'
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
@@ -24,116 +27,65 @@ class ClassContentModelViewSet(BaseModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            print("\n=== INICIO DE CREACIÓN DE CONTENIDO ===")
-            print("Datos recibidos en request.data:", request.data)
-            print("Archivos recibidos en request.FILES:", request.FILES)
+            print("=== INICIO DE CREACIÓN DE CONTENIDO ===")
+            print("Datos recibidos:", request.data)
+            content_type = request.content_type or ''
 
-            # Crear una copia mutable de request.data
-            mutable_data = request.data.copy()
+            # Determinar si es una petición multipart o JSON
+            if 'multipart/form-data' in content_type:
+                # Procesar como multipart (archivos)
+                serializer = self.get_serializer(data=request.data)
+            else:
+                # Procesar como JSON
+                serializer = self.get_serializer(data=request.data)
 
-            # Validar el content_details si está presente
-            if 'content_details' in mutable_data:
-                print("Validando content_details...")
-                try:
-                    if isinstance(mutable_data['content_details'], str):
-                        content_details = json.loads(mutable_data['content_details'])
-                        print("content_details parseado:", content_details)
-                except json.JSONDecodeError as e:
-                    print("Error al parsear content_details:", str(e))
-                    return Response({
-                        'status': 'error',
-                        'message': 'Error en la validación de datos',
-                        'campos_con_error': {
-                            'content_details': ['El valor debe ser un JSON válido']
-                        },
-                        'tipo_error': 'validación'
-                    }, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                instance = serializer.save()
+                print("Contenido guardado exitosamente")
+                
+                return Response({
+                    'status': 'success',
+                    'message': 'Contenido creado exitosamente',
+                    'data': serializer.data
+                }, status=status.HTTP_201_CREATED)
+            else:
+                print("Errores de validación:", serializer.errors)
+                return Response({
+                    'status': 'error',
+                    'message': 'Error de validación',
+                    'errors': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Procesar los archivos multimedia
-            multimedia_data = []
-            if 'image' in request.FILES:
-                print("Procesando imagen...")
-                image_file = request.FILES['image']
-                instance = ClassContentModel()
-                image_info = instance.save_multimedia_file(image_file, 'image')
-                print("Información de imagen guardada:", image_info)
-                multimedia_data.append({
-                    'media_type': 'image',
-                    'file_info': image_info
-                })
-
-            if 'audio' in request.FILES:
-                print("Procesando archivo de audio...")
-                audio_file = request.FILES['audio']
-                instance = ClassContentModel()
-                audio_info = instance.save_multimedia_file(audio_file, 'audio')
-                print("Información de audio guardada:", audio_info)
-                multimedia_data.append({
-                    'media_type': 'audio',
-                    'file_info': audio_info
-                })
-
-            if multimedia_data:
-                print("Datos multimedia procesados:", multimedia_data)
-                # Convertir multimedia_data a string JSON antes de asignarlo
-                mutable_data['multimedia'] = json.dumps(multimedia_data)
-
-            print("\nCreando contenido usando el método de la clase padre...")
-            # Usar mutable_data en lugar de request.data
-            serializer = self.get_serializer(data=mutable_data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            
-            print("Contenido creado exitosamente")
-            return Response({
-                'status': 'success',
-                'message': 'Contenido de clase creado exitosamente',
-                'data': serializer.data
-            }, status=status.HTTP_201_CREATED)
-
-        except ValidationError as e:
-            print("Error de validación:", str(e))
-            return Response({
-                'status': 'error',
-                'message': 'Error de validación',
-                'campos_con_error': str(e),
-                'tipo_error': 'validación'
-            }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            import traceback
-            print("Error inesperado:", str(e))
-            print("Traceback completo:", traceback.format_exc())
+            print(f"Error inesperado: {str(e)}")
             return Response({
                 'status': 'error',
-                'message': 'Error al crear el contenido de clase',
-                'detalle_error': str(e),
-                'traceback': traceback.format_exc()
+                'message': f'Error al crear el contenido: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
             
-            # Actualizar el contenido
-            response = super().update(request, *args, **kwargs)
-            
-            return Response({
-                'status': 'success',
-                'message': 'Contenido de clase actualizado exitosamente',
-                'data': response.data
-            })
-            
-        except ValidationError as e:
-            return Response({
-                'status': 'error',
-                'message': 'Error de validación',
-                'detalle_error': str(e),
-            }, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Contenido actualizado exitosamente',
+                    'data': serializer.data
+                })
+            else:
+                return Response({
+                    'status': 'error',
+                    'message': 'Error de validación',
+                    'errors': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
         except Exception as e:
             return Response({
                 'status': 'error',
-                'message': 'Error al actualizar el contenido de clase',
-                'detalle_error': str(e),
+                'message': f'Error al actualizar el contenido: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def partial_update(self, request, *args, **kwargs):
