@@ -28,28 +28,42 @@ class ClassContentModelViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         try:
             print("=== INICIO DE CREACIÓN DE CONTENIDO ===")
-            print("Datos recibidos:", request.data)
-            content_type = request.content_type or ''
-
-            # Determinar si es una petición multipart o JSON
-            if 'multipart/form-data' in content_type:
-                # Procesar como multipart (archivos)
-                serializer = self.get_serializer(data=request.data)
-            else:
-                # Procesar como JSON
-                serializer = self.get_serializer(data=request.data)
-
+            data = request.data.copy()
+            
+            # Manejar galería de imágenes
+            if data.get('content_type') == 'gallery':
+                gallery_images = []
+                content_details = json.loads(data.get('content_details', '{}'))
+                
+                # Procesar cada imagen en la solicitud
+                image_files = request.FILES.getlist('images[]')
+                for index, image_file in enumerate(image_files):
+                    # Guardar la imagen
+                    file_path = f'gallery_images/{uuid.uuid4()}{os.path.splitext(image_file.name)[1]}'
+                    saved_path = default_storage.save(file_path, image_file)
+                    
+                    # Crear información de la imagen
+                    image_info = {
+                        'title': content_details['images'][index].get('title', ''),
+                        'description': content_details['images'][index].get('description', ''),
+                        'image_path': saved_path,
+                        'image_url': default_storage.url(saved_path)
+                    }
+                    gallery_images.append(image_info)
+                
+                # Actualizar content_details con las rutas de las imágenes
+                data['content_details'] = json.dumps({'images': gallery_images})
+            
+            # Procesar otros tipos de contenido normalmente
+            serializer = self.get_serializer(data=data)
             if serializer.is_valid():
                 instance = serializer.save()
-                print("Contenido guardado exitosamente")
-                
                 return Response({
                     'status': 'success',
                     'message': 'Contenido creado exitosamente',
                     'data': serializer.data
                 }, status=status.HTTP_201_CREATED)
             else:
-                print("Errores de validación:", serializer.errors)
                 return Response({
                     'status': 'error',
                     'message': 'Error de validación',
